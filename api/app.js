@@ -1,6 +1,8 @@
 if (process.env.NODE_ENV != "production")
 require('dotenv').config()
 
+const cors = require('cors');
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -9,6 +11,11 @@ var logger = require('morgan');
 
 var app = express();
 
+// CORS'u etkinleştirme
+app.use(cors({
+  origin: 'http://localhost:5173', // Frontend URL'inizle eşleşecek şekilde güncelleyin
+  credentials: true, // Çerezler veya diğer kimlik bilgilerini göndermeniz gerekiyorsa etkinleştirin
+}));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

@@ -71,80 +71,73 @@ router.post("/auth", limiter, async (req, res) => {
   }
 });
 
+
 router.post("/register", async (req, res) => {
-  let body = req.body;
+  const { email, password, first_name, last_name, phone_number } = req.body;
 
   try {
-    let user = await Users.findOne({ email: body.email });
+      // Check if the user already exists
+      let user = await Users.findOne({ email });
 
-    if (user) {
-      return res.sendStatus(Enum.HTTP_CODES.NOT_FOUND);
-    }
+      if (user) {
+          throw new CustomError(
+              Enum.HTTP_CODES.CONFLICT,
+              "Validation Error",
+              "User with this email already exists."
+          );
+      }
 
-    if (!body.email) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Doğrulama Hatası",
-        "e mail alanı dolu olmalıdır."
-      );
-    }
-    if (is.not.email(body.email)) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Doğrulama Hatası",
-        "email değeri email formatında olmalıdır."
-      );
-    }
+      // Validate email
+      if (!email) {
+          throw new CustomError(
+              Enum.HTTP_CODES.BAD_REQUEST,
+              "Validation Error",
+              "Email field must be filled."
+          );
+      }
+      if (is.not.email(email)) {
+          throw new CustomError(
+              Enum.HTTP_CODES.BAD_REQUEST,
+              "Validation Error",
+              "Email must be in a valid email format."
+          );
+      }
 
-    if (!body.password) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Doğrulama Hatası",
-        "Şifre alanı dolu olmalıdır."
-      );
-    }
+      // Validate password
+      if (!password) {
+          throw new CustomError(
+              Enum.HTTP_CODES.BAD_REQUEST,
+              "Validation Error",
+              "Password field must be filled."
+          );
+      }
+      if (password.length < Enum.PASS_LENGTH) {
+          throw new CustomError(
+              Enum.HTTP_CODES.BAD_REQUEST,
+              "Validation Error",
+              `Password must be at least ${Enum.PASS_LENGTH} characters long.`
+          );
+      }
 
-    if (body.password.length < Enum.PASS_LENGTH) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Doğrulama Hatası",
-        "Şifre en az 8 karakter olmalıdır."
-      );
-    }
+      // Hash the password
+      const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 
-    let password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
+      // Create the new user
+      const newUser = await Users.create({
+          email,
+          password: hashedPassword,
+          is_active: true,
+          first_name,
+          last_name,
+          phone_number,
+      });
 
-    let createdUser = await Users.create({
-      email: body.email,
-      password,
-      is_active: true,
-      first_name: body.first_name,
-      last_name: body.last_name,
-      phone_number: body.phone_number
-    });
-
-    let role = await Roles.create({
-      role_name: Enum.SUPER_ADMIN,
-      is_active: true,
-      created_by: createdUser._id
-    });
-
-    await UserRoles.create({
-      role_id: role._id,
-      user_id: createdUser._id
-    });
-
-    res
-      .status(Enum.HTTP_CODES.CREATED)
-      .json(
-        Response.successResponse({ success: true }, Enum.HTTP_CODES.CREATED)
-      );
+      res.status(Enum.HTTP_CODES.CREATED).json(Response.successResponse({ success: true }, Enum.HTTP_CODES.CREATED));
   } catch (error) {
-    let errorResponse = Response.errorResponse(error);
-    res.status(errorResponse.code).json(errorResponse);
+      const errorResponse = Response.errorResponse(error);
+      res.status(errorResponse.code).json(errorResponse);
   }
 });
-
 router.all("*", auth.authenticate(), (req, res, next) => {
   next();
 });
