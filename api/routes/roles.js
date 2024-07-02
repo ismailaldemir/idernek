@@ -14,9 +14,9 @@ const i18n = new (require("../lib/i18n"))(config.DEFAULT_LANG);
 const AuditLogs = require("../lib/AuditLogs");
 const logger = require("../lib/logger/LoggerClass");
 
-router.all("*", auth.authenticate(), (req, res, next) => {
+/*router.all("*", auth.authenticate(), (req, res, next) => {
   next();
-});
+});*/
 
 router.get("/", auth.checkRoles("role_view"), async (req, res) => {
   try {
