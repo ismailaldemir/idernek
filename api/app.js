@@ -11,13 +11,17 @@ var logger = require('morgan');
 
 var app = express();
 
+// CORS'u etkinleştirme
+app.use(cors({
+  origin: 'http://localhost:5173', // Frontend URL'inizle eşleşecek şekilde güncelleyin
+  credentials: true, // Çerezler veya diğer kimlik bilgilerini göndermeniz gerekiyorsa etkinleştirin
+}));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
