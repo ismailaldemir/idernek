@@ -1,29 +1,34 @@
 import React from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const Login = () => {
   const onFinish = async (values) => {
     try {
-      const response = await fetch('http://localhost:3000/api/users/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await axios.post('http://localhost:3000/api/users/auth', values);
 
-      const data = await response.json();
-      if (response.ok) {
+      // Yanıtı detaylı şekilde loglayın
+      console.log('API response:', response.data);
+
+      // Yanıttan token'ı alın
+      const { token, user } = response.data;
+
+      // Token'ı kontrol edin ve kaydedin
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
         message.success('Login successful');
-        window.location.href="/";
-        // Store token in local storage or context
-        localStorage.setItem('token', data.token);
+        window.location.href="/admin"
       } else {
-        message.error(data.message || 'Login failed');
+        message.error('Login failed. No token received.');
       }
     } catch (error) {
-      message.error('An error occurred');
+      if (error.response && error.response.status === 401) {
+        message.error('Login failed. Please check your credentials and try again.');
+      } else {
+        message.error('An error occurred. Please try again later.');
+      }
     }
   };
 

@@ -27,7 +27,7 @@ const limiter = rateLimit({
   legacyHeaders: false // Disable the `X-RateLimit-*` headers.
 });
 
-router.post("/auth", limiter, async (req, res) => {
+/*router.post("/auth", limiter, async (req, res) => {
   try {
     let { email, password } = req.body;
 
@@ -71,71 +71,131 @@ router.post("/auth", limiter, async (req, res) => {
   }
 });
 
+*/
+router.post("/auth", limiter, async (req, res) => {
+  try {
+    let { email, password } = req.body;
+
+    Users.validateFieldsBeforeAuth(email, password);
+
+    let user = await Users.findOne({ email });
+
+    if (!user) {
+      throw new CustomError(
+        Enum.HTTP_CODES.UNAUTHORIZED,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", config.DEFAULT_LANG),
+        i18n.translate("USERS.AUTH_ERROR", config.DEFAULT_LANG)
+      );
+    }
+
+    if (!user.validPassword(password)) {
+      throw new CustomError(
+        Enum.HTTP_CODES.UNAUTHORIZED,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", config.DEFAULT_LANG),
+        i18n.translate("USERS.AUTH_ERROR", config.DEFAULT_LANG)
+      );
+    }
+
+    let payload = {
+      id: user._id,
+      exp: parseInt(Date.now() / 1000) + config.JWT.EXPIRE_TIME
+    };
+
+    let token = jwt.encode(payload, config.JWT.SECRET);
+
+    let userData = {
+      _id: user._id,
+      first_name: user.first_name || "N/A",
+      last_name: user.last_name || "N/A"
+    };
+
+    /* Token ve userData'yı loglayın
+    console.log("Generated Token: ", token);
+    console.log("User Data: ", userData);
+*/
+    res.json({
+      success: true,
+      token: token,
+      user: userData
+    });
+  } catch (err) {
+    let errorResponse = Response.errorResponse(err);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+});
 
 router.post("/register", async (req, res) => {
   const { email, password, first_name, last_name, phone_number } = req.body;
 
   try {
-      // Check if the user already exists
-      let user = await Users.findOne({ email });
+    // Check if the user already exists
+    let user = await Users.findOne({ email });
 
-      if (user) {
-          throw new CustomError(
-              Enum.HTTP_CODES.CONFLICT,
-              "Validation Error",
-              "User with this email already exists."
-          );
-      }
+    if (user) {
+      throw new CustomError(
+        Enum.HTTP_CODES.CONFLICT,
+        "Validation Error",
+        "User with this email already exists."
+      );
+    }
 
-      // Validate email
-      if (!email) {
-          throw new CustomError(
-              Enum.HTTP_CODES.BAD_REQUEST,
-              "Validation Error",
-              "Email field must be filled."
-          );
-      }
-      if (is.not.email(email)) {
-          throw new CustomError(
-              Enum.HTTP_CODES.BAD_REQUEST,
-              "Validation Error",
-              "Email must be in a valid email format."
-          );
-      }
+    // Validate email
+    if (!email) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error",
+        "Email field must be filled."
+      );
+    }
+    if (is.not.email(email)) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error",
+        "Email must be in a valid email format."
+      );
+    }
 
-      // Validate password
-      if (!password) {
-          throw new CustomError(
-              Enum.HTTP_CODES.BAD_REQUEST,
-              "Validation Error",
-              "Password field must be filled."
-          );
-      }
-      if (password.length < Enum.PASS_LENGTH) {
-          throw new CustomError(
-              Enum.HTTP_CODES.BAD_REQUEST,
-              "Validation Error",
-              `Password must be at least ${Enum.PASS_LENGTH} characters long.`
-          );
-      }
+    // Validate password
+    if (!password) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error",
+        "Password field must be filled."
+      );
+    }
+    if (password.length < Enum.PASS_LENGTH) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Validation Error",
+        `Password must be at least ${Enum.PASS_LENGTH} characters long.`
+      );
+    }
 
-      // Hash the password
-      const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+    // Hash the password
+    const hashedPassword = bcrypt.hashSync(
+      password,
+      bcrypt.genSaltSync(8),
+      null
+    );
 
-      // Create the new user
-      const newUser = await Users.create({
-          email,
-          password: hashedPassword,
-          is_active: true,
-          first_name,
-          last_name,
-          phone_number,
-      });
+    // Create the new user
+    const newUser = await Users.create({
+      email,
+      password: hashedPassword,
+      is_active: true,
+      first_name,
+      last_name,
+      phone_number
+    });
 
-      res.status(Enum.HTTP_CODES.CREATED).json(Response.successResponse({ success: true }, Enum.HTTP_CODES.CREATED));
+    res
+      .status(Enum.HTTP_CODES.CREATED)
+      .json(
+        Response.successResponse({ success: true }, Enum.HTTP_CODES.CREATED)
+      );
   } catch (error) {
-      const errorResponse = Response.errorResponse(error);
-      res.status(errorResponse.code).json(errorResponse);
+    const errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
   }
 });
 router.all("*", auth.authenticate(), (req, res, next) => {
@@ -143,7 +203,7 @@ router.all("*", auth.authenticate(), (req, res, next) => {
 });
 
 /* GET users listing. */
-router.get("/", auth.checkRoles("user_view"), async (req, res) => {
+router.get("/", /*auth.checkRoles("user_view"),*/ async (req, res) => {
   try {
     let users = await Users.find({}, { password: 0 }).lean();
 

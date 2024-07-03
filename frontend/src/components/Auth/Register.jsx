@@ -1,28 +1,30 @@
-import React from 'react';
-import { Form, Input, Button, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import React from "react";
+import { Form, Input, Button, message } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 const Register = () => {
   const [form] = Form.useForm();
 
-  const onFinish = async (values) => {
+  const onFinish = async values => {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
     try {
-      const response = await fetch('http://localhost:3000/api/users/register', {
-        method: 'POST',
+      const response = await fetch(`${apiUrl}/api/users/register`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(values)
       });
       const data = await response.json();
       if (response.ok) {
-        message.success('Registration successful');
+        message.success("Registration successful");
         form.resetFields();
       } else {
-        message.error(data.message || 'Registration failed');
+        message.error(data.message || "Registration failed");
       }
     } catch (error) {
-      message.error('An error occurred');
+      message.error("An error occurred");
     }
   };
 
@@ -38,16 +40,16 @@ const Register = () => {
       >
         <Form.Item
           name="email"
-       //   label="Email"
+          //   label="Email"
           rules={[
             {
               required: true,
-              message: 'Please input your email!',
+              message: "Please input your email!"
             },
             {
-              type: 'email',
-              message: 'Please enter a valid email!',
-            },
+              type: "email",
+              message: "Please enter a valid email!"
+            }
           ]}
         >
           <Input prefix={<UserOutlined />} placeholder="Email" />
@@ -55,16 +57,16 @@ const Register = () => {
 
         <Form.Item
           name="password"
-         // label="Password"
+          // label="Password"
           rules={[
             {
               required: true,
-              message: 'Please input your password!',
+              message: "Please input your password!"
             },
             {
               min: 8,
-              message: 'Password must be at least 8 characters long!',
-            },
+              message: "Password must be at least 8 characters long!"
+            }
           ]}
         >
           <Input.Password prefix={<LockOutlined />} placeholder="Password" />
