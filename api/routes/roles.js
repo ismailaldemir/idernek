@@ -18,7 +18,7 @@ const logger = require("../lib/logger/LoggerClass");
   next();
 });*/
 
-router.get("/", auth.checkRoles("role_view"), async (req, res) => {
+router.get("/", /*auth.checkRoles("role_view"),*/ async (req, res) => {
   try {
     let roles = await Roles.find({}).lean();
 
