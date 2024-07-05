@@ -1,13 +1,51 @@
-import { useContext } from "react";
+import React, { useContext, useState } from "react";
 import Proptypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
 import { CartContext } from "../../../context/CartProvider";
 import "./Header.css";
+import { Modal, message } from "antd";
+import axios from "axios";
+
+const { confirm } = Modal;
 
 const Header = ({ setIsSearchShow }) => {
   const { cartItems } = useContext(CartContext);
   const user = localStorage.getItem("token");
   const { pathname } = useLocation();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        message.error("Oturum açılmamış.");
+        return;
+      }
+
+      const userInfoResponse = await axios.get("http://localhost:3000/api/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setCurrentUser(userInfoResponse.data.data);
+
+      confirm({
+        title: "Çıkış yapmak istediğinizden emin misiniz?",
+        onOk() {
+          localStorage.removeItem("token");
+          window.location.href = "/admin";
+        },
+        onCancel() {
+          console.log("Çıkış işlemi iptal edildi");
+        },
+      });
+    } catch (error) {
+      console.error("API hatası:", error);
+      message.error("Çıkış yapılamadı.");
+    }
+  };
 
   return (
     <header>
@@ -233,21 +271,7 @@ const Header = ({ setIsSearchShow }) => {
                   </Link>
                 </div>
                 {user && (
-                  <button
-                    className="search-button"
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Çıkış yapmak istediğinizden emin misiniz?"
-                        )
-                      ) {
-                        {
-                          localStorage.removeItem("token");
-                          window.location.href = "/admin";
-                        }
-                      }
-                    }}
-                  >
+                  <button className="search-button" onClick={handleLogout}>
                     <i className="bi bi-box-arrow-right"></i>
                   </button>
                 )}

@@ -13,8 +13,8 @@ var app = express();
 
 // CORS'u etkinleştirme
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL'inizle eşleşecek şekilde güncelleyin
-  credentials: true, // Çerezler veya diğer kimlik bilgilerini göndermeniz gerekiyorsa etkinleştirin
+  origin: 'http://localhost:5173', // Frontend URL ile eşleşecek şekilde güncelleme
+  credentials: true, // Çerezler veya diğer kimlik bilgilerini etkinleştirme
 }));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
