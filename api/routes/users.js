@@ -176,6 +176,26 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    let user = await Users.findById(userId, { password: 0 }).lean();
+
+    if (!user) {
+      return res.status(404).json(Response.errorResponse("Kullanıcı bulunamadı"));
+    }
+
+    let roles = await UserRoles.find({ user_id: userId }).populate("role_id");
+    user.roles = roles;
+
+    res.json(Response.successResponse(user));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+});
+
+
 router.post(
   "/add",
   /*auth.checkRoles("user_add"),*/ async (req, res) => {
