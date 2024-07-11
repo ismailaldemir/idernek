@@ -7,9 +7,10 @@ const schema = mongoose.Schema(
     is_active: { type: Boolean, default: true },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Users, // Referans olarak "users" modelini ekledik
-      required: true
-    }
+      ref: Users, // Referans olarak "users" modeli eklendi
+      required: false
+    },
+    image: { type: String, required: false } // Resim dosyasının yolunu depolamak için eklendi
   },
   {
     versionKey: false,
