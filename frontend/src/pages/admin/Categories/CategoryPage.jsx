@@ -48,6 +48,8 @@ const CategoryPage = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [form] = useForm();
   const [fileList, setFileList] = useState([]);
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -62,10 +64,13 @@ const CategoryPage = () => {
           Authorization: `Bearer ${token}`
         }
       });
+
       const formattedData = response.data.data.map(item => ({
         ...item,
-        key: item._id
+        key: item._id,
+        imageUrl: `http://localhost:3000/api/tmp/${item.image}`
       }));
+
       setDataSource(formattedData);
       setPrintTable(formattedData);
     } catch (error) {
@@ -78,9 +83,9 @@ const CategoryPage = () => {
   const handleApiError = error => {
     console.error("API hatası:", error);
     if (error.response && error.response.status === 401) {
-      message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın.");
+      message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın..");
     } else {
-      message.error("İşlem gerçekleştirilemedi");
+      message.error("İşlem gerçekleştirilemedi..");
     }
   };
 
@@ -117,26 +122,71 @@ const CategoryPage = () => {
     }
   };
 
+  // const handleAddCategory = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const formData = new FormData();
+  //     const values = await form.validateFields();
+
+  //     formData.append("name", values.name);
+  //     formData.append("is_active", values.is_active ? "true" : "false");
+  //     if (fileList.length > 0) {
+  //       formData.append("image", fileList[0]);
+  //     }
+
+  //     await axios.post("http://localhost:3000/api/categories/add", formData, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "multipart/form-data"
+  //       }
+  //     });
+
+  //     message.success(`${values.name} kategorisi başarıyla eklendi.`);
+  //     setAddModalVisible(false);
+  //     form.resetFields();
+  //     setFileList([]);
+  //     fetchCategories();
+  //   } catch (error) {
+  //     handleApiError(error);
+  //   }
+  // };
+
   const handleAddCategory = async () => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
       const values = await form.validateFields();
+  
+      // Kategori adının zaten var olup olmadığını kontrol et
+      const response = await axios.get("http://localhost:3000/api/categories", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
+      const existingCategory = response.data.data.find(
+        category => category.name.toLowerCase() === values.name.toLowerCase()
+      );
 
+      if (existingCategory) {
+        message.error(`${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`);
+        return; // Aynı kategori adı mevcutsa eklemeyi durdur
+      }
+  
       formData.append("name", values.name);
       formData.append("is_active", values.is_active ? "true" : "false");
       if (fileList.length > 0) {
         formData.append("image", fileList[0]);
       }
-
+  
       await axios.post("http://localhost:3000/api/categories/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
-
-      message.success("Kategori başarıyla eklendi");
+  
+      message.success(`${values.name} kategorisi başarıyla eklendi.`);
       setAddModalVisible(false);
       form.resetFields();
       setFileList([]);
@@ -145,7 +195,7 @@ const CategoryPage = () => {
       handleApiError(error);
     }
   };
-
+  
   const handleEditCategory = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -170,14 +220,13 @@ const CategoryPage = () => {
         }
       );
 
-      message.success("Kategori başarıyla güncellendi");
+      message.success(`${values.name} kategorisi başarıyla güncellendi.`);
       setEditModalVisible(false);
       setEditingCategory(null);
       setFileList([]);
       fetchCategories();
     } catch (error) {
-      console.error("Kategori güncellenemedi:", error);
-      message.error("Kategori güncellenemedi");
+      handleApiError(error);
     }
   };
 
@@ -323,30 +372,20 @@ const CategoryPage = () => {
       render: text => moment(text).format("DD/MM/YYYY HH:mm")
     },
     {
-      title: "Görsel",
-      dataIndex: "image",
-      key: "image",
-      render: image =>
-        image ? (
-          <img
-            src={`http://localhost:3000/api/tmp/${image}`}
-            alt="Category"
-            style={{ width: 50, height: 50 }}
-          />
-        ) : null
-    },
-    {
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
         <Button
           icon={<EditOutlined />}
+          type="primary"
           onClick={() => {
             setEditingCategory(record);
             form.setFieldsValue(record);
             setEditModalVisible(true);
           }}
-        />
+        >
+          Düzenle
+        </Button>
       )
     }
   ];
@@ -365,7 +404,11 @@ const CategoryPage = () => {
       <Button
         type="primary"
         icon={<PlusOutlined />}
-        onClick={() => setAddModalVisible(true)}
+        onClick={() => {
+          form.resetFields();
+          setAddModalVisible(true);
+          setFileList([]);
+        }}
         style={{ marginBottom: 16 }}
       >
         Yeni Kategori
@@ -408,7 +451,7 @@ const CategoryPage = () => {
           <Form.Item
             label="Kategori Adı"
             name="name"
-            rules={[{ required: true, message: "Kategori adı gerekli" }]}
+            rules={[{ required: true, message: "Kategori adı alanı doldurulmalıdır." }]}
           >
             <Input />
           </Form.Item>
@@ -429,6 +472,13 @@ const CategoryPage = () => {
               fileList={fileList}
               onRemove={() => setFileList([])}
             >
+              {fileList.length > 0 && (
+                <img
+                  src={URL.createObjectURL(fileList[0])}
+                  alt="Görsel Önizleme"
+                  style={{ marginTop: 16, width: "100%", height: "auto" }}
+                />
+              )}
               <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
             </Dragger>
           </Form.Item>
@@ -448,7 +498,9 @@ const CategoryPage = () => {
           <Form.Item
             label="Kategori Adı"
             name="name"
-            rules={[{ required: true, message: "Kategori adı gerekli" }]}
+            rules={[
+              { required: true, message: "Kategori adı doldurulmalıdır." }
+            ]}
           >
             <Input />
           </Form.Item>

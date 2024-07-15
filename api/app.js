@@ -1,4 +1,8 @@
-if (process.env.NODE_ENV != "production")
+require("core-js/stable");
+require("regenerator-runtime/runtime");
+
+
+if (process.env.NODE_ENV !== "production")
 require('dotenv').config()
 
 const cors = require('cors');
@@ -8,6 +12,12 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
+if (typeof global === 'undefined') {
+  global = {};
+} else if (typeof globalThis !== 'undefined') {
+  global = globalThis;
+}
 
 var app = express();
 

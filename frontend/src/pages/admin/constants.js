@@ -7,4 +7,5 @@ export const PaperSizeOptions = [
     { value: "portrait", label: "Dikey" },
     { value: "landscape", label: "Yatay" }
   ];
-  
+
+ 

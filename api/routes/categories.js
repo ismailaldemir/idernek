@@ -48,92 +48,29 @@ router.get(
   }
 );
 
-// router.post(
-//   "/add",
-//   /*auth.checkRoles("category_add"),*/ async (req, res) => {
-//     let body = req.body;
-
-//     try {
-//       if (!body.name)
-//         throw new CustomError(
-//           Enum.HTTP_CODES.BAD_REQUEST,
-//           i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
-//           i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
-//             "name"
-//           ])
-//         );
-
-//       let category = new Categories({
-//         name: body.name,
-//         is_active: true,
-//         created_by: req.user.id
-//       });
-
-//       await category.save();
-
-//       //auditlogs kaydı ekleniyor
-//       AuditLogs.info(req.user.email, "Categories", "Add", category);
-//       logger.info(req.user.email, "Categories", "Add", category);
-
-//       //yapılan işleme ait bildirim mesajı görüntüleniyor
-//       emitter
-//         .getEmitter("notifications")
-//         .emit("messages", { message: category.name + " is added" });
-
-//       res.json(Response.successResponse({ success: true }));
-//     } catch (error) {
-//       logger.error(null, "Categories", "Add", error);
-//       let errorResponse = Response.errorResponse(error);
-//       res.status(errorResponse.code).json(errorResponse);
-//     }
-//   }
-// );
-
-// router.post(
-//   "/update",
-//   /*auth.checkRoles("category_update"),*/ async (req, res) => {
-//     let body = req.body;
-
-//     try {
-//       if (!body._id)
-//         throw new CustomError(
-//           Enum.HTTP_CODES.BAD_REQUEST,
-//           i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
-//           i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
-//             "id"
-//           ])
-//         );
-
-//       let updates = {};
-
-//       if (body.name) updates.name = body.name;
-//       if (typeof body.is_active === "boolean")
-//         updates.is_active = body.is_active;
-
-//       await Categories.updateOne({ _id: body._id }, updates);
-
-//       //auditlogs kaydı ekleniyor
-//       AuditLogs.info(null, "Categories", "Update", {
-//         _id: body._id,
-//         ...updates
-//       });
-
-//       res.json(Response.successResponse({ success: true }));
-//     } catch (error) {
-//       let errorResponse = Response.errorResponse(error);
-//       res.status(errorResponse.code).json(errorResponse);
-//     }
-//   }
-// );
 router.post("/add", upload, async (req, res) => {
   let body = req.body;
   let file = req.file;
 
   try {
-    if (!body.name) {
+    if (!body.name)
       throw new CustomError(
         Enum.HTTP_CODES.BAD_REQUEST,
-        i18n.translate("COMMON.VALIDATION_ERROR")
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+          "name"
+        ])
+      );
+
+      // Kategori adının benzersiz olduğunu kontrol et
+    const existingCategory = await Categories.findOne({ name: body.name });
+    if (existingCategory) {
+      throw new CustomError(
+        Enum.HTTP_CODES.CONFLICT,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("CATEGORY.ALREADY_EXISTS", req.user.language, [
+          body.name
+        ])
       );
     }
 
@@ -141,7 +78,9 @@ router.post("/add", upload, async (req, res) => {
       name: body.name,
       is_active: body.is_active,
       created_by: req.user._id,
-      image: file ? file.filename : undefined
+      image: file ? file.filename : undefined,
+      tags: body.tags ? JSON.parse(body.tags) : [], // tags alanı
+      description: body.description // description alanı
     });
 
     await newCategory.save();
@@ -176,6 +115,8 @@ router.post("/update", upload, async (req, res) => {
 
     category.name = body.name;
     category.is_active = body.is_active;
+    category.tags = body.tags ? JSON.parse(body.tags) : []; // tags güncelleme
+    category.description = body.description; // description güncelleme
     if (file) {
       category.image = file.filename;
     }
@@ -188,6 +129,7 @@ router.post("/update", upload, async (req, res) => {
     res.status(errorResponse.code).json(errorResponse);
   }
 });
+
 router.get("/uploads/:filename", (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(config.FILE_UPLOAD_PATH, filename);
@@ -195,33 +137,67 @@ router.get("/uploads/:filename", (req, res) => {
   res.sendFile(filePath);
 });
 
-router.post(
-  "/delete",
-  /*auth.checkRoles("category_delete"),*/ async (req, res) => {
-    let body = req.body;
-    try {
-      if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
-        throw new CustomError(
-          Enum.HTTP_CODES.BAD_REQUEST,
-          i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
-          i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
-            "ids"
-          ])
-        );
-      }
+// router.post(
+//   "/delete",
+//   /*auth.checkRoles("category_delete"),*/ async (req, res) => {
+//     let body = req.body;
+//     try {
+//       if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+//         throw new CustomError(
+//           Enum.HTTP_CODES.BAD_REQUEST,
+//           i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+//           i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+//             "ids"
+//           ])
+//         );
+//       }
 
-      await Categories.deleteMany({ _id: { $in: body.ids } });
+//       await Categories.deleteMany({ _id: { $in: body.ids } });
 
-      // Audit log kaydı ekleme
-      // AuditLogs.info(null, "Categories", "Delete", { _id: body.ids });
+//       // Audit log kaydı ekleme
+//       // AuditLogs.info(null, "Categories", "Delete", { _id: body.ids });
 
-      res.json(Response.successResponse({ success: true }));
-    } catch (error) {
-      let errorResponse = Response.errorResponse(error);
-      res.status(errorResponse.code).json(errorResponse);
+//       res.json(Response.successResponse({ success: true }));
+//     } catch (error) {
+//       let errorResponse = Response.errorResponse(error);
+//       res.status(errorResponse.code).json(errorResponse);
+//     }
+//   }
+// );
+router.post("/delete", async (req, res) => {
+  let body = req.body;
+  try {
+    if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+          "ids"
+        ])
+      );
     }
+
+    // Kategorileri bul ve sil
+    const categoriesToDelete = await Categories.find({ _id: { $in: body.ids } });
+    
+    await Categories.deleteMany({ _id: { $in: body.ids } });
+
+    // Silinen kategorilere ait resimleri sil
+    categoriesToDelete.forEach(category => {
+      const filePath = path.join(config.FILE_UPLOAD_PATH, category.image);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error(`Dosya silinemedi: ${filePath}`, err);
+        }
+      });
+    });
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
   }
-);
+});
 
 router.post(
   "/export",
