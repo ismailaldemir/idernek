@@ -62,7 +62,6 @@ const CategoryPage = () => {
       setFileList([]);
     }
   }, [editingCategory]);
-  
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -329,7 +328,7 @@ const CategoryPage = () => {
     setDataSource(sortedData);
   };
 
-  const handleImagePreview = (imageUrl) => {
+  const handleImagePreview = imageUrl => {
     setPreviewImage(imageUrl);
     setPreviewVisible(true);
   };
@@ -346,6 +345,33 @@ const CategoryPage = () => {
     setPreviewImage("");
   };
 
+  const handleExport = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(`${API_BASE_URL}/api/categories/export`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'blob' // İndirilen dosya için blob tipi
+      });
+  
+      // Blob'dan URL oluştur ve dosyayı indir
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `categories_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -475,29 +501,14 @@ const CategoryPage = () => {
           <img
             src={text}
             alt={text}
-            style={{ width: "50px", height: "50px" }}
-          />
-        ) : (
-          "Yok"
-        )
-    },
-    {
-      title: "Resim",
-      dataIndex: "imageUrl",
-      key: "imageUrl",
-      render: text => 
-        text ? (
-          <img
-            src={text}
-            alt={text}
-            style={{ width: "50px", height: "50px", cursor: 'pointer' }}
+            style={{ width: "50px", height: "50px", cursor: "pointer" }}
             onClick={() => handleImagePreview(text)}
           />
         ) : (
           "Yok"
         )
     },
-    { 
+    {
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
@@ -539,6 +550,14 @@ const CategoryPage = () => {
       >
         Kategori Ekle
       </Button>
+      <Button
+        type="primary"
+        onClick={handleExport}
+        style={{ marginBottom: 16, marginLeft: 8 }}
+      >
+        Excel'e Aktar
+      </Button>
+
       <Popconfirm
         title="Seçili kategorileri silmek istediğinizden emin misiniz?"
         onConfirm={handleDeleteCategories}
@@ -638,7 +657,7 @@ const CategoryPage = () => {
           setEditingCategory(null);
         }}
       >
-      {console.log(editingCategory)} 
+        {/* {console.log(editingCategory)}  */}
         <Form form={form} layout="vertical">
           <Form.Item
             label="Kategori Adı"
@@ -698,13 +717,13 @@ const CategoryPage = () => {
       </Modal>
       <Modal
         title="Resim Önizleme"
-        visible={previewVisible}
+        open={previewVisible}
         footer={null}
         onCancel={handleCancelPreview}
       >
         <img
           alt="Önizleme"
-          style={{ width: '100%', height: 'auto' }}
+          style={{ width: "100%", height: "auto" }}
           src={previewImage}
         />
       </Modal>

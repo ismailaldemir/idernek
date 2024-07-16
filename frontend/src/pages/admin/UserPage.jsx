@@ -206,7 +206,7 @@ const AdminUserPage = () => {
       dataIndex: "first_name",
       key: "first_name",
       ...getColumnSearchProps('first_name'),
-      sorter: (a, b) => a.first_name?.localeCompare(b.first_name),
+      sorter: (a, b) => a.first_name.localeCompare(b.first_name),
       sortDirections: ['ascend', 'descend'],
     },
     {
@@ -214,7 +214,7 @@ const AdminUserPage = () => {
       dataIndex: "last_name",
       key: "last_name",
       ...getColumnSearchProps('last_name'),
-      sorter: (a, b) => a.last_name?.localeCompare(b.last_name),
+      sorter: (a, b) => a.last_name.localeCompare(b.last_name),
       sortDirections: ['ascend', 'descend'],
     },
     {
@@ -222,7 +222,7 @@ const AdminUserPage = () => {
       dataIndex: "email",
       key: "email",
       ...getColumnSearchProps('email'),
-      sorter: (a, b) => a.email?.localeCompare(b.email),
+      sorter: (a, b) => a.email.localeCompare(b.email),
       sortDirections: ['ascend', 'descend'],
     },
     {
