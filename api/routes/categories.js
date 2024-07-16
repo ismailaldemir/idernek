@@ -137,33 +137,6 @@ router.get("/uploads/:filename", (req, res) => {
   res.sendFile(filePath);
 });
 
-// router.post(
-//   "/delete",
-//   /*auth.checkRoles("category_delete"),*/ async (req, res) => {
-//     let body = req.body;
-//     try {
-//       if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
-//         throw new CustomError(
-//           Enum.HTTP_CODES.BAD_REQUEST,
-//           i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
-//           i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
-//             "ids"
-//           ])
-//         );
-//       }
-
-//       await Categories.deleteMany({ _id: { $in: body.ids } });
-
-//       // Audit log kaydı ekleme
-//       // AuditLogs.info(null, "Categories", "Delete", { _id: body.ids });
-
-//       res.json(Response.successResponse({ success: true }));
-//     } catch (error) {
-//       let errorResponse = Response.errorResponse(error);
-//       res.status(errorResponse.code).json(errorResponse);
-//     }
-//   }
-// );
 router.post("/delete", async (req, res) => {
   let body = req.body;
   try {
@@ -177,27 +150,43 @@ router.post("/delete", async (req, res) => {
       );
     }
 
-    // Kategorileri bul ve sil
+    // Kategorileri bul
     const categoriesToDelete = await Categories.find({ _id: { $in: body.ids } });
-    
+
+    console.log("Silinecek Kategoriler:", categoriesToDelete);
+
+    // Kategorileri sil
     await Categories.deleteMany({ _id: { $in: body.ids } });
 
     // Silinen kategorilere ait resimleri sil
-    categoriesToDelete.forEach(category => {
-      const filePath = path.join(config.FILE_UPLOAD_PATH, category.image);
-      fs.unlink(filePath, (err) => {
-        if (err) {
+    for (const category of categoriesToDelete) {
+      if (category.image) {
+        const filePath = path.join(config.FILE_UPLOAD_PATH, category.image);
+        console.log(`Tam Dosya Yolu: ${filePath}`);
+
+        try {
+          if (fs.existsSync(filePath)) {
+            await fs.promises.unlink(filePath);
+          } else {
+            console.warn(`Dosya bulunamadı: ${filePath}`);
+          }
+        } catch (err) {
           console.error(`Dosya silinemedi: ${filePath}`, err);
         }
-      });
-    });
+      } else {
+        console.warn(`Resim yok, kategori silinecek: ${category._id}`);
+        
+      }
+    }
 
     res.json(Response.successResponse({ success: true }));
   } catch (error) {
+    console.error("Silme işlemi sırasında hata:", error);
     let errorResponse = Response.errorResponse(error);
     res.status(errorResponse.code).json(errorResponse);
   }
 });
+
 
 router.post(
   "/export",
