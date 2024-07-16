@@ -6,6 +6,7 @@ import {
   Modal,
   Checkbox,
   Select,
+  Tag,
   Switch,
   Upload,
   Form,
@@ -26,7 +27,7 @@ import {
 } from "@ant-design/icons";
 import { PaperSizeOptions, OrientationOptions } from "../constants";
 import Highlighter from "react-highlight-words";
-
+import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -50,10 +51,18 @@ const CategoryPage = () => {
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (editingCategory) {
+      setFileList([]);
+    }
+  }, [editingCategory]);
+  
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -68,7 +77,7 @@ const CategoryPage = () => {
       const formattedData = response.data.data.map(item => ({
         ...item,
         key: item._id,
-        imageUrl: `http://localhost:3000/api/tmp/${item.image}`
+        imageUrl: `${API_BASE_URL}/images/${item.image}`
       }));
 
       setDataSource(formattedData);
@@ -84,6 +93,8 @@ const CategoryPage = () => {
     console.error("API hatası:", error);
     if (error.response && error.response.status === 401) {
       message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın..");
+      window.location.href = "/login";
+      //TODO:react router dom history kullanımına bakılacak
     } else {
       message.error("İşlem gerçekleştirilemedi..");
     }
@@ -125,7 +136,6 @@ const CategoryPage = () => {
   // const handleAddCategory = async () => {
   //   try {
   //     const token = localStorage.getItem("token");
-  //     const formData = new FormData();
   //     const values = await form.validateFields();
 
   //     // Kategori adının zaten var olup olmadığını kontrol et
@@ -145,10 +155,11 @@ const CategoryPage = () => {
   //       );
   //       return; // Aynı kategori adı mevcutsa eklemeyi durdur
   //     }
-
+  //     //formdata verilerini oluştur
+  //     const formData = new FormData();
   //     formData.append("name", values.name);
   //     formData.append("is_active", values.is_active ? "true" : "false");
-  //     formData.append("tags", values.tags);
+  //     formData.append("tags", JSON.stringify(values.tags));
   //     formData.append("description", values.description);
   //     if (fileList.length > 0) {
   //       formData.append("image", fileList[0]);
@@ -171,7 +182,6 @@ const CategoryPage = () => {
   //   }
   // };
 
-
   const handleAddCategory = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -190,16 +200,23 @@ const CategoryPage = () => {
 
       if (existingCategory) {
         message.error(
-          `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`
+          `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz.`
         );
         return; // Aynı kategori adı mevcutsa eklemeyi durdur
       }
-      //formdata verilerini oluştur
+
+      // FormData verilerini oluştur
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("is_active", values.is_active ? "true" : "false");
-      formData.append("tags", JSON.stringify(values.tags));
-      formData.append("description", values.description);
+      formData.append(
+        "tags",
+        JSON.stringify(values.tags) ? JSON.stringify(values.tags) : ""
+      );
+      formData.append(
+        "description",
+        values.description ? values.description : ""
+      );
       if (fileList.length > 0) {
         formData.append("image", fileList[0]);
       }
@@ -217,45 +234,62 @@ const CategoryPage = () => {
       setFileList([]);
       fetchCategories();
     } catch (error) {
-      handleApiError(error);
+      if (error.response) {
+        // API hatası durumunda
+        console.error("API hatası:", error.response.data);
+        message.error("Bir hata oluştu: " + error.response.data.error.message);
+      } else if (error instanceof Error && error.name === "ValidateError") {
+        // Form doğrulama hatası durumunda
+        console.error("Doğrulama hatası:", error);
+        handleApiError(error); // Hata işleme fonksiyonu
+      } else {
+        console.error("Hata:", error);
+        message.error("Bir hata oluştu.");
+      }
     }
   };
 
-   const handleEditCategory = async () => {
-     try {
-       const token = localStorage.getItem("token");
-       const formData = new FormData();
-       const values = await form.validateFields();
+  const handleEditCategory = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      const values = await form.validateFields();
 
-       formData.append("_id", editingCategory._id);
-       formData.append("name", values.name);
-       formData.append("is_active", values.is_active ? "true" : "false");
-       formData.append("tags", JSON.stringify(values.tags));
-       formData.append("description", values.description);
-       if (fileList.length > 0) {
-         formData.append("image", fileList[0]);
-       }
+      formData.append("_id", editingCategory._id);
+      formData.append("name", values.name);
+      formData.append("is_active", values.is_active ? "true" : "false");
+      formData.append(
+        "tags",
+        JSON.stringify(values.tags) ? JSON.stringify(values.tags) : ""
+      );
+      formData.append(
+        "description",
+        values.description ? values.description : ""
+      );
+      if (fileList.length > 0) {
+        formData.append("image", fileList[0]);
+      }
 
-       await axios.post(
-         "http://localhost:3000/api/categories/update",
-         formData,
-         {
-           headers: {
-             Authorization: `Bearer ${token}`,
-             "Content-Type": "multipart/form-data"
-           }
-         }
-       );
+      await axios.post(
+        "http://localhost:3000/api/categories/update",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
 
-       message.success(`${values.name} kategorisi başarıyla güncellendi.`);
-       setEditModalVisible(false);
-       setEditingCategory(null);
-       setFileList([]);
-       fetchCategories();
-     } catch (error) {
-       handleApiError(error);
-     }
-   };
+      message.success(`${values.name} kategorisi başarıyla güncellendi.`);
+      setEditModalVisible(false);
+      setEditingCategory(null);
+      setFileList([]);
+      fetchCategories();
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
 
   const handleDeleteCategories = async () => {
     try {
@@ -293,6 +327,18 @@ const CategoryPage = () => {
     }
 
     setDataSource(sortedData);
+  };
+
+  const handlePreview = () => {
+    if (fileList.length > 0) {
+      setPreviewImage(URL.createObjectURL(fileList[0]));
+      setPreviewVisible(true);
+    }
+  };
+
+  const handleCancelPreview = () => {
+    setPreviewVisible(false);
+    setPreviewImage("");
   };
 
   const getColumnSearchProps = dataIndex => ({
@@ -388,9 +434,7 @@ const CategoryPage = () => {
       title: "Etiketler",
       dataIndex: "tags",
       key: "tags",
-      render: tags => tags.join(", "), // Etiketleri virgülle ayırarak göster
-      sorter: (a, b) => a.tags.join(", ").localeCompare(b.tags.join(", ")),
-      ...getColumnSearchProps("tags")
+      render: text => (text ? text.join(", ") : "")
     },
     {
       title: "Açıklama",
@@ -418,6 +462,21 @@ const CategoryPage = () => {
       render: text => moment(text).format("DD/MM/YYYY HH:mm")
     },
     {
+      title: "Resim",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      render: text =>
+        text ? (
+          <img
+            src={text}
+            alt={text}
+            style={{ width: "50px", height: "50px" }}
+          />
+        ) : (
+          "Yok"
+        )
+    },
+    { 
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
@@ -457,7 +516,7 @@ const CategoryPage = () => {
         }}
         style={{ marginBottom: 16 }}
       >
-        Yeni Kategori
+        Kategori Ekle
       </Button>
       <Popconfirm
         title="Seçili kategorileri silmek istediğinizden emin misiniz?"
@@ -488,7 +547,7 @@ const CategoryPage = () => {
       />
 
       <Modal
-        title="Yeni Kategori"
+        title="Kategori Ekle"
         open={addModalVisible}
         onOk={handleAddCategory}
         onCancel={() => setAddModalVisible(false)}
@@ -558,6 +617,7 @@ const CategoryPage = () => {
           setEditingCategory(null);
         }}
       >
+      {console.log(editingCategory)} 
         <Form form={form} layout="vertical">
           <Form.Item
             label="Kategori Adı"
@@ -587,6 +647,7 @@ const CategoryPage = () => {
           <Form.Item label="Açıklama" name="description">
             <Input.TextArea />
           </Form.Item>
+
           <Form.Item label="Görsel" name="image">
             <Dragger
               beforeUpload={file => {
@@ -596,7 +657,20 @@ const CategoryPage = () => {
               fileList={fileList}
               onRemove={() => setFileList([])}
             >
-              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
+              {fileList.length > 0 ? (
+                <img
+                  src={URL.createObjectURL(fileList[0])}
+                  alt="Görsel Önizleme"
+                  style={{ marginTop: 16, width: "100%", height: "auto" }}
+                />
+              ) : editingCategory && editingCategory.image ? (
+                <img
+                  src={`http://localhost:3000/images/${editingCategory.image}`}
+                  alt="Yüklü Görsel"
+                  style={{ marginTop: 16, width: "100%", height: "auto" }}
+                />
+              ) : null}
+              <Button icon={<UploadOutlined />}>Görsel Yükle / Değiştir</Button>
             </Dragger>
           </Form.Item>
         </Form>

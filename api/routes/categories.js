@@ -113,10 +113,21 @@ router.post("/update", upload, async (req, res) => {
       );
     }
 
+    // Eski resmi sil
+    if (category.image) {
+      const oldImagePath = path.join(config.FILE_UPLOAD_PATH, category.image);
+      if (fs.existsSync(oldImagePath)) {
+        await fs.promises.unlink(oldImagePath);
+      }
+    }
+
+    // Kategori güncelle
     category.name = body.name;
     category.is_active = body.is_active;
     category.tags = body.tags ? JSON.parse(body.tags) : []; // tags güncelleme
     category.description = body.description; // description güncelleme
+
+    // Yeni resmi ekle
     if (file) {
       category.image = file.filename;
     }
@@ -130,12 +141,50 @@ router.post("/update", upload, async (req, res) => {
   }
 });
 
-router.get("/uploads/:filename", (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(config.FILE_UPLOAD_PATH, filename);
+// router.post("/update", upload, async (req, res) => {
+//   let body = req.body;
+//   let file = req.file;
 
-  res.sendFile(filePath);
-});
+//   try {
+//     if (!body._id) {
+//       throw new CustomError(
+//         Enum.HTTP_CODES.BAD_REQUEST,
+//         i18n.translate("COMMON.VALIDATION_ERROR")
+//       );
+//     }
+
+//     let category = await Categories.findById(body._id);
+
+//     if (!category) {
+//       throw new CustomError(
+//         Enum.HTTP_CODES.BAD_REQUEST,
+//         i18n.translate("CATEGORY.CATEGORY_NOT_FOUND")
+//       );
+//     }
+
+//     category.name = body.name;
+//     category.is_active = body.is_active;
+//     category.tags = body.tags ? JSON.parse(body.tags) : []; // tags güncelleme
+//     category.description = body.description; // description güncelleme
+//     if (file) {
+//       category.image = file.filename;
+//     }
+
+//     await category.save();
+
+//     res.json(Response.successResponse(category));
+//   } catch (error) {
+//     let errorResponse = Response.errorResponse(error);
+//     res.status(errorResponse.code).json(errorResponse);
+//   }
+// });
+
+// router.get("/uploads/:filename", (req, res) => {
+//   const filename = req.params.filename;
+//   const filePath = path.join(config.FILE_UPLOAD_PATH, filename);
+
+//   res.sendFile(filePath);
+// });
 
 router.post("/delete", async (req, res) => {
   let body = req.body;
