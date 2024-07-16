@@ -128,8 +128,28 @@ const CategoryPage = () => {
   //     const formData = new FormData();
   //     const values = await form.validateFields();
 
+  //     // Kategori adının zaten var olup olmadığını kontrol et
+  //     const response = await axios.get("http://localhost:3000/api/categories", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     });
+
+  //     const existingCategory = response.data.data.find(
+  //       category => category.name.toLowerCase() === values.name.toLowerCase()
+  //     );
+
+  //     if (existingCategory) {
+  //       message.error(
+  //         `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`
+  //       );
+  //       return; // Aynı kategori adı mevcutsa eklemeyi durdur
+  //     }
+
   //     formData.append("name", values.name);
   //     formData.append("is_active", values.is_active ? "true" : "false");
+  //     formData.append("tags", values.tags);
+  //     formData.append("description", values.description);
   //     if (fileList.length > 0) {
   //       formData.append("image", fileList[0]);
   //     }
@@ -151,41 +171,46 @@ const CategoryPage = () => {
   //   }
   // };
 
+
   const handleAddCategory = async () => {
     try {
       const token = localStorage.getItem("token");
-      const formData = new FormData();
       const values = await form.validateFields();
-  
+
       // Kategori adının zaten var olup olmadığını kontrol et
       const response = await axios.get("http://localhost:3000/api/categories", {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-  
+
       const existingCategory = response.data.data.find(
         category => category.name.toLowerCase() === values.name.toLowerCase()
       );
 
       if (existingCategory) {
-        message.error(`${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`);
+        message.error(
+          `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`
+        );
         return; // Aynı kategori adı mevcutsa eklemeyi durdur
       }
-  
+      //formdata verilerini oluştur
+      const formData = new FormData();
       formData.append("name", values.name);
       formData.append("is_active", values.is_active ? "true" : "false");
+      formData.append("tags", JSON.stringify(values.tags));
+      formData.append("description", values.description);
       if (fileList.length > 0) {
         formData.append("image", fileList[0]);
       }
-  
+
       await axios.post("http://localhost:3000/api/categories/add", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
-  
+
       message.success(`${values.name} kategorisi başarıyla eklendi.`);
       setAddModalVisible(false);
       form.resetFields();
@@ -195,40 +220,42 @@ const CategoryPage = () => {
       handleApiError(error);
     }
   };
-  
-  const handleEditCategory = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const formData = new FormData();
-      const values = await form.validateFields();
 
-      formData.append("_id", editingCategory._id);
-      formData.append("name", values.name);
-      formData.append("is_active", values.is_active ? "true" : "false");
-      if (fileList.length > 0) {
-        formData.append("image", fileList[0]);
-      }
+   const handleEditCategory = async () => {
+     try {
+       const token = localStorage.getItem("token");
+       const formData = new FormData();
+       const values = await form.validateFields();
 
-      await axios.post(
-        "http://localhost:3000/api/categories/update",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data"
-          }
-        }
-      );
+       formData.append("_id", editingCategory._id);
+       formData.append("name", values.name);
+       formData.append("is_active", values.is_active ? "true" : "false");
+       formData.append("tags", JSON.stringify(values.tags));
+       formData.append("description", values.description);
+       if (fileList.length > 0) {
+         formData.append("image", fileList[0]);
+       }
 
-      message.success(`${values.name} kategorisi başarıyla güncellendi.`);
-      setEditModalVisible(false);
-      setEditingCategory(null);
-      setFileList([]);
-      fetchCategories();
-    } catch (error) {
-      handleApiError(error);
-    }
-  };
+       await axios.post(
+         "http://localhost:3000/api/categories/update",
+         formData,
+         {
+           headers: {
+             Authorization: `Bearer ${token}`,
+             "Content-Type": "multipart/form-data"
+           }
+         }
+       );
+
+       message.success(`${values.name} kategorisi başarıyla güncellendi.`);
+       setEditModalVisible(false);
+       setEditingCategory(null);
+       setFileList([]);
+       fetchCategories();
+     } catch (error) {
+       handleApiError(error);
+     }
+   };
 
   const handleDeleteCategories = async () => {
     try {
@@ -358,6 +385,25 @@ const CategoryPage = () => {
       )
     },
     {
+      title: "Etiketler",
+      dataIndex: "tags",
+      key: "tags",
+      render: tags => tags.join(", "), // Etiketleri virgülle ayırarak göster
+      sorter: (a, b) => a.tags.join(", ").localeCompare(b.tags.join(", ")),
+      ...getColumnSearchProps("tags")
+    },
+    {
+      title: "Açıklama",
+      dataIndex: "description",
+      key: "description",
+      sorter: (a, b) => {
+        const descA = a.description || "";
+        const descB = b.description || "";
+        return descA.localeCompare(descB);
+      },
+      ...getColumnSearchProps("description")
+    },
+    {
       title: "Oluşturulma Tarihi",
       dataIndex: "created_at",
       key: "created_at",
@@ -451,7 +497,9 @@ const CategoryPage = () => {
           <Form.Item
             label="Kategori Adı"
             name="name"
-            rules={[{ required: true, message: "Kategori adı alanı doldurulmalıdır." }]}
+            rules={[
+              { required: true, message: "Kategori adı alanı doldurulmalıdır." }
+            ]}
           >
             <Input />
           </Form.Item>
@@ -462,6 +510,22 @@ const CategoryPage = () => {
             initialValue={false}
           >
             <Switch defaultChecked={false} />
+          </Form.Item>
+          <Form.Item
+            label="Etiketler"
+            name="tags"
+            rules={[
+              { required: true, message: "Etiketler alanı doldurulmalıdır." }
+            ]}
+          >
+            <Select
+              mode="tags"
+              style={{ width: "100%" }}
+              placeholder="Etiketleri girin"
+            />
+          </Form.Item>
+          <Form.Item label="Açıklama" name="description">
+            <Input.TextArea />
           </Form.Item>
           <Form.Item label="Görsel" name="image">
             <Dragger
@@ -506,6 +570,22 @@ const CategoryPage = () => {
           </Form.Item>
           <Form.Item label="Durum" name="is_active" valuePropName="checked">
             <Switch />
+          </Form.Item>
+          <Form.Item
+            label="Etiketler"
+            name="tags"
+            rules={[
+              { required: true, message: "Etiketler alanı doldurulmalıdır." }
+            ]}
+          >
+            <Select
+              mode="tags"
+              style={{ width: "100%" }}
+              placeholder="Etiketleri girin"
+            />
+          </Form.Item>
+          <Form.Item label="Açıklama" name="description">
+            <Input.TextArea />
           </Form.Item>
           <Form.Item label="Görsel" name="image">
             <Dragger
