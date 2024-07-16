@@ -141,51 +141,6 @@ router.post("/update", upload, async (req, res) => {
   }
 });
 
-// router.post("/update", upload, async (req, res) => {
-//   let body = req.body;
-//   let file = req.file;
-
-//   try {
-//     if (!body._id) {
-//       throw new CustomError(
-//         Enum.HTTP_CODES.BAD_REQUEST,
-//         i18n.translate("COMMON.VALIDATION_ERROR")
-//       );
-//     }
-
-//     let category = await Categories.findById(body._id);
-
-//     if (!category) {
-//       throw new CustomError(
-//         Enum.HTTP_CODES.BAD_REQUEST,
-//         i18n.translate("CATEGORY.CATEGORY_NOT_FOUND")
-//       );
-//     }
-
-//     category.name = body.name;
-//     category.is_active = body.is_active;
-//     category.tags = body.tags ? JSON.parse(body.tags) : []; // tags güncelleme
-//     category.description = body.description; // description güncelleme
-//     if (file) {
-//       category.image = file.filename;
-//     }
-
-//     await category.save();
-
-//     res.json(Response.successResponse(category));
-//   } catch (error) {
-//     let errorResponse = Response.errorResponse(error);
-//     res.status(errorResponse.code).json(errorResponse);
-//   }
-// });
-
-// router.get("/uploads/:filename", (req, res) => {
-//   const filename = req.params.filename;
-//   const filePath = path.join(config.FILE_UPLOAD_PATH, filename);
-
-//   res.sendFile(filePath);
-// });
-
 router.post("/delete", async (req, res) => {
   let body = req.body;
   try {
@@ -244,8 +199,8 @@ router.post(
       let categories = await Categories.find({});
 
       let excel = excelExport.toExcel(
-        ["NAME", "IS ACTIVE?", "USER_ID", "CREATED AT", "UPDATED AT"],
-        ["name", "is_active", "created_by", "created_at", "updated_at"],
+        ["Kategori Adı", "Durum", "Etiketler","Açıklama","Eklenme Tarihi", "Güncellenme Tarihi"],
+        ["name", "is_active",  "tags","description","created_at", "updated_at"],
         categories
       );
 
