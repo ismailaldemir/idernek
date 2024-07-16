@@ -329,6 +329,11 @@ const CategoryPage = () => {
     setDataSource(sortedData);
   };
 
+  const handleImagePreview = (imageUrl) => {
+    setPreviewImage(imageUrl);
+    setPreviewVisible(true);
+  };
+
   const handlePreview = () => {
     if (fileList.length > 0) {
       setPreviewImage(URL.createObjectURL(fileList[0]));
@@ -471,6 +476,22 @@ const CategoryPage = () => {
             src={text}
             alt={text}
             style={{ width: "50px", height: "50px" }}
+          />
+        ) : (
+          "Yok"
+        )
+    },
+    {
+      title: "Resim",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      render: text => 
+        text ? (
+          <img
+            src={text}
+            alt={text}
+            style={{ width: "50px", height: "50px", cursor: 'pointer' }}
+            onClick={() => handleImagePreview(text)}
           />
         ) : (
           "Yok"
@@ -674,6 +695,18 @@ const CategoryPage = () => {
             </Dragger>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="Resim Önizleme"
+        visible={previewVisible}
+        footer={null}
+        onCancel={handleCancelPreview}
+      >
+        <img
+          alt="Önizleme"
+          style={{ width: '100%', height: 'auto' }}
+          src={previewImage}
+        />
       </Modal>
     </div>
   );
