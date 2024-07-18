@@ -113,22 +113,22 @@ router.post("/update", upload, async (req, res) => {
       );
     }
 
-    // Eski resmi sil
-    if (category.image) {
-      const oldImagePath = path.join(config.FILE_UPLOAD_PATH, category.image);
-      if (fs.existsSync(oldImagePath)) {
-        await fs.promises.unlink(oldImagePath);
-      }
-    }
-
-    // Kategori güncelle
-    category.name = body.name;
-    category.is_active = body.is_active;
-    category.tags = body.tags ? JSON.parse(body.tags) : []; // tags güncelleme
-    category.description = body.description; // description güncelleme
-
+     // Kategori güncelle
+     category.name = body.name || category.name;
+     category.is_active = body.is_active !== undefined ? body.is_active : category.is_active;
+     category.tags = body.tags ? JSON.parse(body.tags) : category.tags;
+     category.description = body.description || category.description;
+     
+   
     // Yeni resmi ekle
     if (file) {
+      // Eski resmi sil
+      if (category.image) {
+        const oldImagePath = path.join(config.FILE_UPLOAD_PATH, category.image);
+        if (fs.existsSync(oldImagePath)) {
+          await fs.promises.unlink(oldImagePath);
+        }
+      }
       category.image = file.filename;
     }
 
