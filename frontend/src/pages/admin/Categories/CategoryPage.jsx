@@ -67,7 +67,7 @@ const CategoryPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:3000/api/categories", {
+      const response = await axios.get(`${API_BASE_URL}/api/categories`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -115,16 +115,31 @@ const CategoryPage = () => {
         return;
       }
 
+      // await axios.post(
+      //   `${API_BASE_URL}/api/categories/update`,
+      //   { _id: id, name: category.name, is_active: checked },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`
+      //     }
+      //   }
+      // );
       await axios.post(
-        "http://localhost:3000/api/categories/update",
-        { _id: id, name: category.name, is_active: checked },
+        `${API_BASE_URL}/api/categories/update`,
+        {
+          _id: id,
+          name: category.name,
+          is_active: checked,
+          tags: JSON.stringify(category.tags),
+          description: category.description,
+          image: category.image,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
-
       message.success("Kategori durumu başarıyla güncellendi");
       fetchCategories();
     } catch (error) {
@@ -132,62 +147,13 @@ const CategoryPage = () => {
     }
   };
 
-  // const handleAddCategory = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const values = await form.validateFields();
-
-  //     // Kategori adının zaten var olup olmadığını kontrol et
-  //     const response = await axios.get("http://localhost:3000/api/categories", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-
-  //     const existingCategory = response.data.data.find(
-  //       category => category.name.toLowerCase() === values.name.toLowerCase()
-  //     );
-
-  //     if (existingCategory) {
-  //       message.error(
-  //         `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`
-  //       );
-  //       return; // Aynı kategori adı mevcutsa eklemeyi durdur
-  //     }
-  //     //formdata verilerini oluştur
-  //     const formData = new FormData();
-  //     formData.append("name", values.name);
-  //     formData.append("is_active", values.is_active ? "true" : "false");
-  //     formData.append("tags", JSON.stringify(values.tags));
-  //     formData.append("description", values.description);
-  //     if (fileList.length > 0) {
-  //       formData.append("image", fileList[0]);
-  //     }
-
-  //     await axios.post("http://localhost:3000/api/categories/add", formData, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "multipart/form-data"
-  //       }
-  //     });
-
-  //     message.success(`${values.name} kategorisi başarıyla eklendi.`);
-  //     setAddModalVisible(false);
-  //     form.resetFields();
-  //     setFileList([]);
-  //     fetchCategories();
-  //   } catch (error) {
-  //     handleApiError(error);
-  //   }
-  // };
-
   const handleAddCategory = async () => {
     try {
       const token = localStorage.getItem("token");
       const values = await form.validateFields();
 
       // Kategori adının zaten var olup olmadığını kontrol et
-      const response = await axios.get("http://localhost:3000/api/categories", {
+      const response = await axios.get(`${API_BASE_URL}/api/categories`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -199,28 +165,21 @@ const CategoryPage = () => {
 
       if (existingCategory) {
         message.error(
-          `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz.`
+          `${values.name} adlı kategori zaten mevcut. Lütfen başka bir kategori adı giriniz..`
         );
         return; // Aynı kategori adı mevcutsa eklemeyi durdur
       }
-
-      // FormData verilerini oluştur
+      //formdata verilerini oluştur
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("is_active", values.is_active ? "true" : "false");
-      formData.append(
-        "tags",
-        JSON.stringify(values.tags) ? JSON.stringify(values.tags) : ""
-      );
-      formData.append(
-        "description",
-        values.description ? values.description : ""
-      );
+      formData.append("tags", JSON.stringify(values.tags));
+      formData.append("description", values.description);
       if (fileList.length > 0) {
         formData.append("image", fileList[0]);
       }
 
-      await axios.post("http://localhost:3000/api/categories/add", formData, {
+      await axios.post(`${API_BASE_URL}/api/categories/add`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -233,18 +192,7 @@ const CategoryPage = () => {
       setFileList([]);
       fetchCategories();
     } catch (error) {
-      if (error.response) {
-        // API hatası durumunda
-        console.error("API hatası:", error.response.data);
-        message.error("Bir hata oluştu: " + error.response.data.error.message);
-      } else if (error instanceof Error && error.name === "ValidateError") {
-        // Form doğrulama hatası durumunda
-        console.error("Doğrulama hatası:", error);
-        handleApiError(error); // Hata işleme fonksiyonu
-      } else {
-        console.error("Hata:", error);
-        message.error("Bir hata oluştu.");
-      }
+      handleApiError(error);
     }
   };
 
@@ -269,16 +217,12 @@ const CategoryPage = () => {
         formData.append("image", fileList[0]);
       }
 
-      await axios.post(
-        "http://localhost:3000/api/categories/update",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data"
-          }
+      await axios.post(`${API_BASE_URL}/api/categories/update`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
         }
-      );
+      });
 
       message.success(`${values.name} kategorisi başarıyla güncellendi.`);
       setEditModalVisible(false);
@@ -294,7 +238,7 @@ const CategoryPage = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:3000/api/categories/delete",
+        `${API_BASE_URL}/api/categories/delete`,
         { ids: selectedRowKeys },
         {
           headers: {
@@ -309,6 +253,58 @@ const CategoryPage = () => {
       handleApiError(error);
     }
   };
+  const handlePrint = () => {
+    const doc = new jsPDF({
+      orientation,
+      unit: "pt",
+      format: paperSize
+    });
+
+    const tableColumn = selectedColumns.map(col => col.title);
+    const tableRows = printTable.map(item =>
+      selectedColumns.map(col => item[col.dataIndex])
+    );
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows
+    });
+
+    doc.save("categories.pdf");
+  };
+
+  const openPrintModal = () => {
+    setPrintVisible(true);
+  };
+
+  const handlePrintModalOk = () => {
+    handlePrint();
+    setPrintVisible(false);
+  };
+
+  const handlePrintModalCancel = () => {
+    setPrintVisible(false);
+  };
+
+  const handleColumnChange = selectedColumns => {
+    setSelectedColumns(selectedColumns);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = selectedColumns.map(col => col.title);
+    const tableRows = printTable.map(item =>
+      selectedColumns.map(col => item[col.dataIndex])
+    );
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows
+    });
+
+    doc.save("Kategori Listesi.pdf");
+  };
+
   const handleTableChange = (pagination, filters, sorter) => {
     console.log("pagination:", pagination);
     console.log("filters:", filters);
@@ -333,45 +329,11 @@ const CategoryPage = () => {
     setPreviewVisible(true);
   };
 
-  const handlePreview = () => {
-    if (fileList.length > 0) {
-      setPreviewImage(URL.createObjectURL(fileList[0]));
-      setPreviewVisible(true);
-    }
-  };
-
   const handleCancelPreview = () => {
     setPreviewVisible(false);
     setPreviewImage("");
   };
 
-  const handleExport = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(`${API_BASE_URL}/api/categories/export`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        responseType: 'blob' // İndirilen dosya için blob tipi
-      });
-  
-      // Blob'dan URL oluştur ve dosyayı indir
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `categories_${Date.now()}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -441,6 +403,37 @@ const CategoryPage = () => {
     setSearchText("");
   };
 
+  const handleExport = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${API_BASE_URL}/api/categories/export`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          responseType: "blob" // İndirilen dosya için blob tipi
+        }
+      );
+
+      // Blob'dan URL oluştur ve dosyayı indir
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `categories_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns = [
     {
       title: "Kategori Adı",
@@ -465,8 +458,21 @@ const CategoryPage = () => {
       title: "Etiketler",
       dataIndex: "tags",
       key: "tags",
-      render: text => (text ? text.join(", ") : "")
+      render: tags =>
+        tags
+          ? tags.map(tag => (
+              <Tag color="blue" key={tag}>
+                {tag}
+              </Tag>
+            ))
+          : null
     },
+    // {
+    //   title: "Etiketler",
+    //   dataIndex: "tags",
+    //   key: "tags",
+    //   render: text => (text ? text.join(", ") : "")
+    // },
     {
       title: "Açıklama",
       dataIndex: "description",
@@ -501,7 +507,7 @@ const CategoryPage = () => {
           <img
             src={text}
             alt={text}
-            style={{ width: "50px", height: "50px", cursor: "pointer" }}
+            style={{ width: "70px", height: "70px", cursor: "pointer" }}
             onClick={() => handleImagePreview(text)}
           />
         ) : (
@@ -552,12 +558,19 @@ const CategoryPage = () => {
       </Button>
       <Button
         type="primary"
+        icon={<PrinterOutlined />}
+        onClick={openPrintModal}
+        style={{ marginBottom: 16, marginLeft: 8 }}
+      >
+        Yazdır
+      </Button>
+      <Button
+        type="primary"
         onClick={handleExport}
         style={{ marginBottom: 16, marginLeft: 8 }}
       >
         Excel'e Aktar
       </Button>
-
       <Popconfirm
         title="Seçili kategorileri silmek istediğinizden emin misiniz?"
         onConfirm={handleDeleteCategories}
@@ -712,6 +725,46 @@ const CategoryPage = () => {
               ) : null}
               <Button icon={<UploadOutlined />}>Görsel Yükle / Değiştir</Button>
             </Dragger>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Yazdırma Ayarları"
+        open={printVisible}
+        onOk={handlePrintModalOk}
+        onCancel={handlePrintModalCancel}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Kağıt Boyutu">
+            <Select value={paperSize} onChange={setPaperSize}>
+              <Option value="a4">A4</Option>
+              <Option value="a5">A5</Option>
+              <Option value="letter">Letter</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Yönlendirme">
+            <Select value={orientation} onChange={setOrientation}>
+              <Option value="portrait">Dikey</Option>
+              <Option value="landscape">Yatay</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="Yazdırılacak Sütunlar">
+            <Select
+              mode="multiple"
+              value={selectedColumns.map(col => col.key)}
+              onChange={keys => {
+                const newSelectedColumns = columns.filter(col =>
+                  keys.includes(col.key)
+                );
+                setSelectedColumns(newSelectedColumns);
+              }}
+            >
+              {columns.map(col => (
+                <Option key={col.key} value={col.key}>
+                  {col.title}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
