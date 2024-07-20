@@ -19,7 +19,9 @@ const { Sider, Header, Content } = Layout;
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
+  // Menü item'ları
   const menuItems = [
     {
       key: "1",
@@ -131,34 +133,35 @@ const AdminLayout = ({ children }) => {
   return (
     <div className="admin-layout">
       <Layout style={{ minHeight: "100vh" }}>
+        {/* Sider */}
         <Sider
           breakpoint="lg"
-          collapsedWidth="0"
-          onBreakpoint={(broken) => {
-            if (broken) {
-              setDrawerVisible(false);
-            }
-          }}
+          collapsed={collapsed}
+          onCollapse={(collapsed) => setCollapsed(collapsed)}
           theme="dark"
-          className="desktop-menu"
+          className={`desktop-menu ${collapsed ? 'collapsed' : ''}`}
         >
           <Menu
             mode="inline"
-            style={{ height: "100%" }}
+            theme="dark"
+            selectedKeys={[]}  // Adjust this to match the current route if needed
             items={menuItems}
           />
         </Sider>
 
+        {/* Drawer (Hamburger Menü) */}
         <Drawer
           title="Menü"
           placement="left"
           onClose={() => setDrawerVisible(false)}
           open={drawerVisible}
           className="mobile-menu"
+          width={240}
         >
           <Menu
             mode="inline"
-            style={{ height: "100%" }}
+            theme="dark"
+            selectedKeys={[]}  // Adjust this to match the current route if needed
             items={menuItems}
           />
         </Drawer>
@@ -173,6 +176,12 @@ const AdminLayout = ({ children }) => {
                 onClick={() => setDrawerVisible(true)}
               />
               <h2 className="header-title">Admin Paneli</h2>
+              <Button
+                className="collapse-button"
+                type="primary"
+                icon={collapsed ? <MenuOutlined /> : <MenuOutlined />}
+                onClick={() => setCollapsed(!collapsed)}
+              />
             </div>
           </Header>
           <Content className="content">
