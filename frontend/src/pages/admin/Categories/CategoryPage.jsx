@@ -552,7 +552,7 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     }
   ];
-  
+
   const rowSelection = {
     selectedRowKeys,
     onChange: setSelectedRowKeys
@@ -564,8 +564,15 @@ const CategoryPage = () => {
 
   return (
     <div>
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        <Col xs={24} sm={8} md={6} lg={4}>
+      <Row
+        gutter={[16, 16]}
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          flexWrap: "wrap"
+        }}
+      >
+        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
           <Button
             type="primary"
             icon={<PlusOutlined />}
@@ -579,7 +586,7 @@ const CategoryPage = () => {
             Kategori Ekle
           </Button>
         </Col>
-        <Col xs={24} sm={8} md={6} lg={4}>
+        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
           <Button
             type="default"
             icon={<FilePdfOutlined />}
@@ -589,7 +596,7 @@ const CategoryPage = () => {
             Pdf Oluştur
           </Button>
         </Col>
-        <Col xs={24} sm={8} md={6} lg={4}>
+        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
           <Button
             type="default"
             size="middle"
@@ -601,24 +608,21 @@ const CategoryPage = () => {
           </Button>
         </Col>
         {selectedRowKeys.length > 0 && (
-          <Col xs={24} sm={8} md={6} lg={4}>
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
             <Popconfirm
               title="Seçili kategorileri silmek istediğinizden emin misiniz?"
               onConfirm={handleDeleteCategories}
               okText="Evet"
               cancelText="Hayır"
             >
-              <Button
-                type="danger"
-                icon={<DeleteOutlined />}
-                block
-              >
+              <Button type="danger" icon={<DeleteOutlined />} block>
                 Seçilenleri Sil
               </Button>
             </Popconfirm>
           </Col>
         )}
       </Row>
+
       <Table
         dataSource={dataSource}
         columns={columns}
@@ -630,16 +634,16 @@ const CategoryPage = () => {
           showSizeChanger: true,
           pageSizeOptions: ["5", "10", "20", "50", "100"]
         }}
-        scroll={{ x: 1000 }}  // Responsive özellik için scroll ekleme
+        scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
       />
-
-
-
       <Modal
         title="Kategori Ekle"
         open={addModalVisible}
         onOk={handleAddCategory}
         onCancel={() => setAddModalVisible(false)}
+        okText="Kaydet"
+        cancelText="Vazgeç"
+        width={400}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -705,8 +709,10 @@ const CategoryPage = () => {
           setEditModalVisible(false);
           setEditingCategory(null);
         }}
+        okText="Güncelle"
+        cancelText="Vazgeç"
+        width={400}
       >
-        {/* {console.log(editingCategory)}  */}
         <Form form={form} layout="vertical">
           <Form.Item
             label="Kategori Adı"
