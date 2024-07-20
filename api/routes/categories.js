@@ -80,7 +80,7 @@ router.post("/add", upload, async (req, res) => {
       created_by: req.user._id,
       image: file ? file.filename : undefined,
       tags: body.tags ? JSON.parse(body.tags) : [], // tags alanı
-      description: body.description // description alanı
+      description: body.description || '' // description alanı
     });
 
     await newCategory.save();
@@ -157,7 +157,7 @@ router.post("/delete", async (req, res) => {
     // Kategorileri bul
     const categoriesToDelete = await Categories.find({ _id: { $in: body.ids } });
 
-    console.log("Silinecek Kategoriler:", categoriesToDelete);
+    // console.log("Silinecek Kategoriler:", categoriesToDelete);
 
     // Kategorileri sil
     await Categories.deleteMany({ _id: { $in: body.ids } });
@@ -230,11 +230,13 @@ router.post(
       let rows = Import.fromExcel(file.path);
 
       for (let i = 1; i < rows.length; i++) {
-        let [name, is_active, user, created_at, updated_at] = rows[i];
+        let [name, is_active, tags, description, created_at, updated_at] = rows[i];
         if (name) {
           await Categories.create({
             name,
             is_active,
+            tags,
+            description,
             created_by: req.user._id
           });
         }

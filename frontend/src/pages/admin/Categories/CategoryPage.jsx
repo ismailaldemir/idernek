@@ -11,7 +11,9 @@ import {
   Upload,
   Form,
   Input,
-  Popconfirm
+  Popconfirm,
+  Row,
+  Col
 } from "antd";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -23,9 +25,12 @@ import {
   DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
-  EditOutlined
+  EditOutlined,
+  FileExcelOutlined,
+  FilePdfOutlined
 } from "@ant-design/icons";
 import { PaperSizeOptions, OrientationOptions } from "../constants";
+import "./CategoryPage.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
@@ -132,7 +137,7 @@ const CategoryPage = () => {
           is_active: checked,
           tags: JSON.stringify(category.tags),
           description: category.description,
-          image: category.image,
+          image: category.image
         },
         {
           headers: {
@@ -174,7 +179,17 @@ const CategoryPage = () => {
       formData.append("name", values.name);
       formData.append("is_active", values.is_active ? "true" : "false");
       formData.append("tags", JSON.stringify(values.tags));
-      formData.append("description", values.description);
+      // Açıklama alanını kontrol et ve ekle
+      if (
+        values.description !== undefined &&
+        values.description !== null &&
+        values.description.trim() !== ""
+      ) {
+        formData.append("description", values.description);
+      } else {
+        // formData.append("description", ""); // Varsayılan boş bir değer ekle
+        formData.append("description", ""); // Açıklama alanı boşsa hiçbir şey ekleme
+      }
       if (fileList.length > 0) {
         formData.append("image", fileList[0]);
       }
@@ -440,7 +455,8 @@ const CategoryPage = () => {
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
-      ...getColumnSearchProps("name")
+      ...getColumnSearchProps("name"),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "Durum",
@@ -452,7 +468,8 @@ const CategoryPage = () => {
           checked={record.is_active}
           onChange={checked => handleActiveChange(record._id, checked)}
         />
-      )
+      ),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "Etiketler",
@@ -465,14 +482,9 @@ const CategoryPage = () => {
                 {tag}
               </Tag>
             ))
-          : null
+          : null,
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
-    // {
-    //   title: "Etiketler",
-    //   dataIndex: "tags",
-    //   key: "tags",
-    //   render: text => (text ? text.join(", ") : "")
-    // },
     {
       title: "Açıklama",
       dataIndex: "description",
@@ -482,37 +494,46 @@ const CategoryPage = () => {
         const descB = b.description || "";
         return descA.localeCompare(descB);
       },
-      ...getColumnSearchProps("description")
+      ...getColumnSearchProps("description"),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "Oluşturulma Tarihi",
       dataIndex: "created_at",
       key: "created_at",
       sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-      render: text => moment(text).format("DD/MM/YYYY HH:mm")
+      render: text => moment(text).format("DD/MM/YYYY HH:mm"),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "Güncellenme Tarihi",
       dataIndex: "updated_at",
       key: "updated_at",
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
-      render: text => moment(text).format("DD/MM/YYYY HH:mm")
+      render: text => moment(text).format("DD/MM/YYYY HH:mm"),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "Resim",
       dataIndex: "imageUrl",
       key: "imageUrl",
-      render: text =>
-        text ? (
-          <img
-            src={text}
-            alt={text}
-            style={{ width: "70px", height: "70px", cursor: "pointer" }}
-            onClick={() => handleImagePreview(text)}
-          />
-        ) : (
-          "Yok"
-        )
+      render: text => {
+        if (text && text.includes("undefined")) {
+          return "Resim Yok";
+        } else if (text) {
+          return (
+            <img
+              src={text}
+              alt="Kategori Resmi"
+              style={{ width: "70px", height: "70px", cursor: "pointer" }}
+              onClick={() => handleImagePreview(text)}
+            />
+          );
+        } else {
+          return "Resim Yok";
+        }
+      },
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
       title: "İşlemler",
@@ -520,19 +541,18 @@ const CategoryPage = () => {
       render: (text, record) => (
         <Button
           icon={<EditOutlined />}
-          type="primary"
+          type="default"
           onClick={() => {
             setEditingCategory(record);
             form.setFieldsValue(record);
             setEditModalVisible(true);
           }}
-        >
-          Düzenle
-        </Button>
-      )
+        ></Button>
+      ),
+      responsive: ["xs", "sm", "md", "lg", "xl"]
     }
   ];
-
+  
   const rowSelection = {
     selectedRowKeys,
     onChange: setSelectedRowKeys
@@ -544,48 +564,61 @@ const CategoryPage = () => {
 
   return (
     <div>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => {
-          form.resetFields();
-          setAddModalVisible(true);
-          setFileList([]);
-        }}
-        style={{ marginBottom: 16 }}
-      >
-        Kategori Ekle
-      </Button>
-      <Button
-        type="primary"
-        icon={<PrinterOutlined />}
-        onClick={openPrintModal}
-        style={{ marginBottom: 16, marginLeft: 8 }}
-      >
-        Yazdır
-      </Button>
-      <Button
-        type="primary"
-        onClick={handleExport}
-        style={{ marginBottom: 16, marginLeft: 8 }}
-      >
-        Excel'e Aktar
-      </Button>
-      <Popconfirm
-        title="Seçili kategorileri silmek istediğinizden emin misiniz?"
-        onConfirm={handleDeleteCategories}
-        okText="Evet"
-        cancelText="Hayır"
-      >
-        <Button
-          type="danger"
-          icon={<DeleteOutlined />}
-          disabled={!selectedRowKeys.length}
-          style={{ marginBottom: 16, marginLeft: 8 }}
-        >
-          Seçilenleri Sil
-        </Button>
-      </Popconfirm>
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={24} sm={8} md={6} lg={4}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              form.resetFields();
+              setAddModalVisible(true);
+              setFileList([]);
+            }}
+            block
+          >
+            Kategori Ekle
+          </Button>
+        </Col>
+        <Col xs={24} sm={8} md={6} lg={4}>
+          <Button
+            type="default"
+            icon={<FilePdfOutlined />}
+            onClick={openPrintModal}
+            block
+          >
+            Pdf Oluştur
+          </Button>
+        </Col>
+        <Col xs={24} sm={8} md={6} lg={4}>
+          <Button
+            type="default"
+            size="middle"
+            onClick={handleExport}
+            icon={<FileExcelOutlined />}
+            block
+          >
+            Excel'e Aktar
+          </Button>
+        </Col>
+        {selectedRowKeys.length > 0 && (
+          <Col xs={24} sm={8} md={6} lg={4}>
+            <Popconfirm
+              title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+              onConfirm={handleDeleteCategories}
+              okText="Evet"
+              cancelText="Hayır"
+            >
+              <Button
+                type="danger"
+                icon={<DeleteOutlined />}
+                block
+              >
+                Seçilenleri Sil
+              </Button>
+            </Popconfirm>
+          </Col>
+        )}
+      </Row>
       <Table
         dataSource={dataSource}
         columns={columns}
@@ -597,7 +630,10 @@ const CategoryPage = () => {
           showSizeChanger: true,
           pageSizeOptions: ["5", "10", "20", "50", "100"]
         }}
+        scroll={{ x: 1000 }}  // Responsive özellik için scroll ekleme
       />
+
+
 
       <Modal
         title="Kategori Ekle"
@@ -718,7 +754,7 @@ const CategoryPage = () => {
                 />
               ) : editingCategory && editingCategory.image ? (
                 <img
-                  src={`http://localhost:3000/images/${editingCategory.image}`}
+                  src={`${API_BASE_URL}/images/${editingCategory.image}`}
                   alt="Yüklü Görsel"
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
