@@ -1,53 +1,80 @@
 /* AdminLayout.css */
 .admin-layout .header {
-    background: #001529;
-    color: white;
-    padding: 0 16px;
-  }
-  
-  .admin-layout .header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .admin-layout .menu-button {
+  background: #001529;
+  color: white;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-layout .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.admin-layout .menu-button {
+  display: none;
+}
+
+.admin-layout .header-title {
+  color: white;
+  margin: 0;
+}
+
+.admin-layout .content {
+  padding: 24px;
+}
+
+/* Daha geniş ekranlar için: */
+@media (min-width: 992px) {
+  .admin-layout .mobile-menu {
     display: none;
   }
-  
+
+  .admin-layout .desktop-menu {
+    display: flex;
+  }
+}
+
+/* Daha küçük ekranlar için: */
+@media (max-width: 991px) {
+  .admin-layout .desktop-menu {
+    display: none;
+  }
+
+  .admin-layout .menu-button {
+    display: block;
+  }
+
   .admin-layout .header-title {
-    color: white;
-    margin: 0;
+    text-align: center;
+    width: calc(100% - 48px); /* Menü ve collapse button genişliği çıkarıldı */
   }
-  
-  .admin-layout .content {
-    padding: 24px;
+}
+
+/* Hamburger menü için */
+.mobile-menu {
+  width: 240px; /* İhtiyaca göre ayarlayın */
+}
+
+/* Menü genişletme/daraltma butonu */
+.collapse-button {
+  display: none; /* Varsayılan olarak gizle */
+  margin-left: auto;
+}
+
+/* Ekleme: Genişletme/Daraltma butonu küçük ekranlar için */
+@media (max-width: 991px) {
+  .admin-layout .collapse-button {
+    display: none; /* Sadece masaüstü için */
   }
-  
-  /* Daha geniş ekranlar için: */
-  @media (min-width: 992px) {
-    .admin-layout .mobile-menu {
-      display: none;
-    }
-  
-    .admin-layout .desktop-menu {
-      display: flex;
-    }
+}
+
+@media (min-width: 992px) {
+  .admin-layout .collapse-button {
+    display: block; /* Sadece masaüstü için */
   }
-  
-  /* Daha küçük ekranlar için: */
-  @media (max-width: 991px) {
-    .admin-layout .desktop-menu {
-      display: none;
-    }
-  
-    .admin-layout .menu-button {
-      display: block;
-    }
-  
-    .admin-layout .header-title {
-      text-align: center;
-      width: 100%;
-    }
-  }
-  
+}
