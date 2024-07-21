@@ -21,198 +21,94 @@
   z-index: 1000; /* Üst üste binme sıralamasında üstte kalır */
 }
 
-/* Header İçeriği Düzenleme */
+/* Header İçeriği ve Butonlar */
 
-.admin-layout .header-content {
+.header-content {
   display: flex; /* Flexbox ile düzenleme yapar */
   align-items: center; /* Dikeyde ortalar */
-  justify-content: space-between; /* Elemanları aralar */
   width: 100%; /* Tam genişlik */
 }
 
-/* Menü Butonu Stilleri */
-
-.admin-layout .menu-button {
-  display: none; /* Varsayılan olarak gizli */
+.header-title {
+  flex: 1; /* Esnek büyüme oranı 1 */
+  text-align: center; /* Metni ortalar */
+  margin: 0; /* Dış boşluk yok */
 }
 
-/* Header Başlık Stilleri */
+.menu-button, .settings-button {
+  font-size: 20px; /* Yazı tipi boyutu 20px */
+  color: inherit; /* Üst öğenin rengini alır */
+}
 
-.admin-layout .header-title {
-  color: var(--header-text-color); /* Yazı rengini değişkenle ayarlar */
-  margin: 0; /* Margin sıfırlanır */
-  text-align: left; /* Soldan hizalanır */
-  flex: 1; /* Genişliği artırır */
+/* Masaüstü Menü ve Çekmece */
+
+.desktop-menu {
+  background: var(--sidebar-bg-color); /* Arka plan rengini değişkenle ayarlar */
+  position: fixed; /* Sabit pozisyonda kalır */
+  top: 64px; /* Üstten 64px mesafede */
+  bottom: 0; /* Alttan sıfır mesafede */
+  transition: all 0.3s; /* Geçiş animasyonu 0.3s */
+}
+
+.desktop-menu.collapsed {
+  width: 80px; /* Daraltılmış genişlik 80px */
+}
+
+.mobile-menu-drawer {
+  padding-top: 64px; /* Üstten 64px padding */
 }
 
 /* İçerik Stilleri */
 
-.admin-layout .content {
-  padding: 24px; /* Padding 24px */
-  transition: margin-left 0.2s; /* Margin değişikliklerinde geçiş efekti */
-  margin-top: 64px; /* Üstten margin 64px */
+.content {
+  margin-top: 64px; /* Üstte 64px boşluk */
+  margin-left: 10px; /* Solda 240px boşluk */
+  padding: 24px; /* Tüm kenarlardan 24px padding */
+  transition: all 0.3s; /* Geçiş animasyonu 0.3s */
 }
 
-/* Büyük Ekran Ayarları (992px ve Üstü) */
+.content.collapsed {
+  margin-left: 80px; /* Daraltılmış solda 80px boşluk */
+}
 
-@media (min-width: 992px) {
-  .admin-layout .mobile-menu {
-    display: none; /* Küçük ekran menüsü gizlenir */
+/* Responsive Ayarlar */
+
+@media (max-width: 768px) {
+  .admin-layout .header {
+    justify-content: space-between; /* Başlık ile butonları aralar */
   }
-
-  .admin-layout .desktop-menu {
-    display: flex; /* Büyük ekran menüsü görünür */
-    width: 240px; /* Genişlik 240px */
-    position: fixed; /* Sabit pozisyonda kalır */
-    height: calc(100% - 64px); /* Yükseklik ekran yüksekliği - 64px */
-    top: 64px; /* Üstten 64px mesafede */
-    left: 0; /* Soldan sıfır mesafede */
-    overflow: hidden; /* Taşan içeriği gizler */
-    background: var(--sidebar-bg-color); /* Arka plan rengini değişkenle ayarlar */
-    flex-shrink: 0; /* Küçülmesini engeller */
-    box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
-    flex-direction: column; /* Menüyü dikey hizalar */
+  
+  .header-title {
+    font-size: 18px; /* Yazı tipi boyutu 18px */
   }
-
-  .admin-layout .desktop-menu.horizontal-menu {
-    flex-direction: row; /* Yatay menü için yatay hizalar */
-    height: 64px; /* Yatay menü yüksekliği */
-    width: auto; /* Yatay menü genişliği otomatik */
-    overflow-x: auto; /* Yatay kaydırma ekler */
+  
+  .menu-button {
+    font-size: 20px; /* Yazı tipi boyutu 20px */
+    display: block; /* Blok düzende gösterir */
   }
-
-  .admin-layout .desktop-menu.collapsed {
-    width: 80px; /* Çökmüş durumda genişlik 80px */
+  
+  .desktop-menu {
+    display: none; /* Masaüstü menüyü gizler */
   }
-
-  .admin-layout .content {
-    margin-left: calc(240px + 16px); /* İçeriğin sola margini 240px + 16px */
-  }
-
-  .admin-layout .desktop-menu.collapsed ~ .content {
-    margin-left: calc(80px + 16px); /* Çökmüş durumda margin 80px + 16px */
-  }
-
-  .admin-layout .collapse-button {
-    display: block; /* Çökmüş butonu görünür yapar */
+  
+  .content {
+    margin-left: 0; /* Solda boşluk yok */
   }
 }
 
-/* Küçük Ekran Ayarları (991px ve Altı) */
+/* Menü Okları ve Taşma Sorunu Çözümü */
 
-@media (max-width: 991px) {
-  .admin-layout .desktop-menu {
-    display: none; /* Büyük ekran menüsü gizlenir */
-  }
-
-  .admin-layout .menu-button {
-    display: block; /* Menü butonunu görünür yapar */
-  }
-
-  .admin-layout .header-title {
-    text-align: center; /* Başlığı ortalar */
-    width: calc(100% - 48px); /* Başlığın genişliği ekran genişliği - 48px */
-  }
-
-  .admin-layout .content {
-    margin-left: 0; /* İçeriğin sol marginini sıfırlar */
-  }
-}
-
-/* Mobil Menü Stilleri */
-
-.mobile-menu {
-  width: 240px; /* Genişlik 240px */
-  background: var(--sidebar-bg-color); /* Arka plan rengini değişkenle ayarlar */
-}
-
-/* Çökmüş Buton Stilleri */
-
-.collapse-button {
-  display: none; /* Varsayılan olarak gizli */
-  margin-left: auto; /* Otomatik sol margin */
-  color: white; /* Beyaz renk */
-}
-
-/* Çökmüş Butonun Mobil Ekranlarda Görünmesi */
-
-@media (max-width: 991px) {
-  .admin-layout .collapse-button {
-    display: block; /* Küçük ekranlarda görünür */
-  }
-}
-
-/* Çökmüş Butonun Büyük Ekranlarda Gizlenmesi */
-
-@media (min-width: 992px) {
-  .admin-layout .collapse-button {
-    display: none; /* Büyük ekranlarda gizlenir */
-  }
-}
-
-/* Ayarlar Butonu Stilleri */
-
-.settings-button {
-  margin-left: 16px; /* Sol margin 16px */
-}
-
-/* Modal İçeriği Düzenleme */
-
-.ant-modal-body {
+.ant-menu-submenu-title .ant-menu-submenu-arrow {
   display: flex; /* Flexbox ile düzenleme yapar */
-  flex-direction: column; /* Sütun yönünde düzenler */
+  align-items: center; /* Dikeyde ortalar */
 }
 
-/* Menü Item'ları Stilleri */
-
-.ant-menu-item {
-  cursor: pointer; /* İmleci pointer yapar */
-  position: relative; /* Konumlandırma için */
-  padding: 10px 16px; /* Padding 10px üst-alt, 16px sağ-sol */
-  box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
+.ant-menu-submenu-popup {
+  overflow: auto; /* Taşma durumunda kaydırma çubuğu ekler */
 }
 
-/* Seçili Menü Item'ları Stilleri */
-
-.ant-menu-item.ant-menu-item-selected {
-  background-color: turkuaz; /* Arka plan rengini turkuaz yapar */
-  border-radius: 0 16px 16px 0; /* Sağ köşeleri yuvarlatır */
-  padding: 10px 16px; /* Padding 10px üst-alt, 16px sağ-sol */
-  margin-left: 8px; /* Sol margin 8px */
-  margin-right: 8px; /* Sağ margin 8px */
-  width: calc(100% - 16px) !important; /* Genişliği ekran genişliği - 16px */
-  box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
-}
-
-/* Menü Alt Menüler Stilleri */
-
-.ant-menu-submenu {
-  position: relative; /* Konumlandırma için */
+.ant-menu-item, .ant-menu-submenu {
   overflow: hidden; /* Taşan içeriği gizler */
-  transition: max-height 0.3s ease, width 0.3s ease; /* Geçiş efektleri */
-  width: 240px !important; /* Genişlik 240px */
-  box-sizing: border-box; /* Padding ve border'ı genişliğe dahil eder */
-}
-
-.ant-menu-submenu.ant-menu-submenu-open {
-  max-height: 500px; /* Açık durumda maksimum yükseklik 500px */
-  width: 240px !important; /* Genişlik 240px */
-}
-
-.ant-menu-submenu.ant-menu-submenu-close {
-  max-height: 0; /* Kapalı durumda maksimum yükseklik 0 */
-  width: 240px !important; /* Genişlik 240px */
-}
-
-/* Menü Alt Menü Okları Stilleri */
-
-.ant-menu-submenu-arrow {
-  position: absolute; /* Mutlak konumlandırma */
-  top: 50%; /* Üstten %50 mesafede */
-  right: 16px; /* Sağdan 16px mesafede */
-  transform: translateY(-50%); /* Dikeyde ortalar */
-  z-index: 20; /* Üst üste binme sıralamasında üstte kalır */
-  pointer-events: none; /* Tıklanamaz */
-  font-size: 16px; /* Yazı tipi boyutu 16px */
-  color: var(--sidebar-text-color); /* Yazı rengini değişkenle ayarlar */
+  text-overflow: ellipsis; /* Metin taşması durumunda üç nokta ekler */
+  white-space: nowrap; /* Metni tek satırda tutar */
 }
