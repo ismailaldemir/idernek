@@ -181,6 +181,7 @@ const AdminLayout = ({ children }) => {
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         width={240}
+        className="mobile-menu-drawer"
       >
         <Menu
           mode={menuMode}
@@ -198,26 +199,26 @@ const AdminLayout = ({ children }) => {
         onCancel={() => setSettingsVisible(false)}
       >
         <Tabs defaultActiveKey="1">
-          <TabPane tab="Başlık Renkleri" key="1">
+          <TabPane tab="Header" key="1">
             <Input
               type="color"
               value={headerBgColor}
               onChange={(e) => setHeaderBgColor(e.target.value)}
-              addonBefore="Başlık Arka Plan Rengi"
+              addonBefore="Arka Plan Rengi"
             />
             <Input
               type="color"
               value={headerTextColor}
               onChange={(e) => setHeaderTextColor(e.target.value)}
-              addonBefore="Başlık Yazı Rengi"
+              addonBefore="Yazı Rengi"
             />
           </TabPane>
-          <TabPane tab="Yan Menü" key="2">
+          <TabPane tab="Sidebar Menü" key="2">
             <Input
               type="color"
               value={sidebarBgColor}
               onChange={(e) => setSidebarBgColor(e.target.value)}
-              addonBefore="Yan Menü Arka Plan Rengi"
+              addonBefore="Arka Plan Rengi"
             />
             <Switch
               checked={menuMode === "inline"}
