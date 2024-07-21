@@ -1,4 +1,4 @@
-import { Layout, Menu, Button, Drawer } from "antd";
+import { Layout, Menu, Button, Drawer, Modal, Input, Switch, Tabs } from "antd";
 import PropTypes from "prop-types";
 import {
   UserOutlined,
@@ -9,185 +9,239 @@ import {
   ShoppingCartOutlined,
   AppstoreOutlined,
   MenuOutlined,
+  SettingOutlined
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import './AdminLayout.css'; // responsive stiller için CSS dosyası
+import "./AdminLayout.css"; // responsive stiller için CSS dosyası
 
 const { Sider, Header, Content } = Layout;
+const { TabPane } = Tabs;
 
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [headerBgColor, setHeaderBgColor] = useState("#001529");
+  const [headerTextColor, setHeaderTextColor] = useState("#ffffff");
+  const [sidebarBgColor, setSidebarBgColor] = useState("#001529");
+  const [openKeys, setOpenKeys] = useState([]);
+  const [menuMode, setMenuMode] = useState("inline");
+  const [menuTheme, setMenuTheme] = useState("dark");
+  const [menuItems, setMenuItems] = useState([]);
 
-  const menuItems = [
-    {
-      key: "1",
-      icon: <DashboardOutlined />,
-      label: "Dashboard",
-      onClick: () => {
-        navigate(`/admin`);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const savedHeaderBgColor = localStorage.getItem("headerBgColor");
+    const savedHeaderTextColor = localStorage.getItem("headerTextColor");
+    const savedSidebarBgColor = localStorage.getItem("sidebarBgColor");
+    const savedMenuMode = localStorage.getItem("menuMode");
+    const savedMenuTheme = localStorage.getItem("menuTheme");
+    if (savedHeaderBgColor) setHeaderBgColor(savedHeaderBgColor);
+    if (savedHeaderTextColor) setHeaderTextColor(savedHeaderTextColor);
+    if (savedSidebarBgColor) setSidebarBgColor(savedSidebarBgColor);
+    if (savedMenuMode) setMenuMode(savedMenuMode);
+    if (savedMenuTheme) setMenuTheme(savedMenuTheme);
+  }, []);
+
+  useEffect(() => {
+    // Define the menu items
+    setMenuItems([
+      {
+        key: "1",
+        icon: <DashboardOutlined />,
+        label: "Dashboard",
+        onClick: () => navigate(`/admin`)
       },
-    },
-    {
-      key: "2",
-      icon: <AppstoreOutlined />,
-      label: "Kategoriler",
-      path: "/",
-      children: [
-        {
-          key: "3",
-          label: "Kategori Listesi",
-          path: "/admin/categories",
-          onClick: () => {
-            navigate(`/admin/categories`);
+      {
+        key: "2",
+        icon: <AppstoreOutlined />,
+        label: "Kategoriler",
+        children: [
+          {
+            key: "3",
+            label: "Kategori Listesi",
+            onClick: () => navigate(`/admin/categories`)
           },
-        },
-        {
-          key: "4",
-          label: "Yeni Kategori Oluştur",
-          path: "/admin/categories/create",
-          onClick: () => {
-            navigate("/admin/categories/create");
-          },
-        },
-      ],
-    },
-    {
-      key: "5",
-      icon: <LaptopOutlined />,
-      label: "Ürünler",
-      path: "/",
-      children: [
-        {
-          key: "6",
-          label: "Ürün Listesi",
-          path: "/admin/products",
-          onClick: () => {
-            navigate(`/admin/products`);
-          },
-        },
-        {
-          key: "7",
-          label: "Yeni Ürün Oluştur",
-          path: "/admin/products/create",
-          onClick: () => {
-            navigate("/admin/products/create");
-          },
-        },
-      ],
-    },
-    {
-      key: "8",
-      icon: <BarcodeOutlined />,
-      label: "Kuponlar",
-      path: "/admin/coupons",
-      children: [
-        {
-          key: "9",
-          label: "Kupon Listesi",
-          path: "/admin/coupons",
-          onClick: () => {
-            navigate(`/admin/coupons`);
-          },
-        },
-        {
-          key: "10",
-          label: "Yeni Kupon Oluştur",
-          path: "/admin/coupons/create",
-          onClick: () => {
-            navigate("/admin/coupons/create");
-          },
-        },
-      ],
-    },
-    {
-      key: "11",
-      icon: <UserOutlined />,
-      label: "Kullanıcı Listesi",
-      path: "/admin/users",
-      onClick: () => {
-        navigate(`/admin/users`);
+          {
+            key: "4",
+            label: "Kategori Ekle",
+            onClick: () => navigate("/admin/categories/create")
+          }
+        ]
       },
-    },
-    {
-      key: "12",
-      icon: <ShoppingCartOutlined />,
-      label: "Siparişler",
-      onClick: () => {
-        navigate(`/admin/orders`);
+      {
+        key: "5",
+        icon: <LaptopOutlined />,
+        label: "Ürünler",
+        children: [
+          {
+            key: "6",
+            label: "Ürün Listesi",
+            onClick: () => navigate(`/admin/products`)
+          },
+          {
+            key: "7",
+            label: "Yeni Ürün Oluştur",
+            onClick: () => navigate("/admin/products/create")
+          }
+        ]
       },
-    },
-    {
-      key: "13",
-      icon: <RollbackOutlined />,
-      label: "Ana Sayfaya Git",
-      onClick: () => {
-        navigate(`/`);
+      {
+        key: "8",
+        icon: <BarcodeOutlined />,
+        label: "Kuponlar",
+        children: [
+          {
+            key: "9",
+            label: "Kupon Listesi",
+            onClick: () => navigate(`/admin/coupons`)
+          },
+          {
+            key: "10",
+            label: "Yeni Kupon Oluştur",
+            onClick: () => navigate("/admin/coupons/create")
+          }
+        ]
       },
-    },
-  ];
+      {
+        key: "11",
+        icon: <UserOutlined />,
+        label: "Kullanıcı Listesi",
+        onClick: () => navigate(`/admin/users`)
+      },
+      {
+        key: "12",
+        icon: <ShoppingCartOutlined />,
+        label: "Siparişler",
+        onClick: () => navigate(`/admin/orders`)
+      }
+    ]);
+  }, [navigate]);
+
+  const saveSettings = () => {
+    localStorage.setItem("headerBgColor", headerBgColor);
+    localStorage.setItem("headerTextColor", headerTextColor);
+    localStorage.setItem("sidebarBgColor", sidebarBgColor);
+    localStorage.setItem("menuMode", menuMode);
+    localStorage.setItem("menuTheme", menuTheme);
+    setSettingsVisible(false);
+  };
 
   return (
-    <div className="admin-layout">
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sider
-          breakpoint="lg"
-          collapsedWidth="0"
-          onBreakpoint={(broken) => {
-            if (broken) {
-              setDrawerVisible(false);
-            }
-          }}
-          theme="dark"
-          className="desktop-menu"
-        >
-          <Menu
-            mode="inline"
-            style={{ height: "100%" }}
-            items={menuItems}
+    <Layout className="admin-layout">
+      <Header className="header" style={{ background: headerBgColor }}>
+        <div className="header-content">
+          <Button
+            className="menu-button"
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setDrawerVisible(true)}
           />
-        </Sider>
-
-        <Drawer
-          title="Menü"
-          placement="left"
-          onClose={() => setDrawerVisible(false)}
-          open={drawerVisible}
-          className="mobile-menu"
-        >
-          <Menu
-            mode="inline"
-            style={{ height: "100%" }}
-            items={menuItems}
+          <h1 className="header-title" style={{ color: headerTextColor }}>
+            Admin Panel
+          </h1>
+          <Button
+            className="settings-button"
+            type="text"
+            icon={<SettingOutlined />}
+            onClick={() => setSettingsVisible(true)}
           />
-        </Drawer>
-
-        <Layout>
-          <Header className="header">
-            <div className="header-content">
-              <Button
-                className="menu-button"
-                type="primary"
-                icon={<MenuOutlined />}
-                onClick={() => setDrawerVisible(true)}
-              />
-              <h2 className="header-title">Admin Paneli</h2>
-            </div>
-          </Header>
-          <Content className="content">
-            <div className="site-layout-background">
-              {children}
-            </div>
-          </Content>
-        </Layout>
+        </div>
+      </Header>
+      <Sider
+        className={`desktop-menu ${collapsed ? 'collapsed' : ''}`}
+        width={240}
+        theme={menuTheme}
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(collapsed) => setCollapsed(collapsed)}
+      >
+        <Menu
+          mode={menuMode}
+          theme={menuTheme}
+          selectedKeys={[window.location.pathname]}
+          openKeys={openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys)}
+          items={menuItems}
+          ref={menuRef}
+        />
+      </Sider>
+      <Layout>
+        <Content className="content">
+          {children}
+        </Content>
       </Layout>
-    </div>
+      <Drawer
+        title="Menu"
+        placement="left"
+        closable={false}
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={240}
+      >
+        <Menu
+          mode={menuMode}
+          theme={menuTheme}
+          selectedKeys={[window.location.pathname]}
+          openKeys={openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys)}
+          items={menuItems}
+        />
+      </Drawer>
+      <Modal
+        title="Ayarlar"
+        open={settingsVisible}
+        onOk={saveSettings}
+        onCancel={() => setSettingsVisible(false)}
+      >
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="Başlık Renkleri" key="1">
+            <Input
+              type="color"
+              value={headerBgColor}
+              onChange={(e) => setHeaderBgColor(e.target.value)}
+              addonBefore="Başlık Arka Plan Rengi"
+            />
+            <Input
+              type="color"
+              value={headerTextColor}
+              onChange={(e) => setHeaderTextColor(e.target.value)}
+              addonBefore="Başlık Yazı Rengi"
+            />
+          </TabPane>
+          <TabPane tab="Yan Menü" key="2">
+            <Input
+              type="color"
+              value={sidebarBgColor}
+              onChange={(e) => setSidebarBgColor(e.target.value)}
+              addonBefore="Yan Menü Arka Plan Rengi"
+            />
+            <Switch
+              checked={menuMode === "inline"}
+              onChange={(checked) => setMenuMode(checked ? "inline" : "horizontal")}
+              checkedChildren="Inline"
+              unCheckedChildren="Horizontal"
+              style={{ marginTop: 16 }}
+            />
+            <Switch
+              checked={menuTheme === "dark"}
+              onChange={(checked) => setMenuTheme(checked ? "dark" : "light")}
+              checkedChildren="Dark"
+              unCheckedChildren="Light"
+              style={{ marginTop: 16 }}
+            />
+          </TabPane>
+        </Tabs>
+      </Modal>
+    </Layout>
   );
 };
 
-export default AdminLayout;
-
 AdminLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 };
+
+export default AdminLayout;

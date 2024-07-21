@@ -117,7 +117,9 @@ router.post("/update", upload, async (req, res) => {
      category.name = body.name || category.name;
      category.is_active = body.is_active !== undefined ? body.is_active : category.is_active;
      category.tags = body.tags ? JSON.parse(body.tags) : category.tags;
-     category.description = body.description || category.description;
+     category.description = body.description !== undefined ? body.description : category.description;
+
+
      
    
     // Yeni resmi ekle
