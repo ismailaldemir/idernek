@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from "react";
 import { Layout, Menu, Button, Drawer, Modal, Input, Switch, Tabs } from "antd";
 import PropTypes from "prop-types";
 import {
@@ -11,7 +12,6 @@ import {
   MenuOutlined,
   SettingOutlined
 } from "@ant-design/icons";
-import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLayout.css"; // responsive stiller için CSS dosyası
 
@@ -25,7 +25,6 @@ const AdminLayout = ({ children }) => {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [headerBgColor, setHeaderBgColor] = useState("#001529");
   const [headerTextColor, setHeaderTextColor] = useState("#ffffff");
-  const [sidebarBgColor, setSidebarBgColor] = useState("#001529");
   const [openKeys, setOpenKeys] = useState([]);
   const [menuMode, setMenuMode] = useState("inline");
   const [menuTheme, setMenuTheme] = useState("dark");
@@ -36,12 +35,10 @@ const AdminLayout = ({ children }) => {
   useEffect(() => {
     const savedHeaderBgColor = localStorage.getItem("headerBgColor");
     const savedHeaderTextColor = localStorage.getItem("headerTextColor");
-    const savedSidebarBgColor = localStorage.getItem("sidebarBgColor");
     const savedMenuMode = localStorage.getItem("menuMode");
     const savedMenuTheme = localStorage.getItem("menuTheme");
     if (savedHeaderBgColor) setHeaderBgColor(savedHeaderBgColor);
     if (savedHeaderTextColor) setHeaderTextColor(savedHeaderTextColor);
-    if (savedSidebarBgColor) setSidebarBgColor(savedSidebarBgColor);
     if (savedMenuMode) setMenuMode(savedMenuMode);
     if (savedMenuTheme) setMenuTheme(savedMenuTheme);
   }, []);
@@ -124,7 +121,6 @@ const AdminLayout = ({ children }) => {
   const saveSettings = () => {
     localStorage.setItem("headerBgColor", headerBgColor);
     localStorage.setItem("headerTextColor", headerTextColor);
-    localStorage.setItem("sidebarBgColor", sidebarBgColor);
     localStorage.setItem("menuMode", menuMode);
     localStorage.setItem("menuTheme", menuTheme);
     setSettingsVisible(false);
@@ -140,9 +136,9 @@ const AdminLayout = ({ children }) => {
             icon={<MenuOutlined />}
             onClick={() => setDrawerVisible(true)}
           />
-          <h1 className="header-title" style={{ color: headerTextColor }}>
-            Admin Panel
-          </h1>
+          <h2 className="header-title" style={{ color: headerTextColor }}>
+            Admin Paneli
+          </h2>
           <Button
             className="settings-button"
             type="text"
@@ -152,27 +148,25 @@ const AdminLayout = ({ children }) => {
         </div>
       </Header>
       <Sider
-        className={`desktop-menu ${collapsed ? 'collapsed' : ''}`}
+        className={`desktop-menu ${collapsed ? "collapsed" : ""}`}
         width={240}
         theme={menuTheme}
         collapsible
         collapsed={collapsed}
-        onCollapse={(collapsed) => setCollapsed(collapsed)}
+        onCollapse={collapsed => setCollapsed(collapsed)}
       >
         <Menu
           mode={menuMode}
           theme={menuTheme}
           selectedKeys={[window.location.pathname]}
           openKeys={openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys)}
+          onOpenChange={keys => setOpenKeys(keys)}
           items={menuItems}
           ref={menuRef}
         />
       </Sider>
       <Layout>
-        <Content className="content">
-          {children}
-        </Content>
+        <Content className="content">{children}</Content>
       </Layout>
       <Drawer
         title="Menu"
@@ -188,7 +182,7 @@ const AdminLayout = ({ children }) => {
           theme={menuTheme}
           selectedKeys={[window.location.pathname]}
           openKeys={openKeys}
-          onOpenChange={(keys) => setOpenKeys(keys)}
+          onOpenChange={keys => setOpenKeys(keys)}
           items={menuItems}
         />
       </Drawer>
@@ -197,43 +191,57 @@ const AdminLayout = ({ children }) => {
         open={settingsVisible}
         onOk={saveSettings}
         onCancel={() => setSettingsVisible(false)}
+        okText="Kaydet"
+        cancelText="Vazgeç"
       >
         <Tabs defaultActiveKey="1">
           <TabPane tab="Header" key="1">
-            <Input
-              type="color"
-              value={headerBgColor}
-              onChange={(e) => setHeaderBgColor(e.target.value)}
-              addonBefore="Arka Plan Rengi"
-            />
-            <Input
-              type="color"
-              value={headerTextColor}
-              onChange={(e) => setHeaderTextColor(e.target.value)}
-              addonBefore="Yazı Rengi"
-            />
+            <div className="header-settings">
+              <div className="setting-item">
+                <span>Arka Plan Rengi</span>
+                <Input
+                  type="color"
+                  value={headerBgColor}
+                  onChange={e => setHeaderBgColor(e.target.value)}
+                  style={{ marginLeft: "8px" }}
+                />
+              </div>
+              <div className="setting-item">
+                <span>Yazı Rengi</span>
+                <Input
+                  type="color"
+                  value={headerTextColor}
+                  onChange={e => setHeaderTextColor(e.target.value)}
+                  style={{ marginLeft: "8px" }}
+                />
+              </div>
+            </div>
           </TabPane>
           <TabPane tab="Sidebar Menü" key="2">
-            <Input
-              type="color"
-              value={sidebarBgColor}
-              onChange={(e) => setSidebarBgColor(e.target.value)}
-              addonBefore="Arka Plan Rengi"
-            />
-            <Switch
-              checked={menuMode === "inline"}
-              onChange={(checked) => setMenuMode(checked ? "inline" : "horizontal")}
-              checkedChildren="Inline"
-              unCheckedChildren="Horizontal"
-              style={{ marginTop: 16 }}
-            />
-            <Switch
-              checked={menuTheme === "dark"}
-              onChange={(checked) => setMenuTheme(checked ? "dark" : "light")}
-              checkedChildren="Dark"
-              unCheckedChildren="Light"
-              style={{ marginTop: 16 }}
-            />
+            <div className="switch-container">
+              {/* Menü modu için Switch bileşeni */}
+              <div className="switch-item">
+                <span>Menü Modu:</span>
+                <Switch
+                  checked={menuMode === "inline"}
+                  onChange={checked =>
+                    setMenuMode(checked ? "inline" : "vertical")
+                  }
+                  checkedChildren="Inline"
+                  unCheckedChildren="Vertical"
+                />
+              </div>
+              {/* Menü teması için Switch bileşeni */}
+              <div className="switch-item">
+                <span>Menü Teması:</span>
+                <Switch
+                  checked={menuTheme === "dark"}
+                  onChange={checked => setMenuTheme(checked ? "dark" : "light")}
+                  checkedChildren="Dark"
+                  unCheckedChildren="Light"
+                />
+              </div>
+            </div>
           </TabPane>
         </Tabs>
       </Modal>
@@ -242,7 +250,7 @@ const AdminLayout = ({ children }) => {
 };
 
 AdminLayout.propTypes = {
-  children: PropTypes.node.isRequired,
+  children: PropTypes.node.isRequired
 };
 
 export default AdminLayout;
