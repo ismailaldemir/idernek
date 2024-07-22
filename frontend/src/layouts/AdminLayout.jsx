@@ -30,6 +30,15 @@ const AdminLayout = ({ children }) => {
   const [menuTheme, setMenuTheme] = useState("dark");
   const [menuItems, setMenuItems] = useState([]);
 
+  const handleMenuThemeChange = checked => {
+    const theme = checked ? "dark" : "light";
+    setMenuTheme(theme);
+
+    document.documentElement.style.setProperty(
+      "--menu-bg-color",
+      theme === "dark" ? "#001529" : "#ffffff"
+    );
+  };
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -166,25 +175,34 @@ const AdminLayout = ({ children }) => {
         />
       </Sider>
       <Layout>
-        <Content className="content">{children}</Content>
+        <Content className={`content ${collapsed ? "sider-collapsed" : ""}`}>
+          {children}
+        </Content>
       </Layout>
       <Drawer
-        title="Menu"
+        // title="Menü" /*Uygulama adı ya da farklı bir başlık kullanılabilir*/
         placement="left"
         closable={false}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         width={240}
-        className="mobile-menu-drawer"
+        className={`mobile-menu-drawer ${
+          menuTheme === "dark" ? "dark-theme" : "light-theme"
+        }`} // Tema sınıfı ekle
       >
-        <Menu
-          mode={menuMode}
-          theme={menuTheme}
-          selectedKeys={[window.location.pathname]}
-          openKeys={openKeys}
-          onOpenChange={keys => setOpenKeys(keys)}
-          items={menuItems}
-        />
+        <div className="menu-header">
+          {" "}
+          {/* Menü başlık alanı için div */}
+          <Menu
+            mode={menuMode}
+            theme={menuTheme}
+            selectedKeys={[window.location.pathname]}
+            openKeys={openKeys}
+            onOpenChange={keys => setOpenKeys(keys)}
+            items={menuItems}
+            className="mobile-menu-drawer" // Menu bileşenine sınıf ekleme
+          />
+        </div>
       </Drawer>
       <Modal
         title="Ayarlar"
@@ -236,7 +254,7 @@ const AdminLayout = ({ children }) => {
                 <span>Menü Teması:</span>
                 <Switch
                   checked={menuTheme === "dark"}
-                  onChange={checked => setMenuTheme(checked ? "dark" : "light")}
+                  onChange={checked => handleMenuThemeChange(checked)}
                   checkedChildren="Dark"
                   unCheckedChildren="Light"
                 />

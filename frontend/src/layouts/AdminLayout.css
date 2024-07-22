@@ -2,6 +2,7 @@
 
 .admin-layout {
   display: flex; /* Flexbox ile düzenleme yapar */
+  flex-direction: row; /* Yatayda düzenleme */
   min-height: 100vh; /* Minimum yükseklik ekranın tamamını kapsar */
   overflow: hidden; /* Taşan içeriği gizler */
   padding-top: 10px; /* Header yüksekliği kadar boşluk bırakır */
@@ -45,19 +46,29 @@
   color: inherit; /* Üst öğenin rengini alır */
 }
 
+/* Menü başlıklarının bulunduğu alan için stil */
+.menu-header {
+  border-radius: 15px; /* Köşe ovalleştirme */
+  background: var(--menu-bg-color); /* Arka plan rengini değişkenle ayarlar */
+  padding: 10px; /* İç boşluk */
+}
+
 /* Masaüstü Menü ve Çekmece */
 
 .desktop-menu {
-  background: var(--sidebar-bg-color); /* Arka plan rengini değişkenle ayarlar */
+  background: var(--menu-bg-color); /* Arka plan rengini değişkenle ayarlar */
   position: fixed; /* Sabit pozisyonda kalır */
   top: 64px; /* Üstten 64px mesafede */
-  bottom: 30px; /* Alttan sıfır mesafede */
-  transition: all 0.3s; /* Geçiş animasyonu 0.3s */
+  bottom: 30px; /* Alttan mesafe */
+  transition: width 1.6s ease; /* Menü genişliği değişimini 0.6 saniyede yavaşlat */
   border-radius: 30px; /* Köşeleri oval yapar */
   overflow: hidden; /* İçeriği sınırlar */
   left: 10px; /* Soldan 10px boşluk bırakır */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* İsteğe bağlı: Menüye hafif bir gölge ekler */
   height: calc(100vh - 64px - 30px); /* Menü yüksekliği, üst ve alt boşlukları hesaba katar */
+  padding-top: 120px;
+  width: 240px; /* Genişlik: menü genişliği */
+  z-index: 100; /* Menü çekmecesinin üstte görünmesini sağlar */
 }
 
 .desktop-menu::after {
@@ -73,29 +84,60 @@
 }
 
 .desktop-menu.collapsed {
-  width: 80px; /* Daraltılmış genişlik 80px */
+  width: 90px; /* Daraltılmış genişlik 80px */
   border-radius: 30px; /* Köşeleri oval yapar */
   height: calc(100vh - 64px - 30px); /* Daraltıldığında da yüksekliği korur */
+  position: fixed; /* Sabit pozisyonda kalır */
+  top: 74px;
 }
 
 .mobile-menu-drawer {
-  padding-top: 64px; /* Üstten 64px padding */
   border-radius: 30px; /* Köşeleri oval yapar */
-  margin-top: 64px;
+  position: relative; /* Çekmecenin kendisi için relative konumlandırma */
+  top: 74px; /* Header yüksekliği + 10px boşluk */
+  left: 10px;
+  background: var(--menu-bg-color); /* Menü arka plan rengini değişkenle ayarlar */
+}
+
+/* Mobil menü çekmecesi içindeki menülerin başlangıç koordinatları */
+.mobile-menu-drawer .ant-menu {
+  position: absolute; /* Menü içeriğinin boşluktan etkilenmemesi için absolute konumlandırma */
+  top: 120px;
+  left: 0;
+  bottom: 30px;
+  width: calc(100% - 20px); /* Çekmecenin kendisi 10px sol ve sağ boşlukla ayarlanacağı için genişliği 20px azaltın */
+  padding: 0; /* İçeriğin üstten ve soldan boşluğunu sıfırlayın */
+}
+
+/* Menü öğeleri için stil */
+.mobile-menu-drawer .ant-menu-item {
+  margin-top: 0; /* Üstten 5px boşluk bırakır */
+  padding-left: 0; /* Soldan 25px padding ekler */
 }
 
 /* İçerik Stilleri */
 
 .content {
+  flex-grow: 1; /* İçeriğin genişlemesini sağlar */
   margin-top: 64px; /* Üstte 64px boşluk */
-  margin-left: 10px; /* Solda 10px boşluk */
   margin-bottom: 30px; /* Alt kısmında 30px boşluk */
+  margin-right: 10px; /* Sağdan 10px boşluk bırakır */
   padding: 24px; /* Tüm kenarlardan 24px padding */
-  transition: all 0.3s; /* Geçiş animasyonu 0.3s */
+  transition: margin-left 0.6s ease; /* İçeriğin sol margin değişimini 0.6 saniyede yavaşlat */
+  z-index: 1; /* Menü çekmecesinin altında kalmasını sağlar */
+  transform: translateX(0); /* İçerik alanının başlangıç konumu */
+  transition: transform 0.6s ease; /* İçeriğin hareketini 0.6 saniyede yavaşlat */
 }
 
 .content.collapsed {
-  margin-left: 80px; /* Daraltılmış solda 80px boşluk */
+  margin-left: 100px; /* Daraltılmış solda 100px boşluk */
+  margin-right: calc(10px + 10px); /* Sağdan 10px boşluk + menü genişliği kadar boşluk bırakır */
+}
+
+/* Menü daraltıldığında content için uygulanacak stil */
+.sider-collapsed {
+  margin-left: 80px; /* Menü daraltıldığında genişlik */
+  margin-right: calc(10px + 10px); /* Sağdan 10px boşluk + menü genişliği kadar boşluk bırakır */
 }
 
 /* Responsive Ayarlar */
@@ -103,7 +145,9 @@
 @media (max-width: 768px) {
   .admin-layout .header {
     justify-content: space-between; /* Başlık ile butonları aralar */
-    margin: 0; /* Margin yok */
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 30px; /* Köşe ovalleştirme */
   }
   
   .header-title {
@@ -126,6 +170,36 @@
   }
 }
 
+:root {
+  --menu-bg-color-dark: #001529; /* Koyu tema arka plan rengi */
+  --menu-bg-color-light: #ffffff; /* Açık tema arka plan rengi */
+}
+
+/* Koyu tema için */
+.mobile-menu-drawer.dark-theme {
+  background: var(--menu-bg-color-dark);
+}
+
+/* Açık tema için */
+.mobile-menu-drawer.light-theme {
+  background: var(--menu-bg-color-light);
+}
+
+:root {
+  --header-text-color-dark: #ffffff; /* Koyu tema için yazı rengi */
+  --header-text-color-light: #000000; /* Açık tema için yazı rengi */
+}
+
+/* Koyu tema için yazı rengi */
+.mobile-menu-drawer.dark-theme .ant-drawer-title {
+  color: var(--header-text-color-dark);
+}
+
+/* Açık tema için yazı rengi */
+.mobile-menu-drawer.light-theme .ant-drawer-title {
+  color: var(--header-text-color-light);
+}
+
 /* Menü Okları ve Taşma Olmaması için gerekli düzenleme */
 
 .ant-menu-submenu-title .ant-menu-submenu-arrow {
@@ -141,6 +215,7 @@
   overflow: hidden; /* Taşan içeriği gizler */
   text-overflow: ellipsis; /* Metin taşması durumunda üç nokta ekler */
   white-space: nowrap; /* Metni tek satırda tutar */
+  font-size: 16px;
 }
 /* Büyük Ekran Ayarları (992px ve Üstü) */
 @media (min-width: 992px) {
@@ -153,7 +228,7 @@
 @media (max-width: 991px) {
   .admin-layout .menu-button {
     display: block; /* Küçük ekranlarda görünür */
-    font-size: 17px; /* Yazı tipi boyutu 20px */
+    font-size: 17px; /* Yazı tipi boyutu 17px */
     color: inherit; /* Üst öğenin rengini alır */
 
   }
@@ -162,11 +237,13 @@
 .inline-menu {
   width: 240px; /* veya uygun genişlik */
   border-radius: 30px; /* Köşeleri oval yapar */
+  padding-top: 10px;
 }
 
 .vertical-menu {
-  width: 100px; /* veya uygun genişlik */
+  width: 240px; /* veya uygun genişlik */
   border-radius: 30px; /* Köşeleri oval yapar */
+  padding-top: 10px;
 }
 
 /* Switch bileşenlerinin genişlik ve yüksekliğini ayarlamak */
