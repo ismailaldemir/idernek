@@ -4,6 +4,9 @@
   display: flex; /* Flexbox ile düzenleme yapar */
   min-height: 100vh; /* Minimum yükseklik ekranın tamamını kapsar */
   overflow: hidden; /* Taşan içeriği gizler */
+  padding-top: 10px; /* Header yüksekliği kadar boşluk bırakır */
+  padding-bottom: 30px; /* Sayfanın altından 30px boşluk bırakır */
+  
 }
 
 /* Header Stilleri */
@@ -15,10 +18,12 @@
   display: flex; /* Flexbox ile düzenleme yapar */
   align-items: center; /* Dikeyde ortalar */
   justify-content: space-between; /* Başlık ile butonları aralar */
-  width: 100%; /* Tam genişlik */
+  width: calc(100% - 20px); /* Tam genişlikten sol ve sağ margin miktarını çıkarır */
   position: fixed; /* Sabit pozisyonda kalır */
   top: 0; /* Üstten sıfır mesafede */
   z-index: 1000; /* Üst üste binme sıralamasında üstte kalır */
+  border-radius: 30px; /* Köşeleri oval yapar */
+  margin: 0 10px; /* Sağ ve soldan 10px boşluk bırakır */
 }
 
 /* Header İçeriği ve Butonlar */
@@ -31,7 +36,7 @@
 
 .header-title {
   flex: 1; /* Esnek büyüme oranı 1 */
-  text-align: center; /* Metni ortalar */
+  text-align: left; /* Metni ortalar */
   margin: 0; /* Dış boşluk yok */
 }
 
@@ -46,23 +51,45 @@
   background: var(--sidebar-bg-color); /* Arka plan rengini değişkenle ayarlar */
   position: fixed; /* Sabit pozisyonda kalır */
   top: 64px; /* Üstten 64px mesafede */
-  bottom: 0; /* Alttan sıfır mesafede */
+  bottom: 30px; /* Alttan sıfır mesafede */
   transition: all 0.3s; /* Geçiş animasyonu 0.3s */
+  border-radius: 30px; /* Köşeleri oval yapar */
+  overflow: hidden; /* İçeriği sınırlar */
+  left: 10px; /* Soldan 10px boşluk bırakır */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* İsteğe bağlı: Menüye hafif bir gölge ekler */
+  height: calc(100vh - 64px - 30px); /* Menü yüksekliği, üst ve alt boşlukları hesaba katar */
+}
+
+.desktop-menu::after {
+  content: ''; /* Pseudo-element için içerik */
+  position: absolute; /* Pozisyonlama */
+  bottom: 0; /* Altta konumlandırma */
+  left: 0; /* Solda konumlandırma */
+  width: 100%; /* Tam genişlik */
+  height: 30px; /* Yükseklik: menü altındaki köşeleri oval yapar */
+  border-radius: 0 0 30px 30px; /* Alt köşeleri oval yapar */
+  background: inherit; /* Arka plan rengini menüden alır */
+  z-index: -1; /* Menü altına yerleştirir */
 }
 
 .desktop-menu.collapsed {
   width: 80px; /* Daraltılmış genişlik 80px */
+  border-radius: 30px; /* Köşeleri oval yapar */
+  height: calc(100vh - 64px - 30px); /* Daraltıldığında da yüksekliği korur */
 }
 
 .mobile-menu-drawer {
   padding-top: 64px; /* Üstten 64px padding */
+  border-radius: 30px; /* Köşeleri oval yapar */
+  margin-top: 64px;
 }
 
 /* İçerik Stilleri */
 
 .content {
   margin-top: 64px; /* Üstte 64px boşluk */
-  margin-left: 10px; /* Solda 240px boşluk */
+  margin-left: 10px; /* Solda 10px boşluk */
+  margin-bottom: 30px; /* Alt kısmında 30px boşluk */
   padding: 24px; /* Tüm kenarlardan 24px padding */
   transition: all 0.3s; /* Geçiş animasyonu 0.3s */
 }
@@ -76,6 +103,7 @@
 @media (max-width: 768px) {
   .admin-layout .header {
     justify-content: space-between; /* Başlık ile butonları aralar */
+    margin: 0; /* Margin yok */
   }
   
   .header-title {
@@ -84,6 +112,7 @@
   
   .menu-button {
     font-size: 20px; /* Yazı tipi boyutu 20px */
+    color: inherit; /* Üst öğenin rengini alır */
     display: block; /* Blok düzende gösterir */
   }
   
@@ -93,10 +122,11 @@
   
   .content {
     margin-left: 0; /* Solda boşluk yok */
+    margin-bottom: 30px; /* Alt kısmında 30px boşluk */
   }
 }
 
-/* Menü Okları ve Taşma Sorunu Çözümü */
+/* Menü Okları ve Taşma Olmaması için gerekli düzenleme */
 
 .ant-menu-submenu-title .ant-menu-submenu-arrow {
   display: flex; /* Flexbox ile düzenleme yapar */
@@ -111,4 +141,81 @@
   overflow: hidden; /* Taşan içeriği gizler */
   text-overflow: ellipsis; /* Metin taşması durumunda üç nokta ekler */
   white-space: nowrap; /* Metni tek satırda tutar */
+}
+/* Büyük Ekran Ayarları (992px ve Üstü) */
+@media (min-width: 992px) {
+  .admin-layout .menu-button {
+    display: none; /* Büyük ekranlarda gizlenir */
+  }
+}
+
+/* Küçük Ekran Ayarları (991px ve Altı) */
+@media (max-width: 991px) {
+  .admin-layout .menu-button {
+    display: block; /* Küçük ekranlarda görünür */
+    font-size: 17px; /* Yazı tipi boyutu 20px */
+    color: inherit; /* Üst öğenin rengini alır */
+
+  }
+}
+
+.inline-menu {
+  width: 240px; /* veya uygun genişlik */
+  border-radius: 30px; /* Köşeleri oval yapar */
+}
+
+.vertical-menu {
+  width: 100px; /* veya uygun genişlik */
+  border-radius: 30px; /* Köşeleri oval yapar */
+}
+
+/* Switch bileşenlerinin genişlik ve yüksekliğini ayarlamak */
+.switch-item .ant-switch {
+  width: 80px; /* Switch genişliğini belirler */
+  height: 22px; /* Switch yüksekliğini belirler */
+}
+
+.header-settings {
+  display: flex;
+  flex-direction: column; /* Dikey hizalamayı sağlar */
+  gap: 16px; /* Elemanlar arasındaki boşluğu ayarlar */
+}
+
+.switch-container {
+  display: flex;
+  flex-direction: column; /* Başlıklar ve switch'leri dikey hizalar */
+  gap: 24px; /* Başlıklar ve switch'ler arasındaki boşluğu ayarlar */
+}
+
+.switch-item {
+  display: flex;
+  flex-direction: column; /* Başlık ve switch'i dikey hizalar */
+  align-items: flex-start; /* Başlık ve switch'i sola hizalar */
+}
+
+.switch-item span {
+  margin-bottom: 4px; /* Başlık ile switch arasındaki boşluk */
+}
+
+.switch-item .ant-switch {
+  margin-top: 0; /* Switch'in başlık ile arasındaki boşluğu ayarlar */
+}
+
+/* Oval köşeler ve merkezleme için CSS */
+.ant-layout-sider-trigger {
+  border-radius: 40%; /* Oval köşeler için */
+  width: 36px; /* Buton genişliği */
+  height: 36px; /* Buton yüksekliği */
+  line-height: 36px; /* İçeriği ortalamak için */
+  text-align: center; /* İçeriği ortalamak için */
+  background-color: #001529; /* Arka plan rengi */
+  color: #ffffff; /* İkon rengi */
+  display: flex; /* İçeriği merkezlemek için flexbox kullanımı */
+  justify-content: center; /* Yatayda merkezleme */
+  align-items: center; /* Dikeyde merkezleme */
+}
+
+/* Üzerine gelindiğinde arka plan rengini değiştirme */
+.ant-layout-sider-trigger:hover {
+  background-color: #1890ff; /* Hover arka plan rengi */
 }
