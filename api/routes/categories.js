@@ -221,35 +221,101 @@ router.post(
   }
 );
 
+// router.post(
+//   "/import",
+//   /*auth.checkRoles("category_add"),*/ upload,
+//   async (req, res) => {
+//     try {
+//       let file = req.file;
+//       let body = req.body;
+
+//       let rows = Import.fromExcel(file.path);
+
+//       for (let i = 1; i < rows.length; i++) {
+//         let [name, is_active,  description] = rows[i];
+//         if (name) {
+//           await Categories.create({
+//             name,
+//             is_active,
+//             description,
+//             created_by: req.user._id
+//           });
+//         }
+//       }
+
+//       res
+//         .status(Enum.HTTP_CODES.CREATED)
+//         .json(Response.successResponse(req.body, Enum.HTTP_CODES.CREATED));
+//     } catch (err) {
+//       let errorResponse = Response.errorResponse(err);
+//       res.status(errorResponse.code).json(Response.errorResponse(err));
+//     }
+//   }
+// );
+
 router.post(
   "/import",
   /*auth.checkRoles("category_add"),*/ upload,
   async (req, res) => {
     try {
+      if (!req.file) {
+        return res.status(HTTP_CODES.BAD_REQUEST).json({
+          message: "No file uploaded"
+        });
+      }
+
       let file = req.file;
       let body = req.body;
 
+      // Dosya yolunu kontrol et
+      // console.log("File Path:", file.path);
+
       let rows = Import.fromExcel(file.path);
 
-      for (let i = 1; i < rows.length; i++) {
-        let [name, is_active, tags, description, created_at, updated_at] = rows[i];
+      // Verileri kontrol et
+      // console.log("Parsed Rows:", rows);
+
+      // for (let i = 1; i < rows.length; i++) {
+      //   let [name, is_active, user, created_at, updated_at] = rows[i];
+      //   if (name) {
+      //     await Categories.create({
+      //       name,
+      //       is_active: is_active === 'true' || is_active === true, // 'true' veya true ise true yap
+      //       created_by: req.user._id
+      //     });
+      //   }
+      // }
+      
+      // Mevcut kategori adlarını al
+      const existingCategories = await Categories.find().select('name').lean().exec();
+      const existingCategoryNames = existingCategories.map(cat => cat.name);
+
+      // Yeni kategorileri filtrele
+      const newCategories = rows.slice(1).filter(row => {
+        const [name] = row;
+        return name && !existingCategoryNames.includes(name);
+      });
+
+      // Yeni kategorileri ekle
+      for (let i = 0; i < newCategories.length; i++) {
+        let [name, is_active, user, created_at, updated_at] = newCategories[i];
         if (name) {
           await Categories.create({
             name,
-            is_active,
-            tags,
-            description,
+            is_active: is_active === 'true' || is_active === true, // 'true' veya true ise true yap
             created_by: req.user._id
           });
         }
       }
 
+
       res
         .status(Enum.HTTP_CODES.CREATED)
         .json(Response.successResponse(req.body, Enum.HTTP_CODES.CREATED));
     } catch (err) {
+      console.error("Error:", err);
       let errorResponse = Response.errorResponse(err);
-      res.status(errorResponse.code).json(Response.errorResponse(err));
+      res.status(errorResponse.code).json(errorResponse);
     }
   }
 );

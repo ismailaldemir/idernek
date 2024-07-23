@@ -60,11 +60,10 @@
   position: fixed; /* Sabit pozisyonda kalır */
   top: 64px; /* Üstten 64px mesafede */
   bottom: 30px; /* Alttan mesafe */
-  transition: width 1.6s ease; /* Menü genişliği değişimini 0.6 saniyede yavaşlat */
+  transition: width 0.6s ease, margin-left 0.6s ease; /* Geçiş süresi ve zamanlama fonksiyonu */
   border-radius: 30px; /* Köşeleri oval yapar */
   overflow: hidden; /* İçeriği sınırlar */
   left: 10px; /* Soldan 10px boşluk bırakır */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* İsteğe bağlı: Menüye hafif bir gölge ekler */
   height: calc(100vh - 64px - 30px); /* Menü yüksekliği, üst ve alt boşlukları hesaba katar */
   padding-top: 120px;
   width: 240px; /* Genişlik: menü genişliği */
@@ -84,7 +83,7 @@
 }
 
 .desktop-menu.collapsed {
-  width: 90px; /* Daraltılmış genişlik 80px */
+  width: 80px; /* Daraltılmış genişlik 80px */
   border-radius: 30px; /* Köşeleri oval yapar */
   height: calc(100vh - 64px - 30px); /* Daraltıldığında da yüksekliği korur */
   position: fixed; /* Sabit pozisyonda kalır */
@@ -97,6 +96,9 @@
   top: 74px; /* Header yüksekliği + 10px boşluk */
   left: 10px;
   background: var(--menu-bg-color); /* Menü arka plan rengini değişkenle ayarlar */
+  z-index: 999; /* Üst üste binme sıralamasında headerın altında kalır */
+  box-shadow: none; /* menü üzerinde gölge yok */
+  overflow: hidden; /* Taşma durumunda kaydırma çubuğu eklemez */
 }
 
 /* Mobil menü çekmecesi içindeki menülerin başlangıç koordinatları */
@@ -121,7 +123,6 @@
   flex-grow: 1; /* İçeriğin genişlemesini sağlar */
   margin-top: 64px; /* Üstte 64px boşluk */
   margin-bottom: 30px; /* Alt kısmında 30px boşluk */
-  margin-right: 10px; /* Sağdan 10px boşluk bırakır */
   padding: 24px; /* Tüm kenarlardan 24px padding */
   transition: margin-left 0.6s ease; /* İçeriğin sol margin değişimini 0.6 saniyede yavaşlat */
   z-index: 1; /* Menü çekmecesinin altında kalmasını sağlar */
@@ -129,15 +130,10 @@
   transition: transform 0.6s ease; /* İçeriğin hareketini 0.6 saniyede yavaşlat */
 }
 
-.content.collapsed {
-  margin-left: 100px; /* Daraltılmış solda 100px boşluk */
-  margin-right: calc(10px + 10px); /* Sağdan 10px boşluk + menü genişliği kadar boşluk bırakır */
-}
-
 /* Menü daraltıldığında content için uygulanacak stil */
 .sider-collapsed {
   margin-left: 80px; /* Menü daraltıldığında genişlik */
-  margin-right: calc(10px + 10px); /* Sağdan 10px boşluk + menü genişliği kadar boşluk bırakır */
+  /*margin-right: calc(10px + 10px); /* Sağdan 10px boşluk + menü genişliği kadar boşluk bırakır */
 }
 
 /* Responsive Ayarlar */
@@ -148,6 +144,8 @@
     margin-left: 10px;
     margin-right: 10px;
     border-radius: 30px; /* Köşe ovalleştirme */
+    z-index: 1000;
+    box-shadow: none; /* Header üzerinde gölge yok */
   }
   
   .header-title {
