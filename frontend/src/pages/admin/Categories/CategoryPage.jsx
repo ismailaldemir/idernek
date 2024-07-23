@@ -500,6 +500,20 @@ const CategoryPage = () => {
     onChange: handleUploadChange
   };
 
+  const handleBeforeUpload = file => {
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("Yalnızca resim formatındaki dosyalar yüklenebilir!");
+      return Upload.LIST_IGNORE;
+    }
+    setFileList([file]);
+    return false;
+  };
+
+  const handleRemove = () => {
+    setFileList([]);
+  };
+
   const columns = [
     {
       title: "Kategori Adı",
@@ -660,7 +674,12 @@ const CategoryPage = () => {
         </Col>
         <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
           <Upload {...uploadProps}>
-            <Button type="default" size="middle" icon={<UploadOutlined />} block>
+            <Button
+              type="default"
+              size="middle"
+              icon={<UploadOutlined />}
+              block
+            >
               Excel'den Al
             </Button>
           </Upload>
@@ -737,7 +756,7 @@ const CategoryPage = () => {
           <Form.Item label="Açıklama" name="description">
             <Input.TextArea />
           </Form.Item>
-          <Form.Item label="Görsel" name="image">
+          {/* <Form.Item label="Görsel" name="image">
             <Dragger
               beforeUpload={file => {
                 setFileList([file]);
@@ -745,6 +764,23 @@ const CategoryPage = () => {
               }}
               fileList={fileList}
               onRemove={() => setFileList([])}
+            >
+              {fileList.length > 0 && (
+                <img
+                  src={URL.createObjectURL(fileList[0])}
+                  alt="Görsel Önizleme"
+                  style={{ marginTop: 16, width: "100%", height: "auto" }}
+                />
+              )}
+              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
+            </Dragger>
+          </Form.Item> */}
+          <Form.Item label="Görsel" name="image">
+            <Dragger
+              beforeUpload={handleBeforeUpload}
+              fileList={fileList}
+              onRemove={handleRemove}
+              accept="image/*" // Sadece resim dosyalarının seçilmesine izin verir
             >
               {fileList.length > 0 && (
                 <img
