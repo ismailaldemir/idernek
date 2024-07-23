@@ -57,6 +57,7 @@ const CategoryPage = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     fetchCategories();
@@ -449,6 +450,56 @@ const CategoryPage = () => {
     }
   };
 
+  const handleUpload = async () => {
+    if (!file) {
+      message.error("Lütfen bir dosya seçin");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file); // image alanı ile dosya ekleniyor
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/categories/import",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      if (response.status === 201) {
+        message.success("Dosya başarıyla yüklendi");
+      } else {
+        message.error("Dosya yükleme sırasında bir hata oluştu");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error("Dosya yükleme sırasında bir hata oluştu");
+    }
+  };
+
+  const handleUploadChange = info => {
+    if (info.file.status === "done") {
+      message.success(`${info.file.name} dosyası başarıyla yüklendi.`);
+      fetchCategories(); // Verileri güncellemek için yeniden fetch yapabilirsiniz.
+    } else if (info.file.status === "error") {
+      message.error(`${info.file.name} dosyasını yüklerken bir hata oluştu.`);
+    }
+  };
+
+  const uploadProps = {
+    name: "image",
+    action: `${API_BASE_URL}/api/categories/import`,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+    showUploadList: false,
+    onChange: handleUploadChange
+  };
+
   const columns = [
     {
       title: "Kategori Adı",
@@ -606,6 +657,13 @@ const CategoryPage = () => {
           >
             Excel'e Aktar
           </Button>
+        </Col>
+        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+          <Upload {...uploadProps}>
+            <Button type="default" size="middle" icon={<UploadOutlined />} block>
+              Excel'den Al
+            </Button>
+          </Upload>
         </Col>
         {selectedRowKeys.length > 0 && (
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
