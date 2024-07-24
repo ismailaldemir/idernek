@@ -13,7 +13,8 @@ import {
   Input,
   Popconfirm,
   Row,
-  Col
+  Col,
+  Tabs
 } from "antd";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -34,11 +35,15 @@ import "./CategoryPage.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
+
 const { Option } = Select;
 const { Dragger } = Upload;
+const { TabPane } = Tabs;
+
 
 const CategoryPage = () => {
   const [dataSource, setDataSource] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [printTable, setPrintTable] = useState([]);
@@ -58,6 +63,7 @@ const CategoryPage = () => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [file, setFile] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     fetchCategories();
@@ -68,6 +74,10 @@ const CategoryPage = () => {
       setFileList([]);
     }
   }, [editingCategory]);
+
+  useEffect(() => {
+    filterData();
+  }, [dataSource, activeTab]);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -92,6 +102,29 @@ const CategoryPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterData = () => {
+    switch (activeTab) {
+      case "active":
+        setFilteredData(dataSource.filter(item => item.is_active));
+        break;
+      case "inactive":
+        setFilteredData(dataSource.filter(item => !item.is_active));
+        break;
+      case "pending":
+        setFilteredData(dataSource.filter(item => item.status === "pending"));
+        break;
+      case "deleted":
+        setFilteredData(dataSource.filter(item => item.status === "deleted"));
+        break;
+      default:
+        setFilteredData(dataSource);
+    }
+  };
+
+  const handleTabChange = key => {
+    setActiveTab(key);
   };
 
   const handleApiError = error => {
@@ -121,15 +154,6 @@ const CategoryPage = () => {
         return;
       }
 
-      // await axios.post(
-      //   `${API_BASE_URL}/api/categories/update`,
-      //   { _id: id, name: category.name, is_active: checked },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`
-      //     }
-      //   }
-      // );
       await axios.post(
         `${API_BASE_URL}/api/categories/update`,
         {
@@ -269,6 +293,7 @@ const CategoryPage = () => {
       handleApiError(error);
     }
   };
+
   const handlePrint = () => {
     const doc = new jsPDF({
       orientation,
@@ -521,7 +546,11 @@ const CategoryPage = () => {
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
       ...getColumnSearchProps("name"),
-      responsive: ["xs", "sm", "md", "lg", "xl"]
+      responsive: ["xs", "sm", "md", "lg", "xl"],
+      render: (text, record) => (
+        <span>
+          {record.is_active ? <Tag color="green">{text}</Tag> : <Tag color="volcano">{text}</Tag>}
+        </span>)
     },
     {
       title: "Durum",
@@ -604,6 +633,7 @@ const CategoryPage = () => {
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
+        <span>
         <Button
           icon={<EditOutlined />}
           type="default"
@@ -612,7 +642,14 @@ const CategoryPage = () => {
             form.setFieldsValue(record);
             setEditModalVisible(true);
           }}
-        ></Button>
+        />
+        <Popconfirm
+            title="Emin misiniz?"
+            onConfirm={() => handleDeleteCategories([record._id])}
+          >
+            <Button icon={<DeleteOutlined />} type="danger" />
+          </Popconfirm>
+        </span>
       ),
       responsive: ["xs", "sm", "md", "lg", "xl"]
     }
@@ -626,6 +663,90 @@ const CategoryPage = () => {
   const handlePageSizeChange = (current, size) => {
     setPageSize(size);
   };
+
+  const tabItems = [
+    {
+      key: "all",
+      label: "Tüm Kategoriler",
+      children: <Table
+        dataSource={filteredData}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{
+          pageSize,
+          onChange: page => {
+            setPageSize(page);
+          }
+        }}
+      />,
+    },
+    {
+      key: "active",
+      label: "Aktif Kategoriler",
+      children: <Table
+        dataSource={filteredData.filter(item => item.is_active)}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{
+          pageSize,
+          onChange: page => {
+            setPageSize(page);
+          }
+        }}
+      />,
+    },
+    {
+      key: "inactive",
+      label: "Pasif Kategoriler",
+      children: <Table
+        dataSource={filteredData.filter(item => !item.is_active)}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{
+          pageSize,
+          onChange: page => {
+            setPageSize(page);
+          }
+        }}
+      />,
+    },
+    {
+      key: "pending",
+      label: "Bekleyen Kategoriler",
+      children: <Table
+        dataSource={filteredData.filter(item => item.status === "pending")}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{
+          pageSize,
+          onChange: page => {
+            setPageSize(page);
+          }
+        }}
+      />,
+    },
+    {
+      key: "deleted",
+      label: "Silinen Kategoriler",
+      children: <Table
+        dataSource={filteredData.filter(item => item.status === "deleted")}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        pagination={{
+          pageSize,
+          onChange: page => {
+            setPageSize(page);
+          }
+        }}
+      />,
+    }
+  ];
+  
 
   return (
     <div>
@@ -699,20 +820,13 @@ const CategoryPage = () => {
           </Col>
         )}
       </Row>
-
-      <Table
-        dataSource={dataSource}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: handlePageSizeChange,
-          showSizeChanger: true,
-          pageSizeOptions: ["5", "10", "20", "50", "100"]
-        }}
-        scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
-      />
+      <Tabs
+      activeKey={activeTab}
+      onChange={handleTabChange}
+      items={tabItems}
+      style={{ marginBottom: 16 }}
+    />
+      
       <Modal
         title="Kategori Ekle"
         open={addModalVisible}
