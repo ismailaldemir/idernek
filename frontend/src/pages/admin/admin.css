@@ -59,4 +59,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
+  .custom-delete-button {
+    background-color:red;;
+    border-color:red;;
+    color: white;
+  }
+
+  .custom-restore-button {
+    background-color: green;
+    border-color: green;
+    color: white;
+  }
+    

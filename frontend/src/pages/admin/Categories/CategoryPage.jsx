@@ -15,7 +15,8 @@ import {
   Row,
   Col,
   Tabs,
-  Card
+  Card,
+  Tooltip
 } from "antd";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -29,7 +30,10 @@ import {
   UploadOutlined,
   EditOutlined,
   FileExcelOutlined,
-  FilePdfOutlined
+  FilePdfOutlined,
+  RollbackOutlined,
+  CloseCircleOutlined,
+  StopOutlined
 } from "@ant-design/icons";
 import { PaperSizeOptions, OrientationOptions } from "../constants";
 import "./../admin.css";
@@ -107,16 +111,24 @@ const CategoryPage = () => {
   const filterData = () => {
     switch (activeTab) {
       case "active":
-        setFilteredData(dataSource.filter(item => item.is_active));
+        setFilteredData(
+          dataSource.filter(item => item.is_active && !item.deleted_at)
+        );
         break;
       case "inactive":
-        setFilteredData(dataSource.filter(item => !item.is_active));
+        setFilteredData(
+          dataSource.filter(item => !item.is_active && !item.deleted_at)
+        );
         break;
       case "pending":
-        setFilteredData(dataSource.filter(item => item.status === "pending"));
+        setFilteredData(
+          dataSource.filter(
+            item => item.status === "pending" && !item.deleted_at
+          )
+        );
         break;
       case "deleted":
-        setFilteredData(dataSource.filter(item => item.deleted_at === "null"));
+        setFilteredData(dataSource.filter(item => item.deleted_at));
         break;
       default:
         setFilteredData(dataSource);
@@ -291,6 +303,50 @@ const CategoryPage = () => {
       fetchCategories();
     } catch (error) {
       handleApiError(error);
+    }
+  };
+
+  const handleSoftDeleteCategories = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_BASE_URL}/api/categories/soft-delete`,
+        { ids: selectedRowKeys },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      message.success("Seçili kategoriler başarıyla silindi");
+      setSelectedRowKeys([]);
+      fetchCategories();
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const handleRestore = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      setLoading(true);
+
+      await axios.post(
+        `${API_BASE_URL}/api/categories/restore`,
+        { ids: selectedRowKeys },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      message.success("Kategoriler başarıyla geri yüklendi");
+      fetchCategories(); // Kategorileri tekrar yükleyin
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -556,7 +612,7 @@ const CategoryPage = () => {
           )}
         </div>
       )
-    },         
+    },
     {
       title: "Durum",
       dataIndex: "is_active",
@@ -595,24 +651,33 @@ const CategoryPage = () => {
       },
       ...getColumnSearchProps("description"),
       responsive: ["xs", "sm", "md", "lg", "xl"],
-      render: (text, record) => (
-        <div className="table-cell">{text}</div>
-      )
+      render: (text, record) => <div className="table-cell">{text}</div>
     },
     {
       title: "Oluşturulma Tarihi",
       dataIndex: "created_at",
       key: "created_at",
       sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-      render: text => <div className="date-cell">{moment(text).format("DD/MM/YYYY HH:mm")}</div>,
+      render: text => (
+        <div className="date-cell">
+          {moment(text).format("DD/MM/YYYY HH:mm")}
+        </div>
+      ),
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: "Güncellenme Tarihi",
-      dataIndex: "updated_at",
-      key: "updated_at",
-      sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
-      render: text => <div className="date-cell">{moment(text).format("DD/MM/YYYY HH:mm")}</div>,
+      title: activeTab === "deleted" ? "Silinme Tarihi" : "Güncellenme Tarihi",
+      dataIndex: activeTab === "deleted" ? "deleted_at" : "updated_at",
+      key: activeTab === "deleted" ? "deleted_at" : "updated_at",
+      sorter: (a, b) =>
+        activeTab === "deleted"
+          ? a.deleted_at.localeCompare(b.deleted_at)
+          : a.updated_at.localeCompare(b.updated_at),
+      render: text => (
+        <div className="date-cell">
+          {moment(text).format("DD/MM/YYYY HH:mm")}
+        </div>
+      ),
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
@@ -637,49 +702,159 @@ const CategoryPage = () => {
       },
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
+    // {
+    //   title: "İşlemler",
+    //   key: "actions",
+    //   render: (text, record) => (
+    //     <span style={{ display: "flex", gap: "4px" }}>
+    //       <Tooltip title="Düzenle">
+    //         <Button
+    //           icon={<EditOutlined />}
+    //           type="default"
+    //           onClick={() => {
+    //             setEditingCategory(record);
+    //             form.setFieldsValue(record);
+    //             setEditModalVisible(true);
+    //           }}
+    //         />
+    //       </Tooltip>
+    //       <Tooltip title="Sil">
+    //         <Popconfirm
+    //           title="Bu kategoriyi silmek istediğinize emin misiniz?"
+    //           onConfirm={async () => {
+    //             try {
+    //               const token = localStorage.getItem("token");
+    //               await axios.post(
+    //                 `${API_BASE_URL}/api/categories/soft-delete`,
+    //                 { ids: [record._id] },
+    //                 {
+    //                   headers: {
+    //                     Authorization: `Bearer ${token}`
+    //                   }
+    //                 }
+    //               );
+    //               message.success("Kategori başarıyla silindi");
+    //               fetchCategories();
+    //             } catch (error) {
+    //               handleApiError(error);
+    //             }
+    //           }}
+    //           okText="Evet"
+    //           cancelText="Hayır"
+    //         >
+    //           <Button icon={<DeleteOutlined />} danger />
+    //         </Popconfirm>
+    //       </Tooltip>
+    //     </span>
+    //   ),
+    //   responsive: ["xs", "sm", "md", "lg", "xl"]
+    // }
     {
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
         <span style={{ display: "flex", gap: "4px" }}>
-          <Button
-            icon={<EditOutlined />}
-            type="default"
-            onClick={() => {
-              setEditingCategory(record);
-              form.setFieldsValue(record);
-              setEditModalVisible(true);
-            }}
-          />
-          <Popconfirm
-            title="Bu kategoriyi silmek istediğinize emin misiniz?"
-            onConfirm={async () => {
-              try {
-                const token = localStorage.getItem("token");
-                await axios.post(
-                  `${API_BASE_URL}/api/categories/delete`,
-                  { ids: [record._id] },
-                  {
-                    headers: {
-                      Authorization: `Bearer ${token}`
+          {activeTab === "deleted" ? (
+            <>
+              <Tooltip title="Geri Yükle">
+                <Button
+                  icon={<RollbackOutlined />}
+                  type="default"
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      await axios.post(
+                        `${API_BASE_URL}/api/categories/restore`,
+                        { ids: [record._id] },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`
+                          }
+                        }
+                      );
+                      message.success("Kategori başarıyla geri yüklendi");
+                      fetchCategories();
+                    } catch (error) {
+                      handleApiError(error);
                     }
-                  }
-                );
-                message.success("Kategori başarıyla silindi");
-                fetchCategories();
-              } catch (error) {
-                handleApiError(error);
-              }
-            }}
-            okText="Evet"
-            cancelText="Hayır"
-          >
-            <Button icon={<DeleteOutlined />} danger />
-          </Popconfirm>
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="Kalıcı Sil">
+                <Popconfirm
+                  title="Bu kategoriyi veritabanından tamamen silmek istediğinize emin misiniz?"
+                  onConfirm={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      await axios.post(
+                        `${API_BASE_URL}/api/categories/hard-delete`,
+                        { ids: [record._id] },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`
+                          }
+                        }
+                      );
+                      message.success("Kategori başarıyla kalıcı olarak silindi");
+                      fetchCategories();
+                    } catch (error) {
+                      handleApiError(error);
+                    }
+                  }}
+                  okText="Evet"
+                  cancelText="Hayır"
+                >
+                  <Button icon={<StopOutlined />} danger />
+                </Popconfirm>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <Tooltip title="Düzenle">
+                <Button
+                  icon={<EditOutlined />}
+                  type="default"
+                  onClick={() => {
+                    setEditingCategory(record);
+                    form.setFieldsValue(record);
+                    setEditModalVisible(true);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="Sil">
+                <Popconfirm
+                  title="Bu kategoriyi silmek istediğinize emin misiniz?"
+                  onConfirm={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
+                      await axios.post(
+                        `${API_BASE_URL}/api/categories/soft-delete`,
+                        { ids: [record._id] },
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`
+                          }
+                        }
+                      );
+                      message.success("Kategori başarıyla silindi");
+                      fetchCategories();
+                    } catch (error) {
+                      handleApiError(error);
+                    }
+                  }}
+                  okText="Evet"
+                  cancelText="Hayır"
+                >
+                  <Button icon={<DeleteOutlined />} danger />
+                </Popconfirm>
+              </Tooltip>
+            </>
+          )}
         </span>
       ),
       responsive: ["xs", "sm", "md", "lg", "xl"]
     }
+    
   ];
 
   const rowSelection = {
@@ -697,7 +872,7 @@ const CategoryPage = () => {
       label: "Tüm Kategoriler",
       children: (
         <Table
-          dataSource={filteredData}
+          dataSource={filteredData.filter(item => !item.deleted_at)}
           columns={columns}
           loading={loading}
           rowSelection={rowSelection}
@@ -773,7 +948,7 @@ const CategoryPage = () => {
       label: "Silinen Kategoriler",
       children: (
         <Table
-          dataSource={filteredData.filter(item => item.deleted_at === "null")}
+          dataSource={filteredData.filter(item => item.deleted_at)}
           columns={columns}
           loading={loading}
           rowSelection={rowSelection}
@@ -847,27 +1022,49 @@ const CategoryPage = () => {
               </Button>
             </Upload>
           </Col>
+          
+          {activeTab === "deleted" && selectedRowKeys.length > 0 && (
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+            <Popconfirm
+              title="Seçili kategorileri geri yüklemek istediğinizden emin misiniz?"
+              onConfirm={handleRestore}
+              okText="Evet"
+              cancelText="Hayır"
+            >
+              <Button type="primary" className="custom-restore-button" icon={<RollbackOutlined />} block>
+                Seçilenleri Geri Yükle
+              </Button>
+            </Popconfirm>
+          </Col>
+        )}
+
           {selectedRowKeys.length > 0 && (
-            <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+            {activeTab === "deleted" ? (
               <Popconfirm
-                title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+                title="Seçili kategorileri veritabanından tamamen silmek istediğinizden emin misiniz?"
                 onConfirm={handleDeleteCategories}
                 okText="Evet"
                 cancelText="Hayır"
               >
-                <Button type="danger" icon={<DeleteOutlined />} block>
-                  Seçilenleri Sil
+                <Button type="primary" className="custom-delete-button" icon={<StopOutlined/>} block>
+                  Seçilenleri Tamamen Sil
                 </Button>
               </Popconfirm>
-            </Col>
-          )}
-          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-          <Dropdown overlay={menu} trigger={['click']}>
-            <Button icon={<SettingOutlined />} block>
-              Ayarlar
-            </Button>
-          </Dropdown>
-        </Col>
+            ) : (
+              <Popconfirm
+                title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+                onConfirm={handleSoftDeleteCategories}
+                okText="Evet"
+                cancelText="Hayır"
+              >
+                <Button type="danger" className="custom-delete-button" icon={<DeleteOutlined />} block>
+                  Seçilenleri  Sil
+                </Button>
+              </Popconfirm>
+            )}
+          </Col>)}
+          
         </Row>
       </Card>
       <Card style={{ marginBottom: 8 }}>

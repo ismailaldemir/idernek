@@ -34,7 +34,7 @@ router.all("*", auth.authenticate(), (req, res, next) => {
   next();
 });
 
-/* GET categories listing. */
+//Tüm kategorileri getir, silinen kayıtları dahil etme
 router.get(
   "/",
   /*auth.checkRoles("category_view"),*/ async (req, res, next) => {
@@ -62,7 +62,7 @@ router.post("/add", upload, async (req, res) => {
         ])
       );
 
-      // Kategori adının benzersiz olduğunu kontrol et
+    // Kategori adının benzersiz olduğunu kontrol et
     const existingCategory = await Categories.findOne({ name: body.name });
     if (existingCategory) {
       throw new CustomError(
@@ -80,7 +80,7 @@ router.post("/add", upload, async (req, res) => {
       created_by: req.user._id,
       image: file ? file.filename : undefined,
       tags: body.tags ? JSON.parse(body.tags) : [], // tags alanı
-      description: body.description || '' // description alanı
+      description: body.description || "" // description alanı
     });
 
     await newCategory.save();
@@ -113,15 +113,14 @@ router.post("/update", upload, async (req, res) => {
       );
     }
 
-     // Kategori güncelle
-     category.name = body.name || category.name;
-     category.is_active = body.is_active !== undefined ? body.is_active : category.is_active;
-     category.tags = body.tags ? JSON.parse(body.tags) : category.tags;
-     category.description = body.description !== undefined ? body.description : category.description;
+    // Kategori güncelle
+    category.name = body.name || category.name;
+    category.is_active =
+      body.is_active !== undefined ? body.is_active : category.is_active;
+    category.tags = body.tags ? JSON.parse(body.tags) : category.tags;
+    category.description =
+      body.description !== undefined ? body.description : category.description;
 
-
-     
-   
     // Yeni resmi ekle
     if (file) {
       // Eski resmi sil
@@ -143,6 +142,69 @@ router.post("/update", upload, async (req, res) => {
   }
 });
 
+router.post("/soft-delete", async (req, res) => {
+  let body = req.body;
+  try {
+    if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+          "ids"
+        ])
+      );
+    }
+
+    // Kategorilerin deleted_at alanını güncelle
+    await Categories.updateMany(
+      { _id: { $in: body.ids } },
+      { $set: { deleted_at: new Date() } }
+    );
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+});
+
+router.post("/hard-delete", async (req, res) => {
+  let body = req.body;
+  try {
+    if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+          "ids"
+        ])
+      );
+    }
+
+    // Kategorileri bul ve sil
+    const categoriesToDelete = await Categories.find({
+      _id: { $in: body.ids }
+    });
+
+    await Categories.deleteMany({ _id: { $in: body.ids } });
+
+    // Silinen kategorilere ait resimleri sil
+    for (const category of categoriesToDelete) {
+      if (category.image) {
+        const filePath = path.join(config.FILE_UPLOAD_PATH, category.image);
+        if (fs.existsSync(filePath)) {
+          await fs.promises.unlink(filePath);
+        }
+      }
+    }
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+});
+
 router.post("/delete", async (req, res) => {
   let body = req.body;
   try {
@@ -157,7 +219,9 @@ router.post("/delete", async (req, res) => {
     }
 
     // Kategorileri bul
-    const categoriesToDelete = await Categories.find({ _id: { $in: body.ids } });
+    const categoriesToDelete = await Categories.find({
+      _id: { $in: body.ids }
+    });
 
     // console.log("Silinecek Kategoriler:", categoriesToDelete);
 
@@ -181,7 +245,6 @@ router.post("/delete", async (req, res) => {
         }
       } else {
         console.warn(`Resim yok, kategori silinecek: ${category._id}`);
-        
       }
     }
 
@@ -193,6 +256,30 @@ router.post("/delete", async (req, res) => {
   }
 });
 
+router.post("/restore", async (req, res) => {
+  let body = req.body;
+  try {
+    if (!body.ids || !Array.isArray(body.ids) || body.ids.length === 0) {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        i18n.translate("COMMON.VALIDATION_ERROR_TITLE", req.user.language),
+        i18n.translate("COMMON.FIELD_MUST_BE_FILLED", req.user.language, [
+          "ids"
+        ])
+      );
+    }
+
+    await Categories.updateMany(
+      { _id: { $in: body.ids } },
+      { $set: { deleted_at: null } }
+    );
+
+    res.json(Response.successResponse({ success: true }));
+  } catch (error) {
+    let errorResponse = Response.errorResponse(error);
+    res.status(errorResponse.code).json(errorResponse);
+  }
+});
 
 router.post(
   "/export",
@@ -201,8 +288,22 @@ router.post(
       let categories = await Categories.find({});
 
       let excel = excelExport.toExcel(
-        ["Kategori Adı", "Durum", "Etiketler","Açıklama","Eklenme Tarihi", "Güncellenme Tarihi"],
-        ["name", "is_active",  "tags","description","created_at", "updated_at"],
+        [
+          "Kategori Adı",
+          "Durum",
+          "Etiketler",
+          "Açıklama",
+          "Eklenme Tarihi",
+          "Güncellenme Tarihi"
+        ],
+        [
+          "name",
+          "is_active",
+          "tags",
+          "description",
+          "created_at",
+          "updated_at"
+        ],
         categories
       );
 
@@ -220,38 +321,6 @@ router.post(
     }
   }
 );
-
-// router.post(
-//   "/import",
-//   /*auth.checkRoles("category_add"),*/ upload,
-//   async (req, res) => {
-//     try {
-//       let file = req.file;
-//       let body = req.body;
-
-//       let rows = Import.fromExcel(file.path);
-
-//       for (let i = 1; i < rows.length; i++) {
-//         let [name, is_active,  description] = rows[i];
-//         if (name) {
-//           await Categories.create({
-//             name,
-//             is_active,
-//             description,
-//             created_by: req.user._id
-//           });
-//         }
-//       }
-
-//       res
-//         .status(Enum.HTTP_CODES.CREATED)
-//         .json(Response.successResponse(req.body, Enum.HTTP_CODES.CREATED));
-//     } catch (err) {
-//       let errorResponse = Response.errorResponse(err);
-//       res.status(errorResponse.code).json(Response.errorResponse(err));
-//     }
-//   }
-// );
 
 router.post(
   "/import",
@@ -285,9 +354,12 @@ router.post(
       //     });
       //   }
       // }
-      
+
       // Mevcut kategori adlarını al
-      const existingCategories = await Categories.find().select('name').lean().exec();
+      const existingCategories = await Categories.find()
+        .select("name")
+        .lean()
+        .exec();
       const existingCategoryNames = existingCategories.map(cat => cat.name);
 
       // Yeni kategorileri filtrele
@@ -302,12 +374,11 @@ router.post(
         if (name) {
           await Categories.create({
             name,
-            is_active: is_active === 'true' || is_active === true, // 'true' veya true ise true yap
+            is_active: is_active === "true" || is_active === true, // 'true' veya true ise true yap
             created_by: req.user._id
           });
         }
       }
-
 
       res
         .status(Enum.HTTP_CODES.CREATED)

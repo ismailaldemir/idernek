@@ -148,7 +148,7 @@ const AdminLayout = ({ children }) => {
           <h2 className="header-title" style={{ color: headerTextColor }}>
             Admin Paneli
           </h2>
-          <Button
+          <Button style={{ color: headerTextColor }}
             className="settings-button"
             type="text"
             icon={<SettingOutlined />}
