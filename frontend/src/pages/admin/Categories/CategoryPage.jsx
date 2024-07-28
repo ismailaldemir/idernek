@@ -702,53 +702,6 @@ const CategoryPage = () => {
       },
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
-    // {
-    //   title: "İşlemler",
-    //   key: "actions",
-    //   render: (text, record) => (
-    //     <span style={{ display: "flex", gap: "4px" }}>
-    //       <Tooltip title="Düzenle">
-    //         <Button
-    //           icon={<EditOutlined />}
-    //           type="default"
-    //           onClick={() => {
-    //             setEditingCategory(record);
-    //             form.setFieldsValue(record);
-    //             setEditModalVisible(true);
-    //           }}
-    //         />
-    //       </Tooltip>
-    //       <Tooltip title="Sil">
-    //         <Popconfirm
-    //           title="Bu kategoriyi silmek istediğinize emin misiniz?"
-    //           onConfirm={async () => {
-    //             try {
-    //               const token = localStorage.getItem("token");
-    //               await axios.post(
-    //                 `${API_BASE_URL}/api/categories/soft-delete`,
-    //                 { ids: [record._id] },
-    //                 {
-    //                   headers: {
-    //                     Authorization: `Bearer ${token}`
-    //                   }
-    //                 }
-    //               );
-    //               message.success("Kategori başarıyla silindi");
-    //               fetchCategories();
-    //             } catch (error) {
-    //               handleApiError(error);
-    //             }
-    //           }}
-    //           okText="Evet"
-    //           cancelText="Hayır"
-    //         >
-    //           <Button icon={<DeleteOutlined />} danger />
-    //         </Popconfirm>
-    //       </Tooltip>
-    //     </span>
-    //   ),
-    //   responsive: ["xs", "sm", "md", "lg", "xl"]
-    // }
     {
       title: "İşlemler",
       key: "actions",
@@ -1030,6 +983,7 @@ const CategoryPage = () => {
               onConfirm={handleRestore}
               okText="Evet"
               cancelText="Hayır"
+              className="ant-popover-buttons"
             >
               <Button type="primary" className="custom-restore-button" icon={<RollbackOutlined />} block>
                 Seçilenleri Geri Yükle
@@ -1042,12 +996,13 @@ const CategoryPage = () => {
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
             {activeTab === "deleted" ? (
               <Popconfirm
-                title="Seçili kategorileri veritabanından tamamen silmek istediğinizden emin misiniz?"
+                title="Seçili kategorileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
                 onConfirm={handleDeleteCategories}
                 okText="Evet"
                 cancelText="Hayır"
+                className="ant-popover-buttons"
               >
-                <Button type="primary" className="custom-delete-button" icon={<StopOutlined/>} block>
+                <Button type="primary" className="custom-delete-button ant-btn" icon={<StopOutlined/>} block>
                   Seçilenleri Tamamen Sil
                 </Button>
               </Popconfirm>
@@ -1057,8 +1012,9 @@ const CategoryPage = () => {
                 onConfirm={handleSoftDeleteCategories}
                 okText="Evet"
                 cancelText="Hayır"
+                className="ant-popover-buttons"
               >
-                <Button type="danger" className="custom-delete-button" icon={<DeleteOutlined />} block>
+                <Button type="danger" className="custom-delete-button ant-btn" icon={<DeleteOutlined />} block>
                   Seçilenleri  Sil
                 </Button>
               </Popconfirm>

@@ -1,74 +1,137 @@
-/* CategoryPage.css */
-
 /* Daha küçük ekranlar için stil ayarları */
 @media (max-width: 576px) {
-    .ant-btn {
+  .ant-btn {
       width: 100%;
-      margin-bottom: 8px;
-    }
-  
-    .custom-col {
+      margin-bottom: 8px; /* Butonlar arasındaki boşluk */
+  }
+
+  .custom-col {
       flex: 1 0 100%;
-    }
   }
-  
-  /* Orta büyüklükteki ekranlar için stil ayarları */
-  @media (min-width: 576px) and (max-width: 768px) {
-    .ant-btn {
+
+  /* Popconfirm butonları için stil */
+  .ant-popover .ant-popover-buttons {
+      display: flex;
+      flex-direction: column; /* Butonları dikey sırala */
+      width: 10px; /* Tam genişlikte olmalarını sağlamak için */
+      margin-top: 8px; /* Üstte boşluk bırakmak için */
+  }
+
+  .ant-popover .ant-btn {
+      width: 100px; /* Butonların tam genişlikte görünmesi için */
+      margin-bottom: 5px; /* Butonlar arasındaki boşluk */
+      min-width: 10px; /* Minimum genişlik ayarlamak için */
+      font-size: 16px; /* Font boyutunu artırarak butonun daha belirgin olmasını sağla */
+      padding: 10px; /* Buton içindeki boşlukları artır */
+  }
+
+  /* Popconfirm içeriği için stil */
+  .ant-popover-inner-content {
+      width: auto; /* İçeriği otomatik genişlikte ayarlamak için */
+      padding: 8px; /* İçerik ile kenarlar arasında boşluk eklemek için */
+  }
+}
+
+
+/* Orta büyüklükteki ekranlar için stil ayarları */
+@media (min-width: 576px) and (max-width: 768px) {
+  .ant-btn {
       width: 100%;
       margin-bottom: 8px;
-    }
-  
-    .custom-col {
+  }
+
+  .custom-col {
       flex: 1 0 50%;
-    }
-  }
-  
-  /* Büyük ekranlar için stil ayarları */
-  @media (min-width: 768px) and (max-width: 992px) {
-    .custom-col {
-      flex: 1 0 33.33%;
-    }
-  }
-  
-  /* En büyük ekranlar için stil ayarları */
-  @media (min-width: 992px) {
-    .custom-col {
-      flex: 1 0 25%;
-    }
-  }
-  
-  .ant-tag {
-    word-break: break-word !important;
-    white-space: normal !important;
   }
 
-  .ant-table-cell {
-    max-width: 150px;
-    word-break: break-word;
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  /* Popconfirm butonları için stil */
+  .ant-popover .ant-popover-buttons {
+      display: flex;
+      flex-direction: row; /* Butonları yan yana sırala */
+      justify-content: space-between; /* Butonlar arasındaki boşluğu ayarlamak için */
+      padding: 8px; /* İçerik ile kenarlar arasında boşluk eklemek için */
+      width: 100%; /* Tam genişlikte olmalarını sağlamak için */
   }
 
-  .date-cell {
-    max-width: 150px;
-    text-align: center; /* Tarih hücresini ortalama */
-    word-break: break-word;
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .ant-popover .ant-btn {
+      flex: 1; /* Butonların eşit genişlikte olmasını sağlamak için */
+      margin: 0 5px; /* Butonlar arasındaki boşluk */
+      min-width: 80px; /* Minimum genişlik ayarlamak için */
   }
 
-  .custom-delete-button {
-    background-color:red;;
-    border-color:red;;
-    color: white;
+  /* Popconfirm içeriği için stil */
+  .ant-popover-inner-content {
+      width: auto; /* İçeriği otomatik genişlikte ayarlamak için */
+      padding: 8px; /* İçerik ile kenarlar arasında boşluk eklemek için */
   }
+}
 
-  .custom-restore-button {
-    background-color: green;
-    border-color: green;
-    color: white;
+/* Büyük ekranlar için stil ayarları */
+@media (min-width: 768px) and (max-width: 992px) {
+  .custom-col {
+    flex: 1 0 33.33%;
   }
-    
+}
+
+/* En büyük ekranlar için stil ayarları */
+@media (min-width: 992px) {
+  .custom-col {
+    flex: 1 0 25%;
+  }
+}
+
+.ant-tag {
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+.ant-table-cell {
+  max-width: 150px;
+  word-break: break-word;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date-cell {
+  max-width: 150px;
+  text-align: center; /* Tarih hücresini ortalama */
+  word-break: break-word;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-delete-button {
+  background-color: red;
+  border-color: red;
+  color: white;
+}
+
+.custom-restore-button {
+  background-color: green;
+  border-color: green;
+  color: white;
+}
+
+.ant-popover {
+  max-width: 300px !important;
+}
+
+.ant-popover-inner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-popover .ant-popover-buttons {
+  display: flex;
+  justify-content: center; /* Butonlar arasındaki boşluğu ayarlamak için */
+  width: 100%;
+}
+
+.ant-popover .ant-btn {
+  flex: 1; /* Butonların eşit genişlikte olmasını sağlamak için */
+  margin: 0 5px; /* Butonlar arasındaki boşluk */
+}
