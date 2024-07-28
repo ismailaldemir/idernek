@@ -14,7 +14,8 @@ import {
   Popconfirm,
   Row,
   Col,
-  Tabs
+  Tabs,
+  Card
 } from "antd";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -31,7 +32,7 @@ import {
   FilePdfOutlined
 } from "@ant-design/icons";
 import { PaperSizeOptions, OrientationOptions } from "../constants";
-import "./CategoryPage.css";
+import "./../admin.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
@@ -39,7 +40,6 @@ import { useForm } from "antd/lib/form/Form";
 const { Option } = Select;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
-
 
 const CategoryPage = () => {
   const [dataSource, setDataSource] = useState([]);
@@ -116,7 +116,7 @@ const CategoryPage = () => {
         setFilteredData(dataSource.filter(item => item.status === "pending"));
         break;
       case "deleted":
-        setFilteredData(dataSource.filter(item => item.status === "deleted"));
+        setFilteredData(dataSource.filter(item => item.deleted_at === "null"));
         break;
       default:
         setFilteredData(dataSource);
@@ -548,10 +548,15 @@ const CategoryPage = () => {
       ...getColumnSearchProps("name"),
       responsive: ["xs", "sm", "md", "lg", "xl"],
       render: (text, record) => (
-        <span>
-          {record.is_active ? <Tag color="green">{text}</Tag> : <Tag color="volcano">{text}</Tag>}
-        </span>)
-    },
+        <div>
+          {record.is_active ? (
+            <Tag color="green">{text}</Tag>
+          ) : (
+            <Tag color="volcano">{text}</Tag>
+          )}
+        </div>
+      )
+    },         
     {
       title: "Durum",
       dataIndex: "is_active",
@@ -589,14 +594,17 @@ const CategoryPage = () => {
         return descA.localeCompare(descB);
       },
       ...getColumnSearchProps("description"),
-      responsive: ["xs", "sm", "md", "lg", "xl"]
+      responsive: ["xs", "sm", "md", "lg", "xl"],
+      render: (text, record) => (
+        <div className="table-cell">{text}</div>
+      )
     },
     {
       title: "Oluşturulma Tarihi",
       dataIndex: "created_at",
       key: "created_at",
       sorter: (a, b) => a.created_at.localeCompare(b.created_at),
-      render: text => moment(text).format("DD/MM/YYYY HH:mm"),
+      render: text => <div className="date-cell">{moment(text).format("DD/MM/YYYY HH:mm")}</div>,
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
@@ -604,7 +612,7 @@ const CategoryPage = () => {
       dataIndex: "updated_at",
       key: "updated_at",
       sorter: (a, b) => a.updated_at.localeCompare(b.updated_at),
-      render: text => moment(text).format("DD/MM/YYYY HH:mm"),
+      render: text => <div className="date-cell">{moment(text).format("DD/MM/YYYY HH:mm")}</div>,
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
@@ -633,21 +641,40 @@ const CategoryPage = () => {
       title: "İşlemler",
       key: "actions",
       render: (text, record) => (
-        <span>
-        <Button
-          icon={<EditOutlined />}
-          type="default"
-          onClick={() => {
-            setEditingCategory(record);
-            form.setFieldsValue(record);
-            setEditModalVisible(true);
-          }}
-        />
-        <Popconfirm
-            title="Emin misiniz?"
-            onConfirm={() => handleDeleteCategories([record._id])}
+        <span style={{ display: "flex", gap: "4px" }}>
+          <Button
+            icon={<EditOutlined />}
+            type="default"
+            onClick={() => {
+              setEditingCategory(record);
+              form.setFieldsValue(record);
+              setEditModalVisible(true);
+            }}
+          />
+          <Popconfirm
+            title="Bu kategoriyi silmek istediğinize emin misiniz?"
+            onConfirm={async () => {
+              try {
+                const token = localStorage.getItem("token");
+                await axios.post(
+                  `${API_BASE_URL}/api/categories/delete`,
+                  { ids: [record._id] },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`
+                    }
+                  }
+                );
+                message.success("Kategori başarıyla silindi");
+                fetchCategories();
+              } catch (error) {
+                handleApiError(error);
+              }
+            }}
+            okText="Evet"
+            cancelText="Hayır"
           >
-            <Button icon={<DeleteOutlined />} type="danger" />
+            <Button icon={<DeleteOutlined />} danger />
           </Popconfirm>
         </span>
       ),
@@ -668,165 +695,190 @@ const CategoryPage = () => {
     {
       key: "all",
       label: "Tüm Kategoriler",
-      children: <Table
-        dataSource={filteredData}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: page => {
-            setPageSize(page);
-          }
-        }}
-      />,
+      children: (
+        <Table
+          dataSource={filteredData}
+          columns={columns}
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={{
+            pageSize,
+            onChange: handlePageSizeChange,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50", "100"]
+          }}
+          scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
+        />
+      )
     },
     {
       key: "active",
       label: "Aktif Kategoriler",
-      children: <Table
-        dataSource={filteredData.filter(item => item.is_active)}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: page => {
-            setPageSize(page);
-          }
-        }}
-      />,
+      children: (
+        <Table
+          dataSource={filteredData.filter(item => item.is_active)}
+          columns={columns}
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={{
+            pageSize,
+            onChange: handlePageSizeChange,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50", "100"]
+          }}
+          scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
+        />
+      )
     },
     {
       key: "inactive",
       label: "Pasif Kategoriler",
-      children: <Table
-        dataSource={filteredData.filter(item => !item.is_active)}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: page => {
-            setPageSize(page);
-          }
-        }}
-      />,
+      children: (
+        <Table
+          dataSource={filteredData.filter(item => !item.is_active)}
+          columns={columns}
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={{
+            pageSize,
+            onChange: handlePageSizeChange,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50", "100"]
+          }}
+          scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
+        />
+      )
     },
-    {
-      key: "pending",
-      label: "Bekleyen Kategoriler",
-      children: <Table
-        dataSource={filteredData.filter(item => item.status === "pending")}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: page => {
-            setPageSize(page);
-          }
-        }}
-      />,
-    },
+    // {
+    //   key: "pending",
+    //   label: "Bekleyen Kategoriler",
+    //   children: (
+    //     <Table
+    //       dataSource={filteredData.filter(item => item.status === "pending")}
+    //       columns={columns}
+    //       loading={loading}
+    //       rowSelection={rowSelection}
+    //       pagination={{
+    //         pageSize,
+    //         onChange: handlePageSizeChange,
+    //         showSizeChanger: true,
+    //         pageSizeOptions: ["5", "10", "20", "50", "100"]
+    //       }}
+    //       scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
+    //     />
+    //   )
+    // },
     {
       key: "deleted",
       label: "Silinen Kategoriler",
-      children: <Table
-        dataSource={filteredData.filter(item => item.status === "deleted")}
-        columns={columns}
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          pageSize,
-          onChange: page => {
-            setPageSize(page);
-          }
-        }}
-      />,
+      children: (
+        <Table
+          dataSource={filteredData.filter(item => item.deleted_at === "null")}
+          columns={columns}
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={{
+            pageSize,
+            onChange: handlePageSizeChange,
+            showSizeChanger: true,
+            pageSizeOptions: ["5", "10", "20", "50", "100"]
+          }}
+          scroll={{ x: "max-content" }} // Daha dinamik bir scroll genişliği sağlar
+        />
+      )
     }
   ];
-  
 
   return (
     <div>
-      <Row
-        gutter={[16, 16]}
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          flexWrap: "wrap"
-        }}
-      >
-        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              form.resetFields();
-              setAddModalVisible(true);
-              setFileList([]);
-            }}
-            block
-          >
-            Kategori Ekle
-          </Button>
-        </Col>
-        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-          <Button
-            type="default"
-            icon={<FilePdfOutlined />}
-            onClick={openPrintModal}
-            block
-          >
-            Pdf Oluştur
-          </Button>
-        </Col>
-        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-          <Button
-            type="default"
-            size="middle"
-            onClick={handleExport}
-            icon={<FileExcelOutlined />}
-            block
-          >
-            Excel'e Aktar
-          </Button>
-        </Col>
-        <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-          <Upload {...uploadProps}>
+      <Card style={{ marginBottom: 8 }}>
+        <Row
+          gutter={[16, 16]}
+          style={{
+            marginBottom: 16,
+            display: "flex",
+            flexWrap: "wrap"
+          }}
+        >
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                form.resetFields();
+                setAddModalVisible(true);
+                setFileList([]);
+              }}
+              block
+            >
+              Kategori Ekle
+            </Button>
+          </Col>
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+            <Button
+              type="default"
+              icon={<FilePdfOutlined />}
+              onClick={openPrintModal}
+              block
+            >
+              Pdf Oluştur
+            </Button>
+          </Col>
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
             <Button
               type="default"
               size="middle"
-              icon={<UploadOutlined />}
+              onClick={handleExport}
+              icon={<FileExcelOutlined />}
               block
             >
-              Excel'den Al
+              Excel'e Aktar
             </Button>
-          </Upload>
-        </Col>
-        {selectedRowKeys.length > 0 && (
-          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-            <Popconfirm
-              title="Seçili kategorileri silmek istediğinizden emin misiniz?"
-              onConfirm={handleDeleteCategories}
-              okText="Evet"
-              cancelText="Hayır"
-            >
-              <Button type="danger" icon={<DeleteOutlined />} block>
-                Seçilenleri Sil
-              </Button>
-            </Popconfirm>
           </Col>
-        )}
-      </Row>
-      <Tabs
-      activeKey={activeTab}
-      onChange={handleTabChange}
-      items={tabItems}
-      style={{ marginBottom: 16 }}
-    />
-      
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+            <Upload {...uploadProps}>
+              <Button
+                type="default"
+                size="middle"
+                icon={<UploadOutlined />}
+                block
+              >
+                Excel'den Al
+              </Button>
+            </Upload>
+          </Col>
+          {selectedRowKeys.length > 0 && (
+            <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+              <Popconfirm
+                title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+                onConfirm={handleDeleteCategories}
+                okText="Evet"
+                cancelText="Hayır"
+              >
+                <Button type="danger" icon={<DeleteOutlined />} block>
+                  Seçilenleri Sil
+                </Button>
+              </Popconfirm>
+            </Col>
+          )}
+          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+          <Dropdown overlay={menu} trigger={['click']}>
+            <Button icon={<SettingOutlined />} block>
+              Ayarlar
+            </Button>
+          </Dropdown>
+        </Col>
+        </Row>
+      </Card>
+      <Card style={{ marginBottom: 8 }}>
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          items={tabItems}
+          style={{ marginBottom: 16 }}
+        />
+      </Card>
+
       <Modal
         title="Kategori Ekle"
         open={addModalVisible}
@@ -959,6 +1011,7 @@ const CategoryPage = () => {
               }}
               fileList={fileList}
               onRemove={() => setFileList([])}
+              accept="image/*" // Sadece resim dosyalarının seçilmesine izin verir
             >
               {fileList.length > 0 ? (
                 <img
@@ -983,6 +1036,8 @@ const CategoryPage = () => {
         open={printVisible}
         onOk={handlePrintModalOk}
         onCancel={handlePrintModalCancel}
+        okText="Pdf Oluştur"
+        cancelText="Vazgeç"
       >
         <Form layout="vertical">
           <Form.Item label="Kağıt Boyutu">
