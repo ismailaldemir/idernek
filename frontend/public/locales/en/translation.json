@@ -1,4 +1,4 @@
-module.exports = {
+{
     "COMMON": {
         "VALIDATION_ERROR_TITLE": "Validation Error",
         "ALREADY_EXIST": "Already Exists!",
@@ -15,5 +15,4 @@ module.exports = {
     "CATEGORIES": {
         "STATUS_UPDATED": "Category status updated successfully"
     }
-    
 }
