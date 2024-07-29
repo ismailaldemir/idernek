@@ -1,4 +1,4 @@
-module.exports = {
+{
     "COMMON": {
         "VALIDATION_ERROR_TITLE": "Doğrulama Hatası",
         "ALREADY_EXIST": "Eklemeye çalıştığınız kayıt sistemde mevcuttur.",
@@ -15,5 +15,4 @@ module.exports = {
     "CATEGORIES": {
         "STATUS_UPDATED": "Kategori durumu başarıyla güncellendi"
     }
-    
 }

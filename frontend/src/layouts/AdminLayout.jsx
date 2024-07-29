@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./AdminLayout.css"; // responsive stiller için CSS dosyası
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const { Sider, Header, Content } = Layout;
 const { TabPane } = Tabs;
@@ -148,6 +149,7 @@ const AdminLayout = ({ children }) => {
           <h2 className="header-title" style={{ color: headerTextColor }}>
             Admin Paneli
           </h2>
+          <LanguageSwitcher />
           <Button style={{ color: headerTextColor }}
             className="settings-button"
             type="text"

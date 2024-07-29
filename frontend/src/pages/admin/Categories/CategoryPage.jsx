@@ -40,6 +40,7 @@ import "./../admin.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
+import { useTranslation } from "react-i18next";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -68,6 +69,7 @@ const CategoryPage = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [file, setFile] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchCategories();
@@ -150,19 +152,58 @@ const CategoryPage = () => {
     }
   };
 
+  // const handleActiveChange = async (id, checked) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+
+  //     if (!token) {
+  //       message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın.");
+  //       return;
+  //     }
+
+  //     const category = dataSource.find(item => item._id === id);
+
+  //     if (!category) {
+  //       message.error("Kategori bulunamadı");
+  //       return;
+  //     }
+
+  //     await axios.post(
+  //       `${API_BASE_URL}/api/categories/update`,
+  //       {
+  //         _id: id,
+  //         name: category.name,
+  //         is_active: checked,
+  //         tags: JSON.stringify(category.tags),
+  //         description: category.description,
+  //         image: category.image
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`
+  //         }
+  //       }
+  //     );
+  //     message.success("Kategori durumu başarıyla güncellendi");
+  //     fetchCategories();
+  //   } catch (error) {
+  //     handleApiError(error);
+  //   }
+  // };
+
   const handleActiveChange = async (id, checked) => {
     try {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın.");
+        message.error(t("COMMON.NEED_PERMISSIONS")); // Yetkisiz erişim mesajı
         return;
       }
 
       const category = dataSource.find(item => item._id === id);
 
       if (!category) {
-        message.error("Kategori bulunamadı");
+        message.error(t("COMMON.UNKNOWN_ERROR")); // Kategori bulunamadı mesajı
         return;
       }
 
@@ -182,7 +223,7 @@ const CategoryPage = () => {
           }
         }
       );
-      message.success("Kategori durumu başarıyla güncellendi");
+      message.success(t("CATEGORIES.STATUS_UPDATED")); // Başarılı güncelleme mesajı
       fetchCategories();
     } catch (error) {
       handleApiError(error);
@@ -748,7 +789,9 @@ const CategoryPage = () => {
                           }
                         }
                       );
-                      message.success("Kategori başarıyla kalıcı olarak silindi");
+                      message.success(
+                        "Kategori başarıyla kalıcı olarak silindi"
+                      );
                       fetchCategories();
                     } catch (error) {
                       handleApiError(error);
@@ -807,7 +850,6 @@ const CategoryPage = () => {
       ),
       responsive: ["xs", "sm", "md", "lg", "xl"]
     }
-    
   ];
 
   const rowSelection = {
@@ -975,52 +1017,67 @@ const CategoryPage = () => {
               </Button>
             </Upload>
           </Col>
-          
+
           {activeTab === "deleted" && selectedRowKeys.length > 0 && (
-          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-            <Popconfirm
-              title="Seçili kategorileri geri yüklemek istediğinizden emin misiniz?"
-              onConfirm={handleRestore}
-              okText="Evet"
-              cancelText="Hayır"
-              className="ant-popover-buttons"
-            >
-              <Button type="primary" className="custom-restore-button" icon={<RollbackOutlined />} block>
-                Seçilenleri Geri Yükle
-              </Button>
-            </Popconfirm>
-          </Col>
-        )}
+            <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+              <Popconfirm
+                title="Seçili kategorileri geri yüklemek istediğinizden emin misiniz?"
+                onConfirm={handleRestore}
+                okText="Evet"
+                cancelText="Hayır"
+                className="ant-popover-buttons"
+              >
+                <Button
+                  type="primary"
+                  className="custom-restore-button"
+                  icon={<RollbackOutlined />}
+                  block
+                >
+                  Seçilenleri Geri Yükle
+                </Button>
+              </Popconfirm>
+            </Col>
+          )}
 
           {selectedRowKeys.length > 0 && (
-          <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
-            {activeTab === "deleted" ? (
-              <Popconfirm
-                title="Seçili kategorileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
-                onConfirm={handleDeleteCategories}
-                okText="Evet"
-                cancelText="Hayır"
-                className="ant-popover-buttons"
-              >
-                <Button type="primary" className="custom-delete-button ant-btn" icon={<StopOutlined/>} block>
-                  Seçilenleri Tamamen Sil
-                </Button>
-              </Popconfirm>
-            ) : (
-              <Popconfirm
-                title="Seçili kategorileri silmek istediğinizden emin misiniz?"
-                onConfirm={handleSoftDeleteCategories}
-                okText="Evet"
-                cancelText="Hayır"
-                className="ant-popover-buttons"
-              >
-                <Button type="danger" className="custom-delete-button ant-btn" icon={<DeleteOutlined />} block>
-                  Seçilenleri  Sil
-                </Button>
-              </Popconfirm>
-            )}
-          </Col>)}
-          
+            <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
+              {activeTab === "deleted" ? (
+                <Popconfirm
+                  title="Seçili kategorileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
+                  onConfirm={handleDeleteCategories}
+                  okText="Evet"
+                  cancelText="Hayır"
+                  className="ant-popover-buttons"
+                >
+                  <Button
+                    type="primary"
+                    className="custom-delete-button ant-btn"
+                    icon={<StopOutlined />}
+                    block
+                  >
+                    Seçilenleri Tamamen Sil
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Popconfirm
+                  title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+                  onConfirm={handleSoftDeleteCategories}
+                  okText="Evet"
+                  cancelText="Hayır"
+                  className="ant-popover-buttons"
+                >
+                  <Button
+                    type="danger"
+                    className="custom-delete-button ant-btn"
+                    icon={<DeleteOutlined />}
+                    block
+                  >
+                    Seçilenleri Sil
+                  </Button>
+                </Popconfirm>
+              )}
+            </Col>
+          )}
         </Row>
       </Card>
       <Card style={{ marginBottom: 8 }}>
