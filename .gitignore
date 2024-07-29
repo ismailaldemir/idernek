@@ -2,3 +2,12 @@ api/node_modules/
 node_modules/
 api/node_modules/.bin/acorn
 api/package-lock.json
+api/tmp/
+api/public/images/
+
+# Environment variables
+/.env
+/api/.env
+api/.env
+frontend/.env
+.env
