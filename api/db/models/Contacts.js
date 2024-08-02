@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const schema = mongoose.Schema({
-    cit_number: {type: Number},
+    cit_number: {type: Number}, //tc kimlik no ya da benzersiz tanımlayıcı
     first_name: {type: String, required: true},
     last_name: {type: String, required: true},
     birth_place: {type: String},
@@ -12,7 +12,7 @@ const schema = mongoose.Schema({
     blood_group: {type: String},
     education: {type: String},
     marital_status: {type: String, required: true},
-    dwelling_id:{type: mongoose.SchemaTypes.ObjectId},
+    dwelling_id:{type: mongoose.SchemaTypes.ObjectId}, //adres konut bağlantısı
     phone_number: {type: String},
     gsm: {type: String, required: true},
     address: {type: String},
@@ -21,7 +21,11 @@ const schema = mongoose.Schema({
     email: {type: String},
     web_page: {type: String},
     is_active: { type: Boolean, default: true },
-    created_by: { type: mongoose.SchemaTypes.ObjectId }
+    image: { type: String, required: false }, 
+    tags: { type: [String], required: false }, 
+    description: { type: String, required: false }, 
+    created_by: { type: mongoose.SchemaTypes.ObjectId },
+    deleted_at: { type: Date, default: null }, // Silinme tarihi
 }, {
     versionKey: false,
     timestamps: {
@@ -30,9 +34,9 @@ const schema = mongoose.Schema({
     }
 });
 
-class Persons extends mongoose.Model {
+class Contacts extends mongoose.Model {
 
 }
 
-schema.loadClass(Persons);
-module.exports = mongoose.model("persons", schema);
+schema.loadClass(Contacts);
+module.exports = mongoose.model("contacts", schema);

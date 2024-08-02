@@ -9,6 +9,7 @@ import ProductDetailsPage from "./pages/ProductDetailsPage";
 import BlogDetailsPage from "./pages/BlogDetailsPage";
 import UserPage from "./pages/admin/UserPage";
 import CategoryPage from "./pages/admin/Categories/CategoryPage";
+import ContactsPage from "./pages/admin/Contacts/ContactsPage";
 
 import "./App.css";
 
@@ -30,6 +31,7 @@ function App() {
         <Route path="/admin/*">
           <Route path="users" element={<UserPage />} />
           <Route path="categories" element={<CategoryPage />} />
+          <Route path="contacts" element={<ContactsPage />} />
         </Route>
       </Routes>
     </I18nextProvider>

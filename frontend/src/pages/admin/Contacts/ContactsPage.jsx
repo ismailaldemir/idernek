@@ -33,7 +33,9 @@ import {
   FilePdfOutlined,
   RollbackOutlined,
   CloseCircleOutlined,
-  StopOutlined
+  StopOutlined,
+  IdcardOutlined,
+  UserAddOutlined
 } from "@ant-design/icons";
 import { PaperSizeOptions, OrientationOptions } from "../constants";
 import "./../admin.css";
@@ -41,26 +43,12 @@ import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
 import { useTranslation } from "react-i18next";
-import {
-  addEntity,
-  editEntity,
-  deleteEntity,
-  softDeleteEntity,
-  restoreEntity,
-  fetchData,
-  updateStatus,
-  exportData,
-  uploadFile
-} from "../../../utils/apiHelpers";
-import { apiService } from "../../../services/apiService";
-import { entityFields } from "../../../constants/entityFields";
-import handleApiError from "../../../utils/handleApiError";
 
 const { Option } = Select;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 
-const CategoryPage = () => {
+const ContactsPage = () => {
   const [dataSource, setDataSource] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,7 +63,7 @@ const CategoryPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingContact, setEditingContact] = useState(null);
   const [form] = useForm();
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
@@ -86,24 +74,24 @@ const CategoryPage = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    fetchCategories();
+    fetchContacts();
   }, []);
 
   useEffect(() => {
-    if (editingCategory) {
+    if (editingContact) {
       setFileList([]);
     }
-  }, [editingCategory]);
+  }, [editingContact]);
 
   useEffect(() => {
     filterData();
   }, [dataSource, activeTab]);
 
-  const fetchCategories = async () => {
+  const fetchContacts = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_BASE_URL}/api/categories`, {
+      const response = await axios.get(`${API_BASE_URL}/api/contacts`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -136,13 +124,13 @@ const CategoryPage = () => {
           dataSource.filter(item => !item.is_active && !item.deleted_at)
         );
         break;
-      // case "pending":
-      //   setFilteredData(
-      //     dataSource.filter(
-      //       item => item.status === "pending" && !item.deleted_at
-      //     )
-      //   );
-      //   break;
+      case "pending":
+        setFilteredData(
+          dataSource.filter(
+            item => item.status === "pending" && !item.deleted_at
+          )
+        );
+        break;
       case "deleted":
         setFilteredData(dataSource.filter(item => item.deleted_at));
         break;
@@ -155,67 +143,233 @@ const CategoryPage = () => {
     setActiveTab(key);
   };
 
-  const handleActiveChange = async (id, checked) => {
-    const data = { is_active: checked /* diğer alanlar */ };
-    await updateStatus("categories", id, data, fetchCategories, t);
+  const handleApiError = error => {
+    console.error("API hatası:", error);
+    if (error.response && error.response.status === 401) {
+      message.error("Yetkisiz erişim. Lütfen tekrar giriş yapın..");
+      window.location.href = "/login";
+      //TODO:react router dom history kullanımına bakılacak
+    } else {
+      message.error("İşlem gerçekleştirilemedi..");
+    }
   };
 
-  const handleAddCategory = async () => {
+  const handleActiveChange = async (id, checked) => {
     try {
-      const values = await form.validateFields();
+      const token = localStorage.getItem("token");
 
-      await addEntity(
-        "categories",
-        form,
-        fileList,
-        fetchCategories,
-        setAddModalVisible
+      if (!token) {
+        message.error(t("COMMON.NEED_PERMISSIONS")); // Yetkisiz erişim mesajı
+        return;
+      }
+
+      const contact = dataSource.find(item => item._id === id);
+
+      if (!contact) {
+        message.error(t("COMMON.UNKNOWN_ERROR")); // Kişi bulunamadı mesajı
+        return;
+      }
+
+      await axios.post(
+        `${API_BASE_URL}/api/contacts/update`,
+        {
+          _id: id,
+          name: contact.name,
+          is_active: checked,
+          tags: JSON.stringify(contact.tags),
+          description: contact.description,
+          image: contact.image
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
+      message.success(t("CATEGORIES.STATUS_UPDATED")); // Başarılı güncelleme mesajı
+      fetchContacts();
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
 
-      message.success(`${values.name} kategorisi başarıyla eklendi.`);
+  const handleAddContact = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const values = await form.validateFields();
+  
+      // Kişi adının zaten var olup olmadığını kontrol et
+      const response = await axios.get(`${API_BASE_URL}/api/contacts`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
+      const existingContact = response.data.data.find(
+        contact => contact.first_name.toLowerCase() === values.first_name.toLowerCase()
+      );
+  
+      if (existingContact) {
+        message.error(
+          `${values.first_name} adlı kişi zaten mevcut. Lütfen başka bir kişi adı giriniz..`
+        );
+        return; // Aynı kişi adı mevcutsa eklemeyi durdur
+      }
+  
+      // FormData verilerini oluştur
+      const formData = new FormData();
+      formData.append("cit_number", values.cit_number); // TC Kimlik Numarası
+      formData.append("first_name", values.first_name); // Ad
+      formData.append("last_name", values.last_name); // Soyad
+      formData.append("birth_place", values.birth_place); // Doğum Yeri
+      formData.append("birth_day", values.birth_day); // Doğum Günü
+      formData.append("gender", values.gender); // Cinsiyet
+      formData.append("mname", values.mname); // Anne Adı
+      formData.append("fname", values.fname); // Baba Adı
+      formData.append("blood_group", values.blood_group); // Kan Grubu
+      formData.append("education", values.education); // Eğitim
+      formData.append("marital_status", values.marital_status); // Medeni Durumu
+      //formData.append("dwelling_id", values.dwelling_id); // Konut ID
+      formData.append("phone_number", values.phone_number); // Telefon Numarası
+      formData.append("gsm", values.gsm); // GSM
+      formData.append("address", values.address); // Adres
+      formData.append("city", values.city); // Şehir
+      formData.append("province", values.province); // İlçe
+      formData.append("email", values.email); // E-posta
+      formData.append("web_page", values.web_page); // Web Sayfası
+      formData.append("is_active", values.is_active ? "true" : "false"); // Aktiflik
+      formData.append("tags", JSON.stringify(values.tags)); // Etiketler
+  
+      // Açıklama alanını kontrol et ve ekle
+      if (values.description !== undefined && values.description !== null && values.description.trim() !== "") {
+        formData.append("description", values.description);
+      } else {
+        formData.append("description", ""); // Varsayılan boş bir değer ekle
+      }
+  
+      if (fileList.length > 0) {
+        formData.append("image", fileList[0]); // Görsel
+      }
+  
+      // Kişiyi ekleme isteği
+      await axios.post(`${API_BASE_URL}/api/contacts/add`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+  
+      message.success(`${values.first_name} kişisi başarıyla eklendi.`);
+      setAddModalVisible(false);
       form.resetFields();
       setFileList([]);
+      fetchContacts();
     } catch (error) {
-      console.error(
-        "Hata:",
-        error.response ? error.response.data : error.message
-      );
       handleApiError(error);
     }
   };
+  
 
-  const handleEditCategory = async () => {
+  const handleEditContact = async () => {
     try {
-      await editEntity(
-        "categories",
-        form,
-        fileList,
-        fetchCategories,
-        setEditModalVisible,
-        editingCategory
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      const values = await form.validateFields();
+
+      formData.append("_id", editingContact._id);
+      formData.append("name", values.name);
+      formData.append("is_active", values.is_active ? "true" : "false");
+      formData.append(
+        "tags",
+        JSON.stringify(values.tags) ? JSON.stringify(values.tags) : ""
       );
-      setEditingCategory(null);
+      formData.append(
+        "description",
+        values.description ? values.description : ""
+      );
+      if (fileList.length > 0) {
+        formData.append("image", fileList[0]);
+      }
+
+      await axios.post(`${API_BASE_URL}/api/contacts/update`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      message.success(`${values.name} kişisi başarıyla güncellendi.`);
+      setEditModalVisible(false);
+      setEditingContact(null);
       setFileList([]);
+      fetchContacts();
     } catch (error) {
-      console.error("Hata:", error); // Hata loglama
       handleApiError(error);
     }
   };
 
-  const handleDeleteCategories = async () => {
-    await deleteEntity("categories", selectedRowKeys, fetchCategories, t);
-    setSelectedRowKeys([]);
+  const handleDeleteContacts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_BASE_URL}/api/contacts/delete`,
+        { ids: selectedRowKeys },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      message.success("Seçili kişiler başarıyla silindi");
+      setSelectedRowKeys([]);
+      fetchContacts();
+    } catch (error) {
+      handleApiError(error);
+    }
   };
 
-  const handleSoftDeleteCategories = async () => {
-    await softDeleteEntity("categories", selectedRowKeys, fetchCategories, t);
-    setSelectedRowKeys([]);
+  const handleSoftDeleteContacts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `${API_BASE_URL}/api/contacts/soft-delete`,
+        { ids: selectedRowKeys },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      message.success("Seçili kişiler başarıyla silindi");
+      setSelectedRowKeys([]);
+      fetchContacts();
+    } catch (error) {
+      handleApiError(error);
+    }
   };
 
   const handleRestore = async () => {
-    setLoading(true);
-    await restoreEntity("categories", selectedRowKeys, fetchCategories, t);
-    setLoading(false);
+    try {
+      const token = localStorage.getItem("token");
+      setLoading(true);
+
+      await axios.post(
+        `${API_BASE_URL}/api/contacts/restore`,
+        { ids: selectedRowKeys },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      message.success("Kişiler başarıyla geri yüklendi");
+      fetchContacts(); // Kişileri tekrar yükleyin
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -235,7 +389,7 @@ const CategoryPage = () => {
       body: tableRows
     });
 
-    doc.save("categories.pdf");
+    doc.save("contacts.pdf");
   };
 
   const openPrintModal = () => {
@@ -267,7 +421,7 @@ const CategoryPage = () => {
       body: tableRows
     });
 
-    doc.save("Kategori Listesi.pdf");
+    doc.save("Kişi Listesi.pdf");
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
@@ -369,17 +523,71 @@ const CategoryPage = () => {
   };
 
   const handleExport = async () => {
-    await exportData("categories", setLoading, t);
-};
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${API_BASE_URL}/api/contacts/export`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          responseType: "blob" // İndirilen dosya için blob tipi
+        }
+      );
+
+      // Blob'dan URL oluştur ve dosyayı indir
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `contacts_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpload = async () => {
-    await uploadFile("categories", file, t);
-};
+    if (!file) {
+      message.error("Lütfen bir dosya seçin");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file); // image alanı ile dosya ekleniyor
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/contacts/import",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      if (response.status === 201) {
+        message.success("Dosya başarıyla yüklendi");
+      } else {
+        message.error("Dosya yükleme sırasında bir hata oluştu");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      message.error("Dosya yükleme sırasında bir hata oluştu");
+    }
+  };
 
   const handleUploadChange = info => {
     if (info.file.status === "done") {
       message.success(`${info.file.name} dosyası başarıyla yüklendi.`);
-      fetchCategories(); // Verileri güncellemek için yeniden fetch yapabilirsiniz.
+      fetchContacts(); // Verileri güncellemek için yeniden fetch yapabilirsiniz.
     } else if (info.file.status === "error") {
       message.error(`${info.file.name} dosyasını yüklerken bir hata oluştu.`);
     }
@@ -387,7 +595,7 @@ const CategoryPage = () => {
 
   const uploadProps = {
     name: "image",
-    action: `${API_BASE_URL}/api/categories/import`,
+    action: `${API_BASE_URL}/api/contacts/import`,
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`
     },
@@ -411,7 +619,7 @@ const CategoryPage = () => {
 
   const columns = [
     {
-      title: "Kategori Adı",
+      title: "Kişi Adı",
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -505,7 +713,7 @@ const CategoryPage = () => {
           return (
             <img
               src={text}
-              alt="Kategori Resmi"
+              alt="Kişi Resmi"
               style={{ width: "70px", height: "70px", cursor: "pointer" }}
               onClick={() => handleImagePreview(text)}
             />
@@ -531,7 +739,7 @@ const CategoryPage = () => {
                     try {
                       const token = localStorage.getItem("token");
                       await axios.post(
-                        `${API_BASE_URL}/api/categories/restore`,
+                        `${API_BASE_URL}/api/contacts/restore`,
                         { ids: [record._id] },
                         {
                           headers: {
@@ -539,8 +747,8 @@ const CategoryPage = () => {
                           }
                         }
                       );
-                      message.success("Kategori başarıyla geri yüklendi");
-                      fetchCategories();
+                      message.success("Kişi başarıyla geri yüklendi");
+                      fetchContacts();
                     } catch (error) {
                       handleApiError(error);
                     }
@@ -549,12 +757,12 @@ const CategoryPage = () => {
               </Tooltip>
               <Tooltip title="Kalıcı Sil">
                 <Popconfirm
-                  title="Bu kategoriyi veritabanından tamamen silmek istediğinize emin misiniz?"
+                  title="Bu kişiyi veritabanından tamamen silmek istediğinize emin misiniz?"
                   onConfirm={async () => {
                     try {
                       const token = localStorage.getItem("token");
                       await axios.post(
-                        `${API_BASE_URL}/api/categories/hard-delete`,
+                        `${API_BASE_URL}/api/contacts/hard-delete`,
                         { ids: [record._id] },
                         {
                           headers: {
@@ -562,10 +770,8 @@ const CategoryPage = () => {
                           }
                         }
                       );
-                      message.success(
-                        "Kategori başarıyla kalıcı olarak silindi"
-                      );
-                      fetchCategories();
+                      message.success("Kişi başarıyla kalıcı olarak silindi");
+                      fetchContacts();
                     } catch (error) {
                       handleApiError(error);
                     }
@@ -584,7 +790,7 @@ const CategoryPage = () => {
                   icon={<EditOutlined />}
                   type="default"
                   onClick={() => {
-                    setEditingCategory(record);
+                    setEditingContact(record);
                     form.setFieldsValue(record);
                     setEditModalVisible(true);
                   }}
@@ -592,12 +798,12 @@ const CategoryPage = () => {
               </Tooltip>
               <Tooltip title="Sil">
                 <Popconfirm
-                  title="Bu kategoriyi silmek istediğinize emin misiniz?"
+                  title="Bu kişiyi silmek istediğinize emin misiniz?"
                   onConfirm={async () => {
                     try {
                       const token = localStorage.getItem("token");
                       await axios.post(
-                        `${API_BASE_URL}/api/categories/soft-delete`,
+                        `${API_BASE_URL}/api/contacts/soft-delete`,
                         { ids: [record._id] },
                         {
                           headers: {
@@ -605,8 +811,8 @@ const CategoryPage = () => {
                           }
                         }
                       );
-                      message.success("Kategori başarıyla silindi");
-                      fetchCategories();
+                      message.success("Kişi başarıyla silindi");
+                      fetchContacts();
                     } catch (error) {
                       handleApiError(error);
                     }
@@ -637,7 +843,7 @@ const CategoryPage = () => {
   const tabItems = [
     {
       key: "all",
-      label: "Tüm Kategoriler",
+      label: "Tüm Kişiler",
       children: (
         <Table
           dataSource={filteredData.filter(item => !item.deleted_at)}
@@ -656,7 +862,7 @@ const CategoryPage = () => {
     },
     {
       key: "active",
-      label: "Aktif Kategoriler",
+      label: "Aktif Kişiler",
       children: (
         <Table
           dataSource={filteredData.filter(item => item.is_active)}
@@ -675,7 +881,7 @@ const CategoryPage = () => {
     },
     {
       key: "inactive",
-      label: "Pasif Kategoriler",
+      label: "Pasif Kişiler",
       children: (
         <Table
           dataSource={filteredData.filter(item => !item.is_active)}
@@ -694,7 +900,7 @@ const CategoryPage = () => {
     },
     // {
     //   key: "pending",
-    //   label: "Bekleyen Kategoriler",
+    //   label: "Bekleyen Kişiler",
     //   children: (
     //     <Table
     //       dataSource={filteredData.filter(item => item.status === "pending")}
@@ -713,7 +919,7 @@ const CategoryPage = () => {
     // },
     {
       key: "deleted",
-      label: "Silinen Kategoriler",
+      label: "Silinen Kişiler",
       children: (
         <Table
           dataSource={filteredData.filter(item => item.deleted_at)}
@@ -754,7 +960,7 @@ const CategoryPage = () => {
               }}
               block
             >
-              Kategori Ekle
+              Kişi Ekle
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -794,7 +1000,7 @@ const CategoryPage = () => {
           {activeTab === "deleted" && selectedRowKeys.length > 0 && (
             <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
               <Popconfirm
-                title="Seçili kategorileri geri yüklemek istediğinizden emin misiniz?"
+                title="Seçili kişileri geri yüklemek istediğinizden emin misiniz?"
                 onConfirm={handleRestore}
                 okText="Evet"
                 cancelText="Hayır"
@@ -816,8 +1022,8 @@ const CategoryPage = () => {
             <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
               {activeTab === "deleted" ? (
                 <Popconfirm
-                  title="Seçili kategorileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
-                  onConfirm={handleDeleteCategories}
+                  title="Seçili kişileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
+                  onConfirm={handleDeleteContacts}
                   okText="Evet"
                   cancelText="Hayır"
                   className="ant-popover-buttons"
@@ -833,8 +1039,8 @@ const CategoryPage = () => {
                 </Popconfirm>
               ) : (
                 <Popconfirm
-                  title="Seçili kategorileri silmek istediğinizden emin misiniz?"
-                  onConfirm={handleSoftDeleteCategories}
+                  title="Seçili kişileri silmek istediğinizden emin misiniz?"
+                  onConfirm={handleSoftDeleteContacts}
                   okText="Evet"
                   cancelText="Hayır"
                   className="ant-popover-buttons"
@@ -863,119 +1069,313 @@ const CategoryPage = () => {
       </Card>
 
       <Modal
-        title="Kategori Ekle"
+        title="Kişi Ekle"
         open={addModalVisible}
-        onOk={handleAddCategory}
+        onOk={handleAddContact}
         onCancel={() => setAddModalVisible(false)}
         okText="Kaydet"
         cancelText="Vazgeç"
-        width={400}
+        width={600}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            label="Kategori Adı"
-            name="name"
-            rules={[
-              { required: true, message: "Kategori adı alanı doldurulmalıdır." }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Durum"
-            name="is_active"
-            valuePropName="checked"
-            initialValue={false}
-          >
-            <Switch defaultChecked={false} />
-          </Form.Item>
-          <Form.Item
-            label="Etiketler"
-            name="tags"
-            rules={[
-              { required: true, message: "Etiketler alanı doldurulmalıdır." }
-            ]}
-          >
-            <Select
-              mode="tags"
-              style={{ width: "100%" }}
-              placeholder="Etiketleri girin"
-            />
-          </Form.Item>
-          <Form.Item label="Açıklama" name="description">
-            <Input.TextArea />
-          </Form.Item>
-          {/* <Form.Item label="Görsel" name="image">
-            <Dragger
-              beforeUpload={file => {
-                setFileList([file]);
-                return false;
-              }}
-              fileList={fileList}
-              onRemove={() => setFileList([])}
-            >
-              {fileList.length > 0 && (
-                <img
-                  src={URL.createObjectURL(fileList[0])}
-                  alt="Görsel Önizleme"
-                  style={{ marginTop: 16, width: "100%", height: "auto" }}
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item label="Görsel" name="image">
+                <Dragger
+                  beforeUpload={handleBeforeUpload}
+                  fileList={fileList}
+                  onRemove={handleRemove}
+                  accept="image/*"
+                >
+                  {fileList.length > 0 ? (
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <img
+                        src={URL.createObjectURL(fileList[0])}
+                        alt="Görsel Önizleme"
+                        style={{
+                          marginTop: 16,
+                          width: 100,
+                          height: 100,
+                          borderRadius: "50%",
+                          objectFit: "cover"
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
+                  )}
+                </Dragger>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="TC Kimlik No" name="cit_number">
+                <Input type="number" />
+              </Form.Item>
+            </Col>
+            <Col span={4}>
+              <Form.Item
+                label="Durum"
+                name="is_active"
+                valuePropName="checked"
+                initialValue={false}
+              >
+                <Switch defaultChecked={false} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Ad"
+                name="first_name"
+                rules={[
+                  { required: true, message: "Ad alanı doldurulmalıdır." }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Soyad"
+                name="last_name"
+                rules={[
+                  { required: true, message: "Soyad alanı doldurulmalıdır." }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={10}>
+              <Form.Item label="Doğum Yeri" name="birth_place">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label="Doğum Günü" name="birth_day">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item
+                label="Cinsiyet"
+                name="gender"
+                rules={[
+                  { required: true, message: "Cinsiyet alanı doldurulmalıdır." }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}></Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Anne Adı" name="mname">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Baba Adı" name="fname">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Kan Grubu" name="blood_group">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Medeni Durumu"
+                name="marital_status"
+                rules={[
+                  {
+                    required: true,
+                    message: "Medeni durum alanı doldurulmalıdır."
+                  }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Telefon Numarası" name="phone_number">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="GSM"
+                name="gsm"
+                rules={[
+                  { required: true, message: "GSM alanı doldurulmalıdır." }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Adres" name="address">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Şehir" name="city">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="İlçe" name="province">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="E-posta" name="email">
+                <Input type="email" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Web Sayfası" name="web_page">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Etiketler" name="tags">
+                <Select
+                  mode="tags"
+                  style={{ width: "100%" }}
+                  placeholder="Etiketleri girin"
                 />
-              )}
-              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
-            </Dragger>
-          </Form.Item> */}
-          <Form.Item label="Görsel" name="image">
-            <Dragger
-              beforeUpload={handleBeforeUpload}
-              fileList={fileList}
-              onRemove={handleRemove}
-              accept="image/*" // Sadece resim dosyalarının seçilmesine izin verir
-            >
-              {fileList.length > 0 && (
-                <img
-                  src={URL.createObjectURL(fileList[0])}
-                  alt="Görsel Önizleme"
-                  style={{ marginTop: 16, width: "100%", height: "auto" }}
-                />
-              )}
-              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
-            </Dragger>
-          </Form.Item>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Açıklama" name="description">
+                <Input.TextArea />
+              </Form.Item>
+            </Col>
+          </Row>
         </Form>
       </Modal>
 
       <Modal
-        title="Kategori Düzenle"
+        title="Kişi Düzenle"
         open={editModalVisible}
-        onOk={handleEditCategory}
+        onOk={handleEditContact}
         onCancel={() => {
           setEditModalVisible(false);
-          setEditingCategory(null);
+          setEditingContact(null);
         }}
         okText="Güncelle"
         cancelText="Vazgeç"
-        width={400}
+        width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="Kategori Adı"
-            name="name"
+            label="TC Kimlik No / Benzersiz Tanımlayıcı"
+            name="cit_number"
+          >
+            <Input type="number" />
+          </Form.Item>
+          <Form.Item
+            label="Ad"
+            name="first_name"
+            rules={[{ required: true, message: "Ad alanı doldurulmalıdır." }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Soyad"
+            name="last_name"
             rules={[
-              { required: true, message: "Kategori adı doldurulmalıdır." }
+              { required: true, message: "Soyad alanı doldurulmalıdır." }
             ]}
           >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Doğum Yeri" name="birth_place">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Doğum Günü" name="birth_day">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Cinsiyet"
+            name="gender"
+            rules={[
+              { required: true, message: "Cinsiyet alanı doldurulmalıdır." }
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Anne Adı" name="mname">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Baba Adı" name="fname">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Kan Grubu" name="blood_group">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Eğitim Durumu" name="education">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Medeni Durum"
+            name="marital_status"
+            rules={[
+              { required: true, message: "Medeni durum alanı doldurulmalıdır." }
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Telefon Numarası" name="phone_number">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="GSM"
+            name="gsm"
+            rules={[{ required: true, message: "GSM alanı doldurulmalıdır." }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label="Adres" name="address">
+            <Input />
+          </Form.Item>
+          <Form.Item label="Şehir" name="city">
+            <Input />
+          </Form.Item>
+          <Form.Item label="İlçe" name="province">
+            <Input />
+          </Form.Item>
+          <Form.Item label="E-posta" name="email">
+            <Input type="email" />
+          </Form.Item>
+          <Form.Item label="Web Sayfası" name="web_page">
             <Input />
           </Form.Item>
           <Form.Item label="Durum" name="is_active" valuePropName="checked">
             <Switch />
           </Form.Item>
-          <Form.Item
-            label="Etiketler"
-            name="tags"
-            rules={[
-              { required: true, message: "Etiketler alanı doldurulmalıdır." }
-            ]}
-          >
+          <Form.Item label="Etiketler" name="tags">
             <Select
               mode="tags"
               style={{ width: "100%" }}
@@ -985,7 +1385,6 @@ const CategoryPage = () => {
           <Form.Item label="Açıklama" name="description">
             <Input.TextArea />
           </Form.Item>
-
           <Form.Item label="Görsel" name="image">
             <Dragger
               beforeUpload={file => {
@@ -994,7 +1393,7 @@ const CategoryPage = () => {
               }}
               fileList={fileList}
               onRemove={() => setFileList([])}
-              accept="image/*" // Sadece resim dosyalarının seçilmesine izin verir
+              accept="image/*"
             >
               {fileList.length > 0 ? (
                 <img
@@ -1002,9 +1401,9 @@ const CategoryPage = () => {
                   alt="Görsel Önizleme"
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
-              ) : editingCategory && editingCategory.image ? (
+              ) : editingContact && editingContact.image ? (
                 <img
-                  src={`${API_BASE_URL}/images/${editingCategory.image}`}
+                  src={`${API_BASE_URL}/images/${editingContact.image}`}
                   alt="Yüklü Görsel"
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
@@ -1014,6 +1413,7 @@ const CategoryPage = () => {
           </Form.Item>
         </Form>
       </Modal>
+
       <Modal
         title="Yazdırma Ayarları"
         open={printVisible}
@@ -1072,4 +1472,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default ContactsPage;

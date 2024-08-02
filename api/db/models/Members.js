@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Associations = require("./Associations");
-const Persons = require("./Persons");
+const Persons = require("./Contacts");
 const Constants = require("./Constants");
 
 const schema = mongoose.Schema({

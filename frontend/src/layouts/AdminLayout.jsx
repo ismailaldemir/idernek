@@ -10,7 +10,9 @@ import {
   ShoppingCartOutlined,
   AppstoreOutlined,
   MenuOutlined,
-  SettingOutlined
+  SettingOutlined,
+  IdcardOutlined,
+  UserAddOutlined
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./AdminLayout.css"; // responsive stiller için CSS dosyası
@@ -66,19 +68,8 @@ const AdminLayout = ({ children }) => {
         key: "2",
         icon: <AppstoreOutlined />,
         label: "Kategoriler",
-        children: [
-          {
-            key: "3",
-            label: "Kategori Listesi",
-            onClick: () => navigate(`/admin/categories`)
-          },
-          {
-            key: "4",
-            label: "Kategori Ekle",
-            onClick: () => navigate("/admin/categories/create")
-          }
-        ]
-      },
+        onClick: () => navigate(`/admin/categories`)
+        },
       {
         key: "5",
         icon: <LaptopOutlined />,
@@ -112,6 +103,12 @@ const AdminLayout = ({ children }) => {
             onClick: () => navigate("/admin/coupons/create")
           }
         ]
+      },
+      {
+        key: "13",
+        icon: <IdcardOutlined />,
+        label: "Kişiler",
+        onClick: () => navigate(`/admin/contacts`)
       },
       {
         key: "11",
