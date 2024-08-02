@@ -5,7 +5,11 @@
         "UNKNOWN_ERROR": "Unknown Error!",
         "FIELD_MUST_BE_FILLED": "{} field must be filled",
         "FIELD_MUST_BE_TYPE": "{} field must be {}",
-        "NEED_PERMISSIONS": "Need Permissions"
+        "NEED_PERMISSIONS": "Need Permissions",
+        "TRANSACTION_COMPLETE_ERROR":"Transaction could not be completed.",
+        "COMMON.SOFT_DELETED_SUCCESS":"Record deleted successfully.",
+        "COMMON.DELETED_SUCCESS":"Record has been successfully permanently deleted.",
+        "COMMON.RESTORED_SUCCESS":"Record was successfully retrieved."
     },
     "USERS": {
         "AUTH_ERROR": "Email or password wrong",

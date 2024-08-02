@@ -1,50 +1,76 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { changeLanguage } from '../i18n';
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { changeLanguage } from "../i18n";
+import languageNames, { getFlagPath } from "../constants/languages";
+import axios from "axios";
+import "./LanguageSwitcher.css";
+import { GlobalOutlined } from "@ant-design/icons";
+import { Dropdown, Menu, Button } from "antd";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [availableLanguages, setAvailableLanguages] = useState([]);
 
-  const handleLanguageChange = (lng) => {
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/languages`
+        );
+        setAvailableLanguages(response.data);
+      } catch (error) {
+        console.error("Diller alınırken hata oluştu:", error);
+      }
+    };
+
+    fetchLanguages();
+
+    // Local storage'den header arka plan rengini ve yazı rengini al ve CSS değişkeni olarak ayarla
+    const headerBgColor = localStorage.getItem("header-bg-color") || "#333333"; // Default arka plan rengi
+    const headerTextColor =
+      localStorage.getItem("header-text-color") || "#ffffff"; // Default yazı rengi
+
+    document.documentElement.style.setProperty(
+      "--header-background-color",
+      headerBgColor
+    );
+    document.documentElement.style.setProperty(
+      "--header-text-color",
+      headerTextColor
+    );
+  }, []);
+
+  const handleLanguageChange = lng => {
     changeLanguage(lng);
-    setIsOpen(false); // Dil değiştirildikten sonra dropdown'ı kapat
   };
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+  // items dizisi oluşturarak kullanmak
+  const menuItems = availableLanguages.map(lng => ({
+    key: lng,
+    label: (
+      <span>
+        <img
+          src={getFlagPath(lng)} // Dinamik bayrak görseli
+          alt={`${languageNames[lng]} bayrağı`} // Alt metin
+          style={{ width: 20, marginRight: 8 }} // Boyut ve margin
+        />
+        {languageNames[lng]}
+      </span>
+    ),
+    onClick: () => handleLanguageChange(lng)
+  }));
 
   return (
-    <div className="language-switcher">
-      <button onClick={toggleDropdown}>
-        Dil Seçin
-      </button>
-      {isOpen && (
-        <ul className="dropdown-menu">
-          <li onClick={() => handleLanguageChange('en')}>English</li>
-          <li onClick={() => handleLanguageChange('tr')}>Türkçe</li>
-        </ul>
-      )}
-      <style jsx>{`
-        .dropdown-menu {
-          list-style-type: none;
-          padding: 0;
-          margin: 0;
-          position: absolute;
-          background-color: white;
-          border: 1px solid #ccc;
-          z-index: 1;
-        }
-        .dropdown-menu li {
-          padding: 8px 12px;
-          cursor: pointer;
-        }
-        .dropdown-menu li:hover {
-          background-color: #f0f0f0;
-        }
-      `}</style>
-    </div>
+    <Dropdown
+      menu={{ items: menuItems }} // items propunu kullanarak menüyü oluşturma
+      trigger={["click"]}
+    >
+      <Button
+        className="language-switcher-button"
+        icon={<GlobalOutlined />}
+      ></Button>
+    </Dropdown>
   );
 };
 
