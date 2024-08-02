@@ -1,0 +1,29 @@
+.language-switcher-button {
+    color: var(--header-text-color); 
+    background-color: var(--header-background-color); 
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
+  
+  .language-switcher-button:hover {
+    color: var(--header-text-color-hover, #cccccc); /* Default hover yazı rengi */
+    background-color: var(--header-background-color-hover, #080000); /* Default hover arka plan rengi */
+  }
+  
+  .language-switcher .ant-dropdown-menu {
+    background-color: var(--header-background-color, #080000); /* Default arka plan rengi */
+    color: var(--header-text-color, #ffffff); /* Default yazı rengi */
+  }
+  
+  .language-switcher .ant-dropdown-menu-item {
+    color: var(--header-text-color, #ffffff); /* Default yazı rengi */
+  }
+  
+  .language-switcher .ant-dropdown-menu-item:hover {
+    background-color: var(--header-background-color-hover, #080000); /* Default hover arka plan rengi */
+    color: var(--header-text-color-hover, #cccccc); /* Default hover yazı rengi */
+  }
+  

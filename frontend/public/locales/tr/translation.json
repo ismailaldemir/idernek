@@ -5,7 +5,11 @@
         "UNKNOWN_ERROR": "Bilinmeyen Hata!",
         "FIELD_MUST_BE_FILLED": "{} alanı dolu olmalıdır.",
         "FIELD_MUST_BE_TYPE": "{} alanı {} tipinde olmalıdır.",
-        "NEED_PERMISSIONS": "Bu işlem için yetkiniz yoktur."
+        "NEED_PERMISSIONS": "Bu işlem için yetkiniz yoktur.",
+        "TRANSACTION_COMPLETE_ERROR":"İşlem gerçekleştirilemedi.",
+        "COMMON.SOFT_DELETED_SUCCESS":"Kayıt başarıyla silindi.",
+        "COMMON.DELETED_SUCCESS":"Kayıt başarıyla kalıcı olarak silindi.",
+        "COMMON.RESTORED_SUCCESS":"Kayıt başarıyla geri alındı."
     },
     "USERS": {
         "AUTH_ERROR": "Email ya da şifre bilgisi hatalı",
