@@ -10,9 +10,9 @@ const schema = mongoose.Schema(
       ref: Users, // Referans olarak "users" modeli eklendi
       required: false
     },
-    image: { type: String, required: false }, // Resim dosyasının yolunu depolamak için eklendi
-    tags: { type: [String], required: false }, // Birden fazla tag bilgisi için eklendi
-    description: { type: String, required: false }, // Biçimlendirilmiş veri için eklendi
+    image: { type: String, required: false }, 
+    tags: { type: [String], required: false }, 
+    description: { type: String, required: false }, 
     deleted_at: { type: Date, default: null }, // Silinme tarihi
   },
   {

@@ -4,7 +4,7 @@ api/node_modules/.bin/acorn
 api/package-lock.json
 api/tmp/
 api/public/images/
-api/public/flags/
+frontend/public/flags/
 
 
 # Environment variables
