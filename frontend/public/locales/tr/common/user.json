@@ -1,0 +1,7 @@
+{
+    "USERS": {
+        "AUTH_ERROR": "Email ya da şifre bilgisi hatalı",
+        "EMAIL_FORMAT_ERROR": "email alanı doğru bir email formatında olmalıdır.",
+        "PASSWORD_LENGTH_ERROR": "password uzunluğu en az {} olmalıdır."
+    }
+}

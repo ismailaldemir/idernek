@@ -1,0 +1,36 @@
+{
+  "COMMON": {
+    "VALIDATION_ERROR_TITLE": "Doğrulama Hatası",
+    "ERROR": "Bir hata oluştu :",
+    "ALREADY_EXIST": "Eklemeye çalıştığınız kayıt sistemde mevcuttur.",
+    "RECORD_ALREADY_EXISTS": "{{recName}} kaydı zaten mevcut. Lütfen başka bir ad giriniz.",
+    "UNKNOWN_ERROR": "Bilinmeyen Hata!",
+    "FETCH_ERROR": "Veri çekme hatası. Lütfen tekrar deneyin.",
+    "FIELD_MUST_BE_FILLED": "{} alanı dolu olmalıdır.",
+    "FIELD_MUST_BE_TYPE": "{} alanı {} tipinde olmalıdır.",
+    "NEED_PERMISSIONS": "Bu işlem için yetkiniz yoktur.",
+    "TRANSACTION_COMPLETE_ERROR": "İşlem gerçekleştirilemedi.",
+    "ADD_SUCCESS": "Kayıt başarıyla eklendi.",
+    "ADD_SUCCESS_PARAM": "{{recName}} kaydı başarıyla eklendi.",
+    "UPDATE_SUCCESS": "Kayıt başarıyla güncellendi.",
+    "RECORD_UPDATE_SUCCESS": "{{recName}} kaydı başarıyla güncellendi.",
+    "SOFT_DELETED_SUCCESS": "Kayıt başarıyla silindi.",
+    "DELETED_SUCCESS": "Kayıt başarıyla tamamen silindi.",
+    "RESTORED_SUCCESS": "Kayıt başarıyla geri alındı.",
+    "ADD_ERROR": "Kayıt ekleme sırasında bir hata oluştu.",
+    "UPDATE_ERROR": "Kayıt güncelleme sırasında bir hata oluştu.",
+    "DELETE_ERROR": "Kayıt silme sırasında bir hata oluştu.",
+    "RESTORE_ERROR": "Kayıt geri alma sırasında bir hata oluştu.",
+    "STATUS_UPDATED": "Kaydın durumu başarıyla güncellendi",
+    "SELECT_FILE": "Lütfen bir dosya seçin",
+    "FILE_UPLOADED_SUCCESS": "Dosya başarıyla yüklendi",
+    "FILE_UPLOAD_ERROR": "Dosya yükleme sırasında bir hata oluştu",
+    "ONLY_IMAGES_ALLOWED": "Yalnızca resim dosyaları yüklenebilir!",
+    "UPLOAD_SUCCESS": "{{fileName}} dosyası başarıyla yüklendi.",
+    "UPLOAD_ERROR": "{{fileName}} dosyasını yüklerken bir hata oluştu."
+  },
+  "SEARCH": {
+    "SEARCH": "Ara",
+    "RESET": "Sıfırla"
+  }
+}

@@ -14,8 +14,10 @@ i18n
       escapeValue: false,
     },
     backend: {
-      loadPath: '/locales/{{lng}}/translation.json',
+      loadPath: '/locales/{{lng}}/{{ns}}/{{ns}}.json',
     },
+    ns: ['common'], // Kullanmak istediğiniz ad alanları
+    defaultNS: 'common', // Varsayılan ad alanı
   });
 
 export const changeLanguage = (lng) => {

@@ -2,17 +2,19 @@ import { entityFields } from "../constants/entityFields";
 import { message } from "antd";
 import { apiService } from "../services/apiService";
 import handleApiError from "./handleApiError";
-import axios from 'axios';
+import axios from "axios";
+import i18n from "../i18n";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // .env dosyasındaki değeri al
-
-
 
 export const addEntity = async (
   entityType,
   form,
   fileList,
   fetchEntities,
-  setModalVisible
+  setModalVisible,
+  t
 ) => {
   try {
     const token = localStorage.getItem("token");
@@ -31,7 +33,7 @@ export const addEntity = async (
 
     if (existingEntity) {
       message.error(
-        `${values.name} adlı ${entityType} zaten mevcut. Lütfen başka bir ad giriniz.`
+        t("common:COMMON.RECORD_ALREADY_EXISTS", { recName: values.name })
       );
       return;
     }
@@ -67,7 +69,9 @@ export const addEntity = async (
       }
     });
 
-    message.success(`${values.name} ${entityType} başarıyla eklendi.`);
+    message.success(
+      t("common:COMMON.ADD_SUCCESS_PARAM", { recName: values.name })
+    );
     setModalVisible(false);
     form.resetFields();
     fetchEntities();
@@ -86,7 +90,8 @@ export const editEntity = async (
   fileList,
   fetchEntities,
   setModalVisible,
-  editingEntity
+  editingEntity,
+  t
 ) => {
   try {
     const token = localStorage.getItem("token");
@@ -115,12 +120,12 @@ export const editEntity = async (
       }
     });
 
-    message.success(`${values.name} ${entityType} başarıyla güncellendi.`);
+    message.success(t("common:COMMON.RECORD_UPDATE_SUCCESS", { recName : values.name}));
     setModalVisible(false);
     form.resetFields();
     fetchEntities();
   } catch (error) {
-    handleApiError(error);
+    handleApiError(error,t);
   }
 };
 
@@ -128,7 +133,7 @@ export const deleteEntity = async (entityType, ids, fetchEntities, t) => {
   try {
     const token = localStorage.getItem("token");
     await axios.post(
-      `/api/${entityType}/delete`,
+      `${API_BASE_URL}/api/${entityType}/delete`,
       { ids },
       {
         headers: {
@@ -136,7 +141,7 @@ export const deleteEntity = async (entityType, ids, fetchEntities, t) => {
         }
       }
     );
-    message.success(t("COMMON.DELETED_SUCCESS"));
+    message.success(t("common:COMMON.DELETED_SUCCESS"));
     fetchEntities();
   } catch (error) {
     handleApiError(error, t);
@@ -147,7 +152,7 @@ export const softDeleteEntity = async (entityType, ids, fetchEntities, t) => {
   try {
     const token = localStorage.getItem("token");
     await axios.post(
-      `/api/${entityType}/soft-delete`,
+      `${API_BASE_URL}/api/${entityType}/soft-delete`,
       { ids },
       {
         headers: {
@@ -155,7 +160,7 @@ export const softDeleteEntity = async (entityType, ids, fetchEntities, t) => {
         }
       }
     );
-    message.success(t("COMMON.SOFT_DELETED_SUCCESS"));
+    message.success(t("common:COMMON.SOFT_DELETED_SUCCESS"));
     fetchEntities();
   } catch (error) {
     handleApiError(error, t);
@@ -166,7 +171,7 @@ export const restoreEntity = async (entityType, ids, fetchEntities, t) => {
   try {
     const token = localStorage.getItem("token");
     await axios.post(
-      `/api/${entityType}/restore`,
+      `${API_BASE_URL}/api/${entityType}/restore`,
       { ids },
       {
         headers: {
@@ -174,7 +179,7 @@ export const restoreEntity = async (entityType, ids, fetchEntities, t) => {
         }
       }
     );
-    message.success(t("COMMON.RESTORED_SUCCESS"));
+    message.success(t("common:COMMON.RESTORED_SUCCESS"));
     fetchEntities();
   } catch (error) {
     handleApiError(error, t);
@@ -182,29 +187,37 @@ export const restoreEntity = async (entityType, ids, fetchEntities, t) => {
 };
 
 // Veri al
-export const fetchData = async (endpoint, setLoading, setDataSource, setPrintTable) => {
-    setLoading(true);
-    const token = localStorage.getItem("token"); // Token'ı al
-  
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}` // Token'ı ekle
-        }
-      });
-      setDataSource(response.data);
-      setPrintTable(response.data);
-    } catch (error) {
-      console.error("Veri çekme hatası:", error);
-      handleApiError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+export const fetchData = async (
+  endpoint,
+  setLoading,
+  setDataSource,
+  setPrintTable,
+  t
+) => {
+  setLoading(true);
+  const token = localStorage.getItem("token"); // Token'ı al
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${token}` // Token'ı ekle
+      }
+    });
+    setDataSource(response.data);
+    setPrintTable(response.data);
+  } catch (error) {
+    console.error("Veri çekme hatası:", error);
+    message.error(t("common:COMMON.FETCH_ERROR"));
+    handleApiError(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
 // Veri güncelle
 export const updateStatus = async (tableName, id, data, fetchFunction, t) => {
   const token = localStorage.getItem("token");
+
   try {
     await axios.post(
       `${API_BASE_URL}/api/${tableName}/update`,
@@ -218,7 +231,7 @@ export const updateStatus = async (tableName, id, data, fetchFunction, t) => {
         }
       }
     );
-    message.success(t(`${tableName.toUpperCase()}.STATUS_UPDATED`));
+    message.success(t("common:COMMON.STATUS_UPDATED"));
     fetchFunction();
   } catch (error) {
     handleApiError(error);
@@ -259,7 +272,7 @@ export const exportData = async (tableName, setLoading, t) => {
 // Dosya yükleme
 export const uploadFile = async (tableName, file, t) => {
   if (!file) {
-    message.error("Lütfen bir dosya seçin");
+    message.success(t("common:COMMON.SELECT_FILE"));
     return;
   }
 
@@ -278,12 +291,33 @@ export const uploadFile = async (tableName, file, t) => {
     );
 
     if (response.status === 201) {
-      message.success("Dosya başarıyla yüklendi");
+      message.success(t("common:FILE_UPLOADED_SUCCESS"));
     } else {
-      message.error("Dosya yükleme sırasında bir hata oluştu");
+      message.error(t("common:FILE_UPLOADED_ERROR"));
     }
   } catch (error) {
     console.error("Upload error:", error);
-    message.error("Dosya yükleme sırasında bir hata oluştu");
+    message.error(t("common:FILE_UPLOADED_ERROR"));
   }
 };
+
+export const printEntity = (entityName, selectedColumns, printTable, orientation, paperSize) => {
+    const doc = new jsPDF({
+        orientation,
+        unit: "pt",
+        format: paperSize
+    });
+
+    const tableColumn = selectedColumns.map(col => col.title);
+    const tableRows = printTable.map(item =>
+        selectedColumns.map(col => item[col.dataIndex])
+    );
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows
+    });
+
+    doc.save(`${entityName}.pdf`);
+};
+

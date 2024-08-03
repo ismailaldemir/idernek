@@ -1,0 +1,7 @@
+{
+    "USERS": {
+        "AUTH_ERROR": "Email or password wrong",
+        "EMAIL_FORMAT_ERROR": "email field must be an email format",
+        "PASSWORD_LENGTH_ERROR": "password length must be greater than {}"
+    }
+}
