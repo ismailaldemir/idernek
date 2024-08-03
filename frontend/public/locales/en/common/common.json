@@ -16,6 +16,11 @@
     "RECORD_UPDATE_SUCCESS": "{{recName}} updated successfully.",
     "SOFT_DELETED_SUCCESS": "Record deleted successfully.",
     "DELETED_SUCCESS": "Record has been successfully permanently deleted.",
+    "CONFIRM_RESTORE": "Would you like to restore this recording?",
+    "CONFIRM_DELETE": "Would you like to permanently delete this record from the database?",
+    "CONFIRM_SOFT_DELETE": "Would you like to delete this recording?",
+    "CONFIRM_YES": "Yes",
+    "CONFIRM_NO": "No",
     "RESTORED_SUCCESS": "Record was successfully retrieved.",
     "ADD_ERROR": "An error occurred while adding the record.",
     "UPDATE_ERROR": "An error occurred while updating the record.",
@@ -32,5 +37,35 @@
   "SEARCH": {
     "SEARCH": "Search",
     "RESET": "Reset"
+  },
+  "COLUMNS": {
+    "TITLE": "Title",
+    "DESCRIPTION": "Description",
+    "CREATED_AT": "Created At",
+    "UPDATED_AT": "Updated At",
+    "DELETED_AT": "Deleted At",
+    "STATUS": "Status",
+    "TAGS": "Tags",
+    "IMAGE": "Image",
+    "ACTIONS": "Actions"
+  },
+  "TOOLTIP": {
+    "DELETE": "Delete",
+    "EDIT": "Edit",
+    "RESTORE": "Restore"
+  },
+  "TABS": {
+    "ALL_RECORDS": "All Records",
+    "ACTIVE_RECORDS": "Active Records",
+    "INACTIVE_RECORDS": "Inactive Records",
+    "DELETED_RECORDS": "Deleted Records"
+  },
+  "BUTTONS": {
+    "NEW_RECORD": "New Record",
+    "CREATE_PDF": "Create Pdf",
+    "CREATE_EXCEL": "Create Excel",
+    "IMPORT_EXCEL": "Import Excel",
+    "DELETE_SELECTED_RECORDS": "Delete Selected",
+    "RESTORE_SELECTED_RECORDS": "Restore Selected"
   }
 }
