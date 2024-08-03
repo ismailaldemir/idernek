@@ -15,7 +15,12 @@
     "UPDATE_SUCCESS": "Kayıt başarıyla güncellendi.",
     "RECORD_UPDATE_SUCCESS": "{{recName}} kaydı başarıyla güncellendi.",
     "SOFT_DELETED_SUCCESS": "Kayıt başarıyla silindi.",
-    "DELETED_SUCCESS": "Kayıt başarıyla tamamen silindi.",
+    "DELETED_SUCCESS": "Kayıt başarıyla kalıcı olarak silindi.",
+    "CONFIRM_RESTORE": "Bu kaydı geri yüklemek ister misiniz?",
+    "CONFIRM_DELETE": "Bu kaydı veritabanından kalıcı olarak silmek ister misiniz?",
+    "CONFIRM_SOFT_DELETE": "Bu kaydı silmek ister misiniz?",
+    "CONFIRM_YES": "Evet",
+    "CONFIRM_NO": "Hayır",
     "RESTORED_SUCCESS": "Kayıt başarıyla geri alındı.",
     "ADD_ERROR": "Kayıt ekleme sırasında bir hata oluştu.",
     "UPDATE_ERROR": "Kayıt güncelleme sırasında bir hata oluştu.",
@@ -32,5 +37,35 @@
   "SEARCH": {
     "SEARCH": "Ara",
     "RESET": "Sıfırla"
-  }
+  },
+  "COLUMNS": {
+    "TITLE": "Adı",
+    "DESCRIPTION":"Açıklama",
+    "CREATED_AT":"Oluşturulma Tarihi",
+    "UPDATED_AT":"Güncellenme Tarihi",
+    "DELETED_AT": "Silinme Tarihi",
+    "STATUS":"Durum",
+    "TAGS":"Etiketler",
+    "IMAGE":"Görsel",
+    "ACTIONS":"İşlemler"
+  },
+  "TOOLTIP":{
+      "DELETE":"Sil",
+      "EDIT":"Düzenle",
+      "RESTORE": "Geri Yükle"
+    },
+    "TABS": {
+        "ALL_RECORDS":"Tüm Kayıtlar",
+        "ACTIVE_RECORDS":"Aktif Kayıtlar",
+        "INACTIVE_RECORDS":"Pasif Kayıtlar",
+        "DELETED_RECORDS":"Silinen Kayıtlar"
+    },
+    "BUTTONS": {
+        "NEW_RECORD": "Yeni Kayıt",
+        "CREATE_PDF": "Pdf Oluştur",
+        "CREATE_EXCEL": "Excel'e Aktar",
+        "IMPORT_EXCEL": "Excel'den Yükle",
+        "DELETE_SELECTED_RECORDS": "Seçilenleri  Sil",
+        "RESTORE_SELECTED_RECORDS": "Seçilenleri  Geri Yükle"
+      }
 }

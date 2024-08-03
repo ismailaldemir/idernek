@@ -394,7 +394,7 @@ const CategoryPage = () => {
 
   const columns = [
     {
-      title: "Kategori Adı",
+      title: t("COLUMNS.TITLE"),
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
@@ -420,7 +420,7 @@ const CategoryPage = () => {
       )
     },
     {
-      title: "Durum",
+      title: t("COLUMNS.STATUS"),
       dataIndex: "is_active",
       key: "is_active",
       sorter: (a, b) => a.is_active - b.is_active,
@@ -433,7 +433,7 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: "Etiketler",
+      title: t("COLUMNS.TAGS"),
       dataIndex: "tags",
       key: "tags",
       render: tags =>
@@ -447,7 +447,7 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: "Açıklama",
+      title: t("COLUMNS.DESCRIPTION"),
       dataIndex: "description",
       key: "description",
       sorter: (a, b) => {
@@ -469,7 +469,7 @@ const CategoryPage = () => {
       render: (text, record) => <div className="table-cell">{text}</div>
     },
     {
-      title: "Oluşturulma Tarihi",
+      title: t("COLUMNS.CREATED_AT"),
       dataIndex: "created_at",
       key: "created_at",
       sorter: (a, b) => a.created_at.localeCompare(b.created_at),
@@ -481,7 +481,10 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: activeTab === "deleted" ? "Silinme Tarihi" : "Güncellenme Tarihi",
+      title:
+        activeTab === "deleted"
+          ? t("COLUMNS.DELETED_AT")
+          : t("COLUMNS.UPDATED_AT"),
       dataIndex: activeTab === "deleted" ? "deleted_at" : "updated_at",
       key: activeTab === "deleted" ? "deleted_at" : "updated_at",
       sorter: (a, b) =>
@@ -496,7 +499,7 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: "Resim",
+      title: t("COLUMNS.IMAGE"),
       dataIndex: "imageUrl",
       key: "imageUrl",
       render: text => {
@@ -518,61 +521,43 @@ const CategoryPage = () => {
       responsive: ["xs", "sm", "md", "lg", "xl"]
     },
     {
-      title: "İşlemler",
+      title: t("COLUMNS.ACTIONS"),
       key: "actions",
       render: (text, record) => (
         <span style={{ display: "flex", gap: "4px" }}>
           {activeTab === "deleted" ? (
             <>
-              <Tooltip title="Geri Yükle">
-                <Button
-                  icon={<RollbackOutlined />}
-                  type="default"
-                  onClick={async () => {
-                    try {
-                      const token = localStorage.getItem("token");
-                      await axios.post(
-                        `${API_BASE_URL}/api/categories/restore`,
-                        { ids: [record._id] },
-                        {
-                          headers: {
-                            Authorization: `Bearer ${token}`
-                          }
-                        }
-                      );
-                      message.success("Kategori başarıyla geri yüklendi");
-                      fetchCategories();
-                    } catch (error) {
-                      handleApiError(error);
-                    }
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title="Kalıcı Sil">
+              <Tooltip title={t("TOOLTIP.RESTORE")}>
                 <Popconfirm
-                  title="Bu kategoriyi veritabanından tamamen silmek istediğinize emin misiniz?"
+                  title={t("common:COMMON.CONFIRM_RESTORE")}
                   onConfirm={async () => {
-                    try {
-                      const token = localStorage.getItem("token");
-                      await axios.post(
-                        `${API_BASE_URL}/api/categories/hard-delete`,
-                        { ids: [record._id] },
-                        {
-                          headers: {
-                            Authorization: `Bearer ${token}`
-                          }
-                        }
-                      );
-                      message.success(
-                        "Kategori başarıyla kalıcı olarak silindi"
-                      );
-                      fetchCategories();
-                    } catch (error) {
-                      handleApiError(error);
-                    }
+                    await restoreEntity(
+                      "categories",
+                      [record._id],
+                      fetchCategories,
+                      t
+                    );
                   }}
-                  okText="Evet"
-                  cancelText="Hayır"
+                  okText={t("common:COMMON.CONFIRM_YES")}
+                  cancelText={t("common:COMMON.CONFIRM_NO")}
+                >
+                  <Button icon={<RollbackOutlined />} type="default" />
+                </Popconfirm>
+              </Tooltip>
+
+              <Tooltip title={t("TOOLTIP.DELETE")}>
+                <Popconfirm
+                  title={t("common:COMMON.CONFIRM_DELETE")}
+                  onConfirm={async () => {
+                    await deleteEntity(
+                      "categories",
+                      [record._id],
+                      fetchCategories,
+                      t
+                    );
+                  }}
+                  okText={t("common:COMMON.CONFIRM_YES")}
+                  cancelText={t("common:COMMON.CONFIRM_NO")}
                 >
                   <Button icon={<StopOutlined />} danger />
                 </Popconfirm>
@@ -580,7 +565,7 @@ const CategoryPage = () => {
             </>
           ) : (
             <>
-              <Tooltip title="Düzenle">
+              <Tooltip title={t("TOOLTIP.EDIT")}>
                 <Button
                   icon={<EditOutlined />}
                   type="default"
@@ -591,29 +576,19 @@ const CategoryPage = () => {
                   }}
                 />
               </Tooltip>
-              <Tooltip title="Sil">
+              <Tooltip title={t("TOOLTIP.DELETE")}>
                 <Popconfirm
-                  title="Bu kategoriyi silmek istediğinize emin misiniz?"
+                  title={t("common:COMMON.CONFIRM_SOFT_DELETE")}
                   onConfirm={async () => {
-                    try {
-                      const token = localStorage.getItem("token");
-                      await axios.post(
-                        `${API_BASE_URL}/api/categories/soft-delete`,
-                        { ids: [record._id] },
-                        {
-                          headers: {
-                            Authorization: `Bearer ${token}`
-                          }
-                        }
-                      );
-                      message.success("Kategori başarıyla silindi");
-                      fetchCategories();
-                    } catch (error) {
-                      handleApiError(error);
-                    }
+                    await softDeleteEntity(
+                      "categories",
+                      [record._id],
+                      fetchCategories,
+                      t
+                    );
                   }}
-                  okText="Evet"
-                  cancelText="Hayır"
+                  okText={t("common:COMMON.CONFIRM_YES")}
+                  cancelText={t("common:COMMON.CONFIRM_NO")}
                 >
                   <Button icon={<DeleteOutlined />} danger />
                 </Popconfirm>
@@ -638,7 +613,7 @@ const CategoryPage = () => {
   const tabItems = [
     {
       key: "all",
-      label: "Tüm Kategoriler",
+      label: t("common:TABS.ALL_RECORDS"),
       children: (
         <Table
           dataSource={filteredData.filter(item => !item.deleted_at)}
@@ -657,7 +632,7 @@ const CategoryPage = () => {
     },
     {
       key: "active",
-      label: "Aktif Kategoriler",
+      label: t("common:TABS.ACTIVE_RECORDS"),
       children: (
         <Table
           dataSource={filteredData.filter(item => item.is_active)}
@@ -676,7 +651,7 @@ const CategoryPage = () => {
     },
     {
       key: "inactive",
-      label: "Pasif Kategoriler",
+      label: t("common:TABS.INACTIVE_RECORDS"),
       children: (
         <Table
           dataSource={filteredData.filter(item => !item.is_active)}
@@ -714,7 +689,7 @@ const CategoryPage = () => {
     // },
     {
       key: "deleted",
-      label: "Silinen Kategoriler",
+      label: t("common:TABS.DELETED_RECORDS"),
       children: (
         <Table
           dataSource={filteredData.filter(item => item.deleted_at)}
@@ -755,7 +730,7 @@ const CategoryPage = () => {
               }}
               block
             >
-              Kategori Ekle
+              {t("common:BUTTONS.NEW_RECORD")}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -765,7 +740,7 @@ const CategoryPage = () => {
               onClick={openPrintModal}
               block
             >
-              Pdf Oluştur
+              {t("common:BUTTONS.CREATE_PDF")}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -776,7 +751,7 @@ const CategoryPage = () => {
               icon={<FileExcelOutlined />}
               block
             >
-              Excel'e Aktar
+              {t("common:BUTTONS.CREATE_EXCEL")}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -787,7 +762,7 @@ const CategoryPage = () => {
                 icon={<UploadOutlined />}
                 block
               >
-                Excel'den Al
+                {t("common:BUTTONS.IMPORT_EXCEL")}
               </Button>
             </Upload>
           </Col>
@@ -795,10 +770,10 @@ const CategoryPage = () => {
           {activeTab === "deleted" && selectedRowKeys.length > 0 && (
             <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
               <Popconfirm
-                title="Seçili kategorileri geri yüklemek istediğinizden emin misiniz?"
+                title={t("common:COMMON.CONFIRM_RESTORE")}
                 onConfirm={handleRestore}
-                okText="Evet"
-                cancelText="Hayır"
+                okText={t("common:COMMON.CONFIRM_YES")}
+                cancelText={t("common:COMMON.CONFIRM_NO")}
                 className="ant-popover-buttons"
               >
                 <Button
@@ -807,7 +782,7 @@ const CategoryPage = () => {
                   icon={<RollbackOutlined />}
                   block
                 >
-                  Seçilenleri Geri Yükle
+                  {t("BUTTONS.RESTORE_SELECTED_RECORDS")}
                 </Button>
               </Popconfirm>
             </Col>
@@ -817,10 +792,10 @@ const CategoryPage = () => {
             <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
               {activeTab === "deleted" ? (
                 <Popconfirm
-                  title="Seçili kategorileri veritabanından kalıcı olarak silmek istediğinizden emin misiniz?"
+                  title={t("common:COMMON.CONFIRM_DELETE")}
                   onConfirm={handleDeleteCategories}
-                  okText="Evet"
-                  cancelText="Hayır"
+                  okText={t("common:COMMON.CONFIRM_YES")}
+                  cancelText={t("common:COMMON.CONFIRM_NO")}
                   className="ant-popover-buttons"
                 >
                   <Button
@@ -829,15 +804,15 @@ const CategoryPage = () => {
                     icon={<StopOutlined />}
                     block
                   >
-                    Seçilenleri Tamamen Sil
+                    {t("BUTTONS.DELETE_SELECTED_RECORDS")}
                   </Button>
                 </Popconfirm>
               ) : (
                 <Popconfirm
-                  title="Seçili kategorileri silmek istediğinizden emin misiniz?"
+                  title={t("common:COMMON.CONFIRM_SOFT_DELETE")}
                   onConfirm={handleSoftDeleteCategories}
-                  okText="Evet"
-                  cancelText="Hayır"
+                  okText={t("common:COMMON.CONFIRM_YES")}
+                  cancelText={t("common:COMMON.CONFIRM_NO")}
                   className="ant-popover-buttons"
                 >
                   <Button
@@ -846,7 +821,7 @@ const CategoryPage = () => {
                     icon={<DeleteOutlined />}
                     block
                   >
-                    Seçilenleri Sil
+                   {t("common:BUTTONS.DELETE_SELECTED_RECORDS")}
                   </Button>
                 </Popconfirm>
               )}
