@@ -40,6 +40,7 @@ import "./../admin.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
 import { useForm } from "antd/lib/form/Form";
+import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import {
   addEntity,
@@ -47,6 +48,7 @@ import {
   deleteEntity,
   softDeleteEntity,
   restoreEntity,
+  printEntity,
   fetchData,
   updateStatus,
   exportData,
@@ -55,6 +57,7 @@ import {
 import { apiService } from "../../../services/apiService";
 import { entityFields } from "../../../constants/entityFields";
 import handleApiError from "../../../utils/handleApiError";
+import { getColumnSearchProps } from "../../../utils/searchEntity";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -118,7 +121,7 @@ const CategoryPage = () => {
       setDataSource(formattedData);
       setPrintTable(formattedData);
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error, t);
     } finally {
       setLoading(false);
     }
@@ -169,10 +172,10 @@ const CategoryPage = () => {
         form,
         fileList,
         fetchCategories,
-        setAddModalVisible
+        setAddModalVisible,
+        t
       );
 
-      message.success(`${values.name} kategorisi başarıyla eklendi.`);
       form.resetFields();
       setFileList([]);
     } catch (error) {
@@ -180,7 +183,7 @@ const CategoryPage = () => {
         "Hata:",
         error.response ? error.response.data : error.message
       );
-      handleApiError(error);
+      handleApiError(error, t);
     }
   };
 
@@ -192,13 +195,14 @@ const CategoryPage = () => {
         fileList,
         fetchCategories,
         setEditModalVisible,
-        editingCategory
+        editingCategory,
+        t
       );
       setEditingCategory(null);
       setFileList([]);
     } catch (error) {
-      console.error("Hata:", error); // Hata loglama
-      handleApiError(error);
+      console.error(t("common:COMMON.ERROR"), error); // Hata loglama
+      handleApiError(error, t);
     }
   };
 
@@ -219,23 +223,13 @@ const CategoryPage = () => {
   };
 
   const handlePrint = () => {
-    const doc = new jsPDF({
+    printEntity(
+      "categories",
+      selectedColumns,
+      printTable,
       orientation,
-      unit: "pt",
-      format: paperSize
-    });
-
-    const tableColumn = selectedColumns.map(col => col.title);
-    const tableRows = printTable.map(item =>
-      selectedColumns.map(col => item[col.dataIndex])
+      paperSize
     );
-
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows
-    });
-
-    doc.save("categories.pdf");
   };
 
   const openPrintModal = () => {
@@ -253,21 +247,6 @@ const CategoryPage = () => {
 
   const handleColumnChange = selectedColumns => {
     setSelectedColumns(selectedColumns);
-  };
-
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = selectedColumns.map(col => col.title);
-    const tableRows = printTable.map(item =>
-      selectedColumns.map(col => item[col.dataIndex])
-    );
-
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows
-    });
-
-    doc.save("Kategori Listesi.pdf");
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
@@ -299,63 +278,63 @@ const CategoryPage = () => {
     setPreviewImage("");
   };
 
-  const getColumnSearchProps = dataIndex => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters
-    }) => (
-      <div style={{ padding: 8 }}>
-        <Input
-          placeholder={`Ara ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={e =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Button
-          type="primary"
-          onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          icon={<SearchOutlined />}
-          size="small"
-          style={{ width: 90, marginRight: 8 }}
-        >
-          Ara
-        </Button>
-        <Button
-          onClick={() => handleReset(clearFilters)}
-          size="small"
-          style={{ width: 90 }}
-        >
-          Sıfırla
-        </Button>
-      </div>
-    ),
-    filterIcon: filtered => (
-      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        ? record[dataIndex]
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
-        : "",
-    render: text =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      )
-  });
+  // const getColumnSearchProps = dataIndex => ({
+  //   filterDropdown: ({
+  //     setSelectedKeys,
+  //     selectedKeys,
+  //     confirm,
+  //     clearFilters
+  //   }) => (
+  //     <div style={{ padding: 8 }}>
+  //       <Input
+  //         placeholder={`Ara ${dataIndex}`}
+  //         value={selectedKeys[0]}
+  //         onChange={e =>
+  //           setSelectedKeys(e.target.value ? [e.target.value] : [])
+  //         }
+  //         onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+  //         style={{ marginBottom: 8, display: "block" }}
+  //       />
+  //       <Button
+  //         type="primary"
+  //         onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+  //         icon={<SearchOutlined />}
+  //         size="small"
+  //         style={{ width: 90, marginRight: 8 }}
+  //       >
+  //         Ara
+  //       </Button>
+  //       <Button
+  //         onClick={() => handleReset(clearFilters)}
+  //         size="small"
+  //         style={{ width: 90 }}
+  //       >
+  //         Sıfırla
+  //       </Button>
+  //     </div>
+  //   ),
+  //   filterIcon: filtered => (
+  //     <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+  //   ),
+  //   onFilter: (value, record) =>
+  //     record[dataIndex]
+  //       ? record[dataIndex]
+  //           .toString()
+  //           .toLowerCase()
+  //           .includes(value.toLowerCase())
+  //       : "",
+  //   render: text =>
+  //     searchedColumn === dataIndex ? (
+  //       <Highlighter
+  //         highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+  //         searchWords={[searchText]}
+  //         autoEscape
+  //         textToHighlight={text ? text.toString() : ""}
+  //       />
+  //     ) : (
+  //       text
+  //     )
+  // });
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -370,18 +349,22 @@ const CategoryPage = () => {
 
   const handleExport = async () => {
     await exportData("categories", setLoading, t);
-};
+  };
 
   const handleUpload = async () => {
     await uploadFile("categories", file, t);
-};
+  };
 
   const handleUploadChange = info => {
     if (info.file.status === "done") {
-      message.success(`${info.file.name} dosyası başarıyla yüklendi.`);
+      message.success(
+        t("common:COMMON.UPLOAD_SUCCESS", { fileName: info.file.name })
+      );
       fetchCategories(); // Verileri güncellemek için yeniden fetch yapabilirsiniz.
     } else if (info.file.status === "error") {
-      message.error(`${info.file.name} dosyasını yüklerken bir hata oluştu.`);
+      message.error(
+        t("common:COMMON.UPLOAD_ERROR", { fileName: info.file.name })
+      );
     }
   };
 
@@ -398,7 +381,7 @@ const CategoryPage = () => {
   const handleBeforeUpload = file => {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
-      message.error("Yalnızca resim formatındaki dosyalar yüklenebilir!");
+      message.error(t("common:COMMON.ONLY_IMAGES_ALLOWED"));
       return Upload.LIST_IGNORE;
     }
     setFileList([file]);
@@ -415,7 +398,16 @@ const CategoryPage = () => {
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
-      ...getColumnSearchProps("name"),
+      ...getColumnSearchProps(
+        "name",
+        searchedColumn,
+        setSearchedColumn,
+        searchText,
+        setSearchText,
+        handleSearch,
+        handleReset,
+        t
+      ),
       responsive: ["xs", "sm", "md", "lg", "xl"],
       render: (text, record) => (
         <div>
@@ -463,7 +455,16 @@ const CategoryPage = () => {
         const descB = b.description || "";
         return descA.localeCompare(descB);
       },
-      ...getColumnSearchProps("description"),
+      ...getColumnSearchProps(
+        "description",
+        searchedColumn,
+        setSearchedColumn,
+        searchText,
+        setSearchText,
+        handleSearch,
+        handleReset,
+        t
+      ),
       responsive: ["xs", "sm", "md", "lg", "xl"],
       render: (text, record) => <div className="table-cell">{text}</div>
     },

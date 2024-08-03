@@ -1,0 +1,36 @@
+{
+  "COMMON": {
+    "VALIDATION_ERROR_TITLE": "Validation Error",
+    "ERROR": "An error occurred :",
+    "ALREADY_EXIST": "Already Exists!",
+    "RECORD_ALREADY_EXISTS": "{{recName}} record already exists. Please enter a different name.",
+    "UNKNOWN_ERROR": "Unknown Error!",
+    "FETCH_ERROR": "Data fetch error. Please try again.",
+    "FIELD_MUST_BE_FILLED": "{} field must be filled",
+    "FIELD_MUST_BE_TYPE": "{} field must be {}",
+    "NEED_PERMISSIONS": "Need Permissions",
+    "TRANSACTION_COMPLETE_ERROR": "Transaction could not be completed.",
+    "ADD_SUCCESS": "Record added successfully.",
+    "ADD_SUCCESS_PARAM": "{{recName}} added successfully.",
+    "UPDATE_SUCCESS": "Record updated successfully.",
+    "RECORD_UPDATE_SUCCESS": "{{recName}} updated successfully.",
+    "SOFT_DELETED_SUCCESS": "Record deleted successfully.",
+    "DELETED_SUCCESS": "Record has been successfully permanently deleted.",
+    "RESTORED_SUCCESS": "Record was successfully retrieved.",
+    "ADD_ERROR": "An error occurred while adding the record.",
+    "UPDATE_ERROR": "An error occurred while updating the record.",
+    "DELETE_ERROR": "An error occurred while deleting the record.",
+    "RESTORE_ERROR": "An error occurred while restoring the record.",
+    "STATUS_UPDATED": "Record status updated successfully",
+    "SELECT_FILE": "Please select a file",
+    "FILE_UPLOADED_SUCCESS": "File uploaded successfully",
+    "FILE_UPLOAD_ERROR": "An error occurred during file upload",
+    "ONLY_IMAGES_ALLOWED": "Only image files can be uploaded!",
+    "UPLOAD_SUCCESS": "{{fileName}} file uploaded successfully.",
+    "UPLOAD_ERROR": "An error occurred while uploading {{fileName}}."
+  },
+  "SEARCH": {
+    "SEARCH": "Search",
+    "RESET": "Reset"
+  }
+}
