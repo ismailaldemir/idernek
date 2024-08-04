@@ -195,7 +195,7 @@ const CategoryPage = () => {
         // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
       } else {
         // Diğer hatalar için genel bir mesaj göster
-        message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+        message.error(t("common:COMMON.ERROR"));
       }
 
       if (error.errorFields) {
@@ -240,7 +240,7 @@ const CategoryPage = () => {
         // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
       } else {
         // Diğer hatalar için genel bir mesaj göster
-        message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+        message.error(t("common:COMMON.ERROR"));
       }
 
       if (error.errorFields) {
@@ -351,7 +351,7 @@ const CategoryPage = () => {
       message.success(
         t("common:COMMON.UPLOAD_SUCCESS", { fileName: info.file.name })
       );
-      fetchCategories(); // Verileri güncellemek için yeniden fetch yapabilirsiniz.
+      fetchCategories(); 
     } else if (info.file.status === "error") {
       message.error(
         t("common:COMMON.UPLOAD_ERROR", { fileName: info.file.name })
@@ -699,13 +699,13 @@ const CategoryPage = () => {
     }
   ];
 
-  return (
+  return (//butonlar
     <div>
-      <Card style={{ marginBottom: 8 }}>
+      <Card style={{ marginBottom: 2 }}>
         <Row
           gutter={[16, 16]}
           style={{
-            marginBottom: 16,
+            marginBottom: 4,
             display: "flex",
             flexWrap: "wrap"
           }}
@@ -830,7 +830,7 @@ const CategoryPage = () => {
       </Card>
 
       <Modal
-        title={t("admin:CATEGORIES.ADD_MODAL_TITLE")} //kategori ekle
+        title={t("admin:CATEGORIES.ADD_MODAL_TITLE")} //kategori ekle modal form
         open={addModalVisible}
         onOk={handleAddCategory}
         onCancel={() => setAddModalVisible(false)}
@@ -920,7 +920,7 @@ const CategoryPage = () => {
       </Modal>
 
       <Modal
-        title={t("admin:CATEGORIES.EDIT_MODAL_TITLE")} //kategori düzenle
+        title={t("admin:CATEGORIES.EDIT_MODAL_TITLE")} //kategori düzenle modal form
         open={editModalVisible}
         onOk={handleEditCategory}
         onCancel={() => {

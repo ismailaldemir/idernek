@@ -3,7 +3,32 @@
     "ADD_MODAL_TITLE": "Kategori Ekle",
     "EDIT_MODAL_TITLE": "Kategori Düzenle",
     "TITLE": "Kategori Adı :",
-    "TITLE_MUST_BE_FILLED":"Kategori adı alanı boş olamaz.",
-    "TAGS_MUST_BE_FILLED":"Etiket alanı boş olamaz."
+    "TITLE_MUST_BE_FILLED": "Kategori adı alanı boş olamaz.",
+    "TAGS_MUST_BE_FILLED": "Etiket alanı boş olamaz."
+  },
+  "MENU": {
+    "DASHBOARD": "Anasayfa",
+    "CATEGORIES": "Kategoriler",
+    "PRODUCTS": "Ürünler",
+    "PRODUCT_LIST": "Ürün Listesi",
+    "NEW_PRODUCT": "Yeni Ürün Oluştur",
+    "COUPONS": "Kuponlar",
+    "COUPON_LIST": "Kupon Listesi",
+    "NEW_COUPON": "Yeni Kupon",
+    "CONTACTS": "Kişiler",
+    "USERS": "Kullanıcılar",
+    "ORDERS": "Siparişler"
+  },
+  "HEADER": {
+    "TITLE": "Yönetim Paneli"
+  },
+  "SETTINGS":{
+    "TITLE":"Ayarlar",
+    "BACKGROUND_COLOR":"Arka Plan Rengi",
+    "TAB_HEADER":"Header",
+    "TEXT_COLOR":"Yazı Rengi",
+    "TAB_SIDEBAR":"Sidebar",
+    "MENU_MODE":"Menü Modu",
+    "MENU_THEME":"Menü Teması"
   }
 }
