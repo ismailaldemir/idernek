@@ -69,7 +69,13 @@
     "DELETE_SELECTED_RECORDS": "Delete Selected",
     "RESTORE_SELECTED_RECORDS": "Restore Selected",
     "UPLOAD_IMAGE": "Upload Image",
+    "UPLOAD_EDIT_IMAGE": "Upload / Edit Image",
     "SAVE":"Save",
-    "CANCEL":"Cancel"
-  }
+    "CANCEL":"Cancel",
+    "EDIT":"Edit"
+  },
+  "PLACEHOLDER":{
+      "TAGS":"Enter tags",
+      "TITLE":"Enter title"
+    }
 }

@@ -163,60 +163,11 @@ const CategoryPage = () => {
     await updateStatus("categories", id, data, fetchCategories, t);
   };
 
-  // const handleAddCategory = async () => {
-  //   try {
-  //     // Formun alanlarını doğrula
-  //     const values = await form.validateFields();
-
-  //     // Yeni kategori eklemek için addEntity fonksiyonunu çağır
-  //     await addEntity(
-  //       "categories",
-  //       values, // Form verilerini burada gönder
-  //       fileList,
-  //       fetchCategories,
-  //       setAddModalVisible,
-  //       t
-  //     );
-
-  //     // Form alanlarını sıfırla ve dosya listesini temizle
-  //     form.resetFields();
-  //     setFileList([]);
-  //   } catch (error) {
-  //     console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
-      
-  //     if (error.errorFields) {
-  //         error.errorFields.forEach(field => {
-  //             const fieldName = field.name[0];
-  //             form.scrollToField(fieldName); // Hatalı alanlara odaklanma
-  //             form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
-  //         });
-  //         // Alanlar boş olduğunda kullanıcıyı bilgilendir
-  //         // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
-  //     } else {
-  //         // Diğer hatalar için genel bir mesaj göster
-  //         message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
-  //     }
-   
-   
-    
-
-  //     if (error.errorFields) {
-  //       // Hatalı alanlara odaklanma
-  //       const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
-  //       form.scrollToField(firstErrorField); // Hatalı alana kaydırma
-  //       form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
-  //     }
-
-  //     // Özelleştirilmiş hata mesajı gösterme
-  //     // message.error(t("common:COMMON.VALIDATION_FAILED"));
-  //   }
-  // };
-
   const handleAddCategory = async () => {
     try {
       // Formun alanlarını doğrula
       const values = await form.validateFields();
-  
+
       // Yeni kategori eklemek için addEntity fonksiyonunu çağır
       await addEntity(
         "categories",
@@ -227,43 +178,43 @@ const CategoryPage = () => {
         t,
         form // Form nesnesini burada gönder
       );
-  
+
       // Form alanlarını sıfırla ve dosya listesini temizle
       form.resetFields();
       setFileList([]);
     } catch (error) {
-          console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
-          
-          if (error.errorFields) {
-              error.errorFields.forEach(field => {
-                  const fieldName = field.name[0];
-                  form.scrollToField(fieldName); // Hatalı alanlara odaklanma
-                  form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
-              });
-              // Alanlar boş olduğunda kullanıcıyı bilgilendir
-              // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
-          } else {
-              // Diğer hatalar için genel bir mesaj göster
-              message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
-          }
-       
-       
-        
-    
-          if (error.errorFields) {
-            // Hatalı alanlara odaklanma
-            const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
-            form.scrollToField(firstErrorField); // Hatalı alana kaydırma
-            form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
-          }
-    
-          // Özelleştirilmiş hata mesajı gösterme
-          // message.error(t("common:COMMON.VALIDATION_FAILED"));
-        }
-      };
-  
+      console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
+
+      if (error.errorFields) {
+        error.errorFields.forEach(field => {
+          const fieldName = field.name[0];
+          form.scrollToField(fieldName); // Hatalı alanlara odaklanma
+          form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
+        });
+        // Alanlar boş olduğunda kullanıcıyı bilgilendir
+        // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
+      } else {
+        // Diğer hatalar için genel bir mesaj göster
+        message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+      }
+
+      if (error.errorFields) {
+        // Hatalı alanlara odaklanma
+        const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
+        form.scrollToField(firstErrorField); // Hatalı alana kaydırma
+        form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
+      }
+
+      // Özelleştirilmiş hata mesajı gösterme
+      // message.error(t("common:COMMON.VALIDATION_FAILED"));
+    }
+  };
+
   const handleEditCategory = async () => {
     try {
+      // Formun alanlarını doğrula
+      const values = await form.validateFields();
+
       await editEntity(
         "categories",
         form,
@@ -273,11 +224,34 @@ const CategoryPage = () => {
         editingCategory,
         t
       );
+
       setEditingCategory(null);
       setFileList([]);
     } catch (error) {
-      console.error(t("common:COMMON.ERROR"), error); // Hata loglama
-      handleApiError(error, t);
+      console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
+
+      if (error.errorFields) {
+        error.errorFields.forEach(field => {
+          const fieldName = field.name[0];
+          form.scrollToField(fieldName); // Hatalı alanlara odaklanma
+          form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
+        });
+        // Alanlar boş olduğunda kullanıcıyı bilgilendir
+        // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
+      } else {
+        // Diğer hatalar için genel bir mesaj göster
+        message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+      }
+
+      if (error.errorFields) {
+        // Hatalı alanlara odaklanma
+        const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
+        form.scrollToField(firstErrorField); // Hatalı alana kaydırma
+        form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
+      }
+
+      // Özelleştirilmiş hata mesajı gösterme
+      // message.error(t("common:COMMON.VALIDATION_FAILED"));
     }
   };
 
@@ -352,64 +326,6 @@ const CategoryPage = () => {
     setPreviewVisible(false);
     setPreviewImage("");
   };
-
-  // const getColumnSearchProps = dataIndex => ({
-  //   filterDropdown: ({
-  //     setSelectedKeys,
-  //     selectedKeys,
-  //     confirm,
-  //     clearFilters
-  //   }) => (
-  //     <div style={{ padding: 8 }}>
-  //       <Input
-  //         placeholder={`Ara ${dataIndex}`}
-  //         value={selectedKeys[0]}
-  //         onChange={e =>
-  //           setSelectedKeys(e.target.value ? [e.target.value] : [])
-  //         }
-  //         onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-  //         style={{ marginBottom: 8, display: "block" }}
-  //       />
-  //       <Button
-  //         type="primary"
-  //         onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
-  //         icon={<SearchOutlined />}
-  //         size="small"
-  //         style={{ width: 90, marginRight: 8 }}
-  //       >
-  //         Ara
-  //       </Button>
-  //       <Button
-  //         onClick={() => handleReset(clearFilters)}
-  //         size="small"
-  //         style={{ width: 90 }}
-  //       >
-  //         Sıfırla
-  //       </Button>
-  //     </div>
-  //   ),
-  //   filterIcon: filtered => (
-  //     <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-  //   ),
-  //   onFilter: (value, record) =>
-  //     record[dataIndex]
-  //       ? record[dataIndex]
-  //           .toString()
-  //           .toLowerCase()
-  //           .includes(value.toLowerCase())
-  //       : "",
-  //   render: text =>
-  //     searchedColumn === dataIndex ? (
-  //       <Highlighter
-  //         highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-  //         searchWords={[searchText]}
-  //         autoEscape
-  //         textToHighlight={text ? text.toString() : ""}
-  //       />
-  //     ) : (
-  //       text
-  //     )
-  // });
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -914,7 +830,7 @@ const CategoryPage = () => {
       </Card>
 
       <Modal
-        title={t("admin:CATEGORIES.MODAL_TITLE")} //kategori ekle
+        title={t("admin:CATEGORIES.ADD_MODAL_TITLE")} //kategori ekle
         open={addModalVisible}
         onOk={handleAddCategory}
         onCancel={() => setAddModalVisible(false)}
@@ -933,7 +849,7 @@ const CategoryPage = () => {
               }
             ]}
           >
-            <Input />
+            <Input placeholder={t("common:PLACEHOLDER.TITLE")} />
           </Form.Item>
           <Form.Item
             label={t("common:COLUMNS.STATUS")}
@@ -956,7 +872,7 @@ const CategoryPage = () => {
             <Select
               mode="tags"
               style={{ width: "100%" }}
-              placeholder="Etiketleri girin"
+              placeholder={t("common:PLACEHOLDER.TAGS")}
             />
           </Form.Item>
           <Form.Item label={t("common:COLUMNS.DESCRIPTION")} name="description">
@@ -1004,35 +920,35 @@ const CategoryPage = () => {
       </Modal>
 
       <Modal
-        title="Kategori Düzenle" //kategori düzenle
+        title={t("admin:CATEGORIES.EDIT_MODAL_TITLE")} //kategori düzenle
         open={editModalVisible}
         onOk={handleEditCategory}
         onCancel={() => {
           setEditModalVisible(false);
           setEditingCategory(null);
         }}
-        okText="Güncelle"
-        cancelText="Vazgeç"
+        okText={t("common:BUTTONS.EDIT")}
+        cancelText={t("common:BUTTONS.CANCEL")}
         width={400}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="Kategori Adı"
+            label={t("admin:CATEGORIES.TITLE")}
             name="name"
             rules={[
-              { required: true, message: "Kategori adı doldurulmalıdır." }
+              { required: true, message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED") }
             ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label="Durum" name="is_active" valuePropName="checked">
+          <Form.Item label={t("common:COLUMNS.STATUS")} name="is_active" valuePropName="checked">
             <Switch />
           </Form.Item>
           <Form.Item
-            label="Etiketler"
+            label={t("common:COLUMNS.TAGS")}
             name="tags"
             rules={[
-              { required: true, message: "Etiketler alanı doldurulmalıdır." }
+              { required: true, message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED") }
             ]}
           >
             <Select
@@ -1041,11 +957,11 @@ const CategoryPage = () => {
               placeholder="Etiketleri girin"
             />
           </Form.Item>
-          <Form.Item label="Açıklama" name="description">
+          <Form.Item label={t("common:COLUMNS.DESCRIPTION")} name="description">
             <Input.TextArea />
           </Form.Item>
 
-          <Form.Item label="Görsel" name="image">
+          <Form.Item label={t("common:COLUMNS.IMAGE")} name="image">
             <Dragger
               beforeUpload={file => {
                 setFileList([file]);
@@ -1068,7 +984,7 @@ const CategoryPage = () => {
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
               ) : null}
-              <Button icon={<UploadOutlined />}>Görsel Yükle / Değiştir</Button>
+              <Button icon={<UploadOutlined />}>{t("common:BUTTONS.UPLOAD_EDIT_IMAGE")}</Button>
             </Dragger>
           </Form.Item>
         </Form>
