@@ -64,6 +64,7 @@ const { Dragger } = Upload;
 const { TabPane } = Tabs;
 
 const CategoryPage = () => {
+  const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -79,7 +80,6 @@ const CategoryPage = () => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [form] = useForm();
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -163,30 +163,105 @@ const CategoryPage = () => {
     await updateStatus("categories", id, data, fetchCategories, t);
   };
 
+  // const handleAddCategory = async () => {
+  //   try {
+  //     // Formun alanlarını doğrula
+  //     const values = await form.validateFields();
+
+  //     // Yeni kategori eklemek için addEntity fonksiyonunu çağır
+  //     await addEntity(
+  //       "categories",
+  //       values, // Form verilerini burada gönder
+  //       fileList,
+  //       fetchCategories,
+  //       setAddModalVisible,
+  //       t
+  //     );
+
+  //     // Form alanlarını sıfırla ve dosya listesini temizle
+  //     form.resetFields();
+  //     setFileList([]);
+  //   } catch (error) {
+  //     console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
+      
+  //     if (error.errorFields) {
+  //         error.errorFields.forEach(field => {
+  //             const fieldName = field.name[0];
+  //             form.scrollToField(fieldName); // Hatalı alanlara odaklanma
+  //             form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
+  //         });
+  //         // Alanlar boş olduğunda kullanıcıyı bilgilendir
+  //         // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
+  //     } else {
+  //         // Diğer hatalar için genel bir mesaj göster
+  //         message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+  //     }
+   
+   
+    
+
+  //     if (error.errorFields) {
+  //       // Hatalı alanlara odaklanma
+  //       const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
+  //       form.scrollToField(firstErrorField); // Hatalı alana kaydırma
+  //       form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
+  //     }
+
+  //     // Özelleştirilmiş hata mesajı gösterme
+  //     // message.error(t("common:COMMON.VALIDATION_FAILED"));
+  //   }
+  // };
+
   const handleAddCategory = async () => {
     try {
+      // Formun alanlarını doğrula
       const values = await form.validateFields();
-
+  
+      // Yeni kategori eklemek için addEntity fonksiyonunu çağır
       await addEntity(
         "categories",
-        form,
+        values, // Form verilerini burada gönder
         fileList,
         fetchCategories,
         setAddModalVisible,
-        t
+        t,
+        form // Form nesnesini burada gönder
       );
-
+  
+      // Form alanlarını sıfırla ve dosya listesini temizle
       form.resetFields();
       setFileList([]);
     } catch (error) {
-      console.error(
-        "Hata:",
-        error.response ? error.response.data : error.message
-      );
-      handleApiError(error, t);
-    }
-  };
-
+          console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
+          
+          if (error.errorFields) {
+              error.errorFields.forEach(field => {
+                  const fieldName = field.name[0];
+                  form.scrollToField(fieldName); // Hatalı alanlara odaklanma
+                  form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
+              });
+              // Alanlar boş olduğunda kullanıcıyı bilgilendir
+              // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
+          } else {
+              // Diğer hatalar için genel bir mesaj göster
+              message.error("Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.");
+          }
+       
+       
+        
+    
+          if (error.errorFields) {
+            // Hatalı alanlara odaklanma
+            const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
+            form.scrollToField(firstErrorField); // Hatalı alana kaydırma
+            form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
+          }
+    
+          // Özelleştirilmiş hata mesajı gösterme
+          // message.error(t("common:COMMON.VALIDATION_FAILED"));
+        }
+      };
+  
   const handleEditCategory = async () => {
     try {
       await editEntity(
@@ -821,7 +896,7 @@ const CategoryPage = () => {
                     icon={<DeleteOutlined />}
                     block
                   >
-                   {t("common:BUTTONS.DELETE_SELECTED_RECORDS")}
+                    {t("common:BUTTONS.DELETE_SELECTED_RECORDS")}
                   </Button>
                 </Popconfirm>
               )}
@@ -839,26 +914,29 @@ const CategoryPage = () => {
       </Card>
 
       <Modal
-        title="Kategori Ekle"
+        title={t("admin:CATEGORIES.MODAL_TITLE")} //kategori ekle
         open={addModalVisible}
         onOk={handleAddCategory}
         onCancel={() => setAddModalVisible(false)}
-        okText="Kaydet"
-        cancelText="Vazgeç"
+        okText={t("common:BUTTONS.SAVE")}
+        cancelText={t("common:BUTTONS.CANCEL")}
         width={400}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="Kategori Adı"
+            label={t("admin:CATEGORIES.TITLE")}
             name="name"
             rules={[
-              { required: true, message: "Kategori adı alanı doldurulmalıdır." }
+              {
+                required: true,
+                message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED")
+              }
             ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Durum"
+            label={t("common:COLUMNS.STATUS")}
             name="is_active"
             valuePropName="checked"
             initialValue={false}
@@ -866,10 +944,13 @@ const CategoryPage = () => {
             <Switch defaultChecked={false} />
           </Form.Item>
           <Form.Item
-            label="Etiketler"
+            label={t("common:COLUMNS.TAGS")}
             name="tags"
             rules={[
-              { required: true, message: "Etiketler alanı doldurulmalıdır." }
+              {
+                required: true,
+                message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED")
+              }
             ]}
           >
             <Select
@@ -878,7 +959,7 @@ const CategoryPage = () => {
               placeholder="Etiketleri girin"
             />
           </Form.Item>
-          <Form.Item label="Açıklama" name="description">
+          <Form.Item label={t("common:COLUMNS.DESCRIPTION")} name="description">
             <Input.TextArea />
           </Form.Item>
           {/* <Form.Item label="Görsel" name="image">
@@ -900,7 +981,7 @@ const CategoryPage = () => {
               <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
             </Dragger>
           </Form.Item> */}
-          <Form.Item label="Görsel" name="image">
+          <Form.Item label={t("common:COLUMNS.IMAGE")} name="image">
             <Dragger
               beforeUpload={handleBeforeUpload}
               fileList={fileList}
@@ -914,14 +995,16 @@ const CategoryPage = () => {
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
               )}
-              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
+              <Button icon={<UploadOutlined />}>
+                {t("common:BUTTONS.UPLOAD_IMAGE")}
+              </Button>
             </Dragger>
           </Form.Item>
         </Form>
       </Modal>
 
       <Modal
-        title="Kategori Düzenle"
+        title="Kategori Düzenle" //kategori düzenle
         open={editModalVisible}
         onOk={handleEditCategory}
         onCancel={() => {

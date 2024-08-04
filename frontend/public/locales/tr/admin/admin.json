@@ -1,0 +1,8 @@
+{
+  "CATEGORIES": {
+    "MODAL_TITLE": "Kategori Ekle",
+    "TITLE": "Kategori Adı :",
+    "TITLE_MUST_BE_FILLED":"Kategori adı alanı boş olamaz.",
+    "TAGS_MUST_BE_FILLED":"Etiket alanı boş olamaz."
+  }
+}

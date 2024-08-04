@@ -4,21 +4,170 @@ import { apiService } from "../services/apiService";
 import handleApiError from "./handleApiError";
 import axios from "axios";
 import i18n from "../i18n";
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // .env dosyasındaki değeri al
+
+// export const addEntity = async (
+//   entityType,
+//   form,
+//   fileList,
+//   fetchEntities,
+//   setModalVisible,
+//   t
+// ) => {
+//   try {
+//     const token = localStorage.getItem("token");
+//     const values = await form.validateFields();
+
+//     // Var olan varlıkları kontrol et
+//     const response = await apiService.get(`/api/${entityType}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`
+//       }
+//     });
+
+//     const existingEntity = response.data.data.find(
+//       entity => entity.name.toLowerCase() === values.name.toLowerCase()
+//     );
+
+//     if (existingEntity) {
+//       message.error(
+//         t("common:COMMON.RECORD_ALREADY_EXISTS", { recName: values.name })
+//       );
+//       return;
+//     }
+
+//     const formData = new FormData();
+//     // Form verilerini ekle
+//     for (const key in entityFields[entityType]) {
+//       if (values[key] !== undefined && values[key] !== null) {
+//         if (key === "tags" && Array.isArray(values[key])) {
+//           // Tags dizisini JSON string olarak ekleyin
+//           formData.append(key, JSON.stringify(values[key]));
+//         } else {
+//           formData.append(key, values[key]);
+//         }
+//       }
+//     }
+
+//     // Resim dosyasını ekle
+//     if (fileList.length > 0) {
+//       formData.append("image", fileList[0]);
+//     }
+
+//     // formData'nın içeriğini kontrol et
+//     for (const pair of formData.entries()) {
+//       console.log(`${pair[0]}: ${pair[1]}`);
+//     }
+
+//     // Kayıt işlemini gerçekleştir
+//     await apiService.post(`/api/${entityType}/add`, formData, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "multipart/form-data"
+//       }
+//     });
+
+//     message.success(
+//       t("common:COMMON.ADD_SUCCESS_PARAM", { recName: values.name })
+//     );
+//     setModalVisible(false);
+//     form.resetFields();
+//     fetchEntities();
+//   } catch (error) {
+//     console.error(
+//       "Hata:",
+//       error.response ? error.response.data : error.message
+//     ); // Hata loglama
+//     handleApiError(error);
+//   }
+// };
+
+// export const addEntity = async (
+//   entityType,
+//   values, // Form verilerini burada al
+//   fileList,
+//   fetchEntities,
+//   setModalVisible,
+//   t
+// ) => {
+//   try {
+//     const token = localStorage.getItem("token");
+
+//     // Var olan varlıkları kontrol et
+//     const response = await apiService.get(`/api/${entityType}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`
+//       }
+//     });
+
+//     const existingEntity = response.data.data.find(
+//       entity => entity.name.toLowerCase() === values.name.toLowerCase()
+//     );
+
+//     if (existingEntity) {
+//       message.error(
+//         t("common:COMMON.RECORD_ALREADY_EXISTS", { recName: values.name })
+//       );
+//       return;
+//     }
+
+//     const formData = new FormData();
+//     // Form verilerini ekle
+//     for (const key in entityFields[entityType]) {
+//       if (
+//         values[key] !== undefined &&
+//         values[key] !== null &&
+//         values[key] !== ""
+//       ) {
+//         if (key === "tags" && Array.isArray(values[key])) {
+//           // Tags dizisini JSON string olarak ekleyin
+//           formData.append(key, JSON.stringify(values[key]));
+//         } else {
+//           formData.append(key, values[key]);
+//         }
+//       }
+//     }
+
+//     // Resim dosyasını ekle
+//     if (fileList.length > 0) {
+//       formData.append("image", fileList[0]);
+//     }
+
+//     // Kayıt işlemini gerçekleştir
+//     await apiService.post(`/api/${entityType}/add`, formData, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "multipart/form-data"
+//       }
+//     });
+
+//     message.success(
+//       t("common:COMMON.ADD_SUCCESS_PARAM", { recName: values.name })
+//     );
+//     setModalVisible(false);
+//     fetchEntities();
+//   } catch (error) {
+//     console.error(
+//       "Hata:",
+//       error.response ? error.response.data : error.message
+//     );
+//     handleApiError(error);
+//   }
+// };
 
 export const addEntity = async (
   entityType,
-  form,
+  values, // Form verilerini burada al
   fileList,
   fetchEntities,
   setModalVisible,
-  t
+  t,
+  form // Form nesnesini ekle
 ) => {
   try {
     const token = localStorage.getItem("token");
-    const values = await form.validateFields();
 
     // Var olan varlıkları kontrol et
     const response = await apiService.get(`/api/${entityType}`, {
@@ -41,7 +190,11 @@ export const addEntity = async (
     const formData = new FormData();
     // Form verilerini ekle
     for (const key in entityFields[entityType]) {
-      if (values[key] !== undefined && values[key] !== null) {
+      if (
+        values[key] !== undefined &&
+        values[key] !== null &&
+        values[key] !== ""
+      ) {
         if (key === "tags" && Array.isArray(values[key])) {
           // Tags dizisini JSON string olarak ekleyin
           formData.append(key, JSON.stringify(values[key]));
@@ -56,11 +209,6 @@ export const addEntity = async (
       formData.append("image", fileList[0]);
     }
 
-    // formData'nın içeriğini kontrol et
-    for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
-    }
-
     // Kayıt işlemini gerçekleştir
     await apiService.post(`/api/${entityType}/add`, formData, {
       headers: {
@@ -73,16 +221,31 @@ export const addEntity = async (
       t("common:COMMON.ADD_SUCCESS_PARAM", { recName: values.name })
     );
     setModalVisible(false);
-    form.resetFields();
     fetchEntities();
   } catch (error) {
-    console.error(
-      "Hata:",
-      error.response ? error.response.data : error.message
-    ); // Hata loglama
-    handleApiError(error);
+    console.error("Hata:", error.response ? error.response.data : error.message);
+
+    let errorMessage;
+    if (error.response) {
+      errorMessage = error.response.data.message || "Hata mesajı bulunamadı.";
+    } else {
+      errorMessage = "Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+    }
+
+    // Hatalı alanlara odaklan
+    if (error.errorFields) {
+      error.errorFields.forEach(field => {
+        const fieldName = field.name[0];
+        form.scrollToField(fieldName); // Hatalı alanlara odaklanma
+        form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
+      });
+    }
+
+    // Kullanıcıya gösterilecek hata mesajı
+    message.error(errorMessage);
   }
 };
+
 
 export const editEntity = async (
   entityType,
@@ -120,12 +283,14 @@ export const editEntity = async (
       }
     });
 
-    message.success(t("common:COMMON.RECORD_UPDATE_SUCCESS", { recName : values.name}));
+    message.success(
+      t("common:COMMON.RECORD_UPDATE_SUCCESS", { recName: values.name })
+    );
     setModalVisible(false);
     form.resetFields();
     fetchEntities();
   } catch (error) {
-    handleApiError(error,t);
+    handleApiError(error, t);
   }
 };
 
@@ -301,23 +466,28 @@ export const uploadFile = async (tableName, file, t) => {
   }
 };
 
-export const printEntity = (entityName, selectedColumns, printTable, orientation, paperSize) => {
-    const doc = new jsPDF({
-        orientation,
-        unit: "pt",
-        format: paperSize
-    });
+export const printEntity = (
+  entityName,
+  selectedColumns,
+  printTable,
+  orientation,
+  paperSize
+) => {
+  const doc = new jsPDF({
+    orientation,
+    unit: "pt",
+    format: paperSize
+  });
 
-    const tableColumn = selectedColumns.map(col => col.title);
-    const tableRows = printTable.map(item =>
-        selectedColumns.map(col => item[col.dataIndex])
-    );
+  const tableColumn = selectedColumns.map(col => col.title);
+  const tableRows = printTable.map(item =>
+    selectedColumns.map(col => item[col.dataIndex])
+  );
 
-    doc.autoTable({
-        head: [tableColumn],
-        body: tableRows
-    });
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows
+  });
 
-    doc.save(`${entityName}.pdf`);
+  doc.save(`${entityName}.pdf`);
 };
-

@@ -32,7 +32,8 @@
     "FILE_UPLOAD_ERROR": "An error occurred during file upload",
     "ONLY_IMAGES_ALLOWED": "Only image files can be uploaded!",
     "UPLOAD_SUCCESS": "{{fileName}} file uploaded successfully.",
-    "UPLOAD_ERROR": "An error occurred while uploading {{fileName}}."
+    "UPLOAD_ERROR": "An error occurred while uploading {{fileName}}.",
+    "VALIDATION_FAILED":"Please fill in all fields"
   },
   "SEARCH": {
     "SEARCH": "Search",
@@ -66,6 +67,9 @@
     "CREATE_EXCEL": "Create Excel",
     "IMPORT_EXCEL": "Import Excel",
     "DELETE_SELECTED_RECORDS": "Delete Selected",
-    "RESTORE_SELECTED_RECORDS": "Restore Selected"
+    "RESTORE_SELECTED_RECORDS": "Restore Selected",
+    "UPLOAD_IMAGE": "Upload Image",
+    "SAVE":"Save",
+    "CANCEL":"Cancel"
   }
 }
