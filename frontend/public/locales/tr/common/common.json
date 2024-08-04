@@ -68,7 +68,14 @@
         "IMPORT_EXCEL": "Excel'den Yükle",
         "DELETE_SELECTED_RECORDS": "Seçilenleri  Sil",
         "RESTORE_SELECTED_RECORDS": "Seçilenleri  Geri Yükle",
+        "UPLOAD_IMAGE": "Görsel Yükle",
+        "UPLOAD_EDIT_IMAGE": "Görsel Yükle / Değiştir",
         "SAVE":"Kaydet",
-        "CANCEL":"Vazgeç"
-      }
+        "CANCEL":"Vazgeç",
+        "EDIT":"Güncelle"
+      },
+      "PLACEHOLDER":{
+          "TAGS":"Etiketleri giriniz",
+          "TITLE":"Başlık /ad giriniz"
+        }
 }

@@ -223,29 +223,19 @@ export const addEntity = async (
     setModalVisible(false);
     fetchEntities();
   } catch (error) {
-    console.error("Hata:", error.response ? error.response.data : error.message);
+    console.error(
+      "Hata:",
+      error.response ? error.response.data : error.message
+    );
 
     let errorMessage;
     if (error.response) {
       errorMessage = error.response.data.message || "Hata mesajı bulunamadı.";
     } else {
-      errorMessage = "Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+      errorMessage = t("common:COMMON.ERROR");
     }
-
-    // Hatalı alanlara odaklan
-    if (error.errorFields) {
-      error.errorFields.forEach(field => {
-        const fieldName = field.name[0];
-        form.scrollToField(fieldName); // Hatalı alanlara odaklanma
-        form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
-      });
-    }
-
-    // Kullanıcıya gösterilecek hata mesajı
-    message.error(errorMessage);
   }
 };
-
 
 export const editEntity = async (
   entityType,
@@ -290,7 +280,19 @@ export const editEntity = async (
     form.resetFields();
     fetchEntities();
   } catch (error) {
-    handleApiError(error, t);
+    console.error(
+      "Hata:",
+      error.response ? error.response.data : error.message
+    );
+
+    // Hata kontrolü
+    let errorMessage;
+    if (error.response) {
+      errorMessage = error.response.data.message || "Hata mesajı bulunamadı.";
+    } else {
+      errorMessage = "Bir sorun oluştu. Lütfen daha sonra tekrar deneyin.";
+    }
+    message.error(errorMessage); // Kullanıcıya hata mesajı gösterme
   }
 };
 
