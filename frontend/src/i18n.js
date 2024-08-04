@@ -16,7 +16,7 @@ i18n
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}/{{ns}}.json',
     },
-    ns: ['common'], // Kullanmak istediğiniz ad alanları
+    ns: ['common','admin', 'site'], // Kullanmak istediğiniz ad alanları
     defaultNS: 'common', // Varsayılan ad alanı
   });
 

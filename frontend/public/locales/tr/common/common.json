@@ -32,7 +32,8 @@
     "FILE_UPLOAD_ERROR": "Dosya yükleme sırasında bir hata oluştu",
     "ONLY_IMAGES_ALLOWED": "Yalnızca resim dosyaları yüklenebilir!",
     "UPLOAD_SUCCESS": "{{fileName}} dosyası başarıyla yüklendi.",
-    "UPLOAD_ERROR": "{{fileName}} dosyasını yüklerken bir hata oluştu."
+    "UPLOAD_ERROR": "{{fileName}} dosyasını yüklerken bir hata oluştu.",
+    "VALIDATION_FAILED":"Lütfen tüm alanları doldurun"
   },
   "SEARCH": {
     "SEARCH": "Ara",
@@ -66,6 +67,8 @@
         "CREATE_EXCEL": "Excel'e Aktar",
         "IMPORT_EXCEL": "Excel'den Yükle",
         "DELETE_SELECTED_RECORDS": "Seçilenleri  Sil",
-        "RESTORE_SELECTED_RECORDS": "Seçilenleri  Geri Yükle"
+        "RESTORE_SELECTED_RECORDS": "Seçilenleri  Geri Yükle",
+        "SAVE":"Kaydet",
+        "CANCEL":"Vazgeç"
       }
 }

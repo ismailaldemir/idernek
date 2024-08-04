@@ -1,0 +1,8 @@
+{
+  "CATEGORIES": {
+    "MODAL_TITLE": "Add Category",
+    "TITLE": "Category Name :",
+    "TITLE_MUST_BE_FILLED":"Category name must be filled.",
+    "TAGS_MUST_BE_FILLED":"Tags must be filled."
+  }
+}
