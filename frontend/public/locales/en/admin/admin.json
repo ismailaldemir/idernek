@@ -5,5 +5,30 @@
     "TITLE": "Category Name :",
     "TITLE_MUST_BE_FILLED":"Category name must be filled.",
     "TAGS_MUST_BE_FILLED":"Tags must be filled."
+  },
+   "MENU": {
+    "DASHBOARD": "Dashboard",
+    "CATEGORIES": "Categories",
+    "PRODUCTS": "Products",
+    "PRODUCT_LIST": "Product List",
+    "NEW_PRODUCT": "Create Product",
+    "COUPONS": "Coupons",
+    "COUPON_LIST": "Copon List",
+    "NEW_COUPON": "Create Coupon",
+    "CONTACTS": "Contacts",
+    "USERS": "Users",
+    "ORDERS": "Orders"
+  },
+  "HEADER": {
+    "TITLE": "Management Dashboard"
+  },
+  "SETTINGS":{
+    "TITLE":"Settings",
+    "BACKGROUND_COLOR":"Background Color",
+    "TAB_HEADER":"Header",
+    "TEXT_COLOR":"Text Color",
+    "TAB_SIDEBAR":"Sidebar",
+    "MENU_MODE":"Menu Mode",
+    "MENU_THEME":"Menu Theme"
   }
 }
