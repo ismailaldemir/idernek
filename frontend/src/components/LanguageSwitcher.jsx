@@ -56,6 +56,9 @@ const LanguageSwitcher = () => {
           style={{ width: 20, marginRight: 8 }} // Boyut ve margin
         />
         {languageNames[lng]}
+        {i18n.language === lng && (
+        <span style={{ marginLeft: 8 }}>✔️</span>
+      )} {/* Aktif dilin yanına onay işareti */}
       </span>
     ),
     onClick: () => handleLanguageChange(lng)
@@ -68,8 +71,21 @@ const LanguageSwitcher = () => {
     >
       <Button
         className="language-switcher-button"
-        icon={<GlobalOutlined />}
-      ></Button>
+        // icon={<GlobalOutlined />}
+        style={{
+          backgroundImage: `url(${getFlagPath(i18n.language)})`, // Seçili dilin bayrağını arka plan resmi olarak ayarlama
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          color: "white", // Yazı rengi
+          width: "20px", // Buton genişliği
+          height: "20px", // Buton yüksekliği
+          borderRadius: "50%", // Yuvarlak yapma
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+      </Button>
     </Dropdown>
   );
 };
