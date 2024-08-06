@@ -86,7 +86,7 @@
               },
               {
                 key: "7",
-                label: t("admin:MENU.NIW_PRODUCT"),
+                label: t("admin:MENU.NEW_PRODUCT"),
                 onClick: () => navigate("/admin/products/create")
               }
             ]
@@ -103,7 +103,7 @@
               },
               {
                 key: "10",
-                label: t("admin:MENU.NEW_COUPONS"),
+                label: t("admin:MENU.NEW_COUPON"),
                 onClick: () => navigate("/admin/coupons/create")
               }
             ]

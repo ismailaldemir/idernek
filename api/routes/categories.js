@@ -50,6 +50,7 @@ router.get(
 
 router.post("/add", upload, async (req, res) => {
   let body = req.body;
+  console.log(body);
   let file = req.file;
 
   try {
@@ -80,7 +81,8 @@ router.post("/add", upload, async (req, res) => {
       created_by: req.user._id,
       image: file ? file.filename : undefined,
       tags: body.tags ? JSON.parse(body.tags) : [], // tags alanı
-      description: body.description || "" // description alanı
+      description: body.description || "", // description alanı
+      parent_id: body.parent_id || null
     });
 
     await newCategory.save();
@@ -120,6 +122,13 @@ router.post("/update", upload, async (req, res) => {
     category.tags = body.tags ? JSON.parse(body.tags) : category.tags;
     category.description =
       body.description !== undefined ? body.description : category.description;
+
+      // Parent ID'yi güncelle
+    if (body.parent_id && body.parent_id !== "-1") {
+      category.parent_id = body.parent_id; // parent_id'yi güncelle
+    } else {
+      category.parent_id = null; // Parent yoksa null yap
+    }
 
     // Yeni resmi ekle
     if (file) {

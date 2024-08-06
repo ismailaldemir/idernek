@@ -4,7 +4,8 @@
     "EDIT_MODAL_TITLE": "Kategori Düzenle",
     "TITLE": "Kategori Adı :",
     "TITLE_MUST_BE_FILLED": "Kategori adı alanı boş olamaz.",
-    "TAGS_MUST_BE_FILLED": "Etiket alanı boş olamaz."
+    "TAGS_MUST_BE_FILLED": "Etiket alanı boş olamaz.",
+    "PARENT_CATEGORY":"Üst Kategori"
   },
   "MENU": {
     "DASHBOARD": "Anasayfa",

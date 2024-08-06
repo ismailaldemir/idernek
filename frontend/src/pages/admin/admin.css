@@ -136,3 +136,7 @@
   margin: 0 5px; /* Butonlar arasındaki boşluk */
 }
 
+.bold-option {
+  font-weight: bold !important; /* Yazıyı kalın yap */
+  color: black !important; /* Yazı rengini siyah yap */
+}

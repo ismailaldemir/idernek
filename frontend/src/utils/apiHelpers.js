@@ -204,6 +204,11 @@ export const addEntity = async (
       }
     }
 
+    // parent_id değerini formData'ya ekle
+    if (values.parent_id !== undefined) {
+      formData.append("parent_id", values.parent_id);
+    }
+
     // Resim dosyasını ekle
     if (fileList.length > 0) {
       formData.append("image", fileList[0]);
@@ -260,6 +265,10 @@ export const editEntity = async (
           formData.append(key, values[key]);
         }
       }
+    }
+
+    if (values.parent_id && values.parent_id !== "-1") {
+      formData.append("parent_id", values.parent_id);
     }
 
     if (fileList.length > 0) {
