@@ -76,6 +76,8 @@
   },
   "PLACEHOLDER":{
       "TAGS":"Enter tags",
-      "TITLE":"Enter title"
+      "TITLE":"Enter title",
+      "PARENT_CATEGORY":"Enter parent category",
+      "NO_PARENT":"Not"
     }
 }

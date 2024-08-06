@@ -76,6 +76,8 @@
       },
       "PLACEHOLDER":{
           "TAGS":"Etiketleri giriniz",
-          "TITLE":"Başlık /ad giriniz"
+          "TITLE":"Başlık /ad giriniz",
+          "PARENT_CATEGORY":"Üst Kategori seçiniz",
+          "NO_PARENT":"Yok"
         }
 }

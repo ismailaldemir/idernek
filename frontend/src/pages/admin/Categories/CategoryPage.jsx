@@ -87,6 +87,7 @@ const CategoryPage = () => {
   const [file, setFile] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const { t } = useTranslation();
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -102,6 +103,56 @@ const CategoryPage = () => {
     filterData();
   }, [dataSource, activeTab]);
 
+  // const fetchCategories = async () => {
+  //   setLoading(true); // Veri çekme işlemi başladığında loading durumunu true yapma.
+  //   try {
+  //     const token = localStorage.getItem("token"); // Local storage'dan token'i alma.
+  //     const response = await axios.get(`${API_BASE_URL}/api/categories`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}` // Token'i Authorization header'ına ekleme.
+  //       }
+  //     });
+
+  //     const formattedData = response.data.data.map(item => ({
+  //       ...item,
+  //       key: item._id, // Her bir kategoriyi tanımlamak için benzersiz anahtar olarak _id kullanma.
+  //       imageUrl: `${API_BASE_URL}/images/${item.image}` // Kategori resimlerinin tam URL'ini oluşturma
+  //     }));
+
+  //     setDataSource(formattedData); // Tabloda gösterilecek veri kaynağını ayarlama.
+  //     setPrintTable(formattedData); // Yazdırılacak tablo verisini ayarlama
+  //     setCategories(formattedData); // Kategorileri modal formda kullanmak için ayarlama.
+  //     filterData(); // Veriyi aktif sekmeye göre filtreleme
+  //   } catch (error) {
+  //     handleApiError(error, t);
+  //   } finally {
+  //     setLoading(false); // Veri çekme işlemi tamamlandığında loading durumunu false yapma.
+  //   }
+  // };
+
+  const organizeCategories = categories => {
+    const categoryMap = {};
+    const tree = [];
+
+    // Kategorileri harita yapısına dönüştür
+    categories.forEach(category => {
+      categoryMap[category._id] = { ...category, children: [] };
+    });
+
+    // Hiyerarşik yapıyı oluştur
+    categories.forEach(category => {
+      if (category.parent_id) {
+        categoryMap[category.parent_id].children.push(
+          categoryMap[category._id]
+        );
+      } else {
+        tree.push(categoryMap[category._id]);
+      }
+    });
+
+    return tree;
+  };
+
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -112,19 +163,63 @@ const CategoryPage = () => {
         }
       });
 
-      const formattedData = response.data.data.map(item => ({
+      const categoriesData = response.data.data;
+
+      // Kategorileri hiyerarşik yapıya dönüştür
+      const organizedCategories = organizeCategories(categoriesData);
+
+      // Kategorilerin seviyelerini hesapla
+      const formattedData = categoriesData.map(item => ({
         ...item,
         key: item._id,
-        imageUrl: `${API_BASE_URL}/images/${item.image}`
+        imageUrl: `${API_BASE_URL}/images/${item.image}`,
+        level: calculateLevel(item._id, categoriesData)
       }));
 
       setDataSource(formattedData);
       setPrintTable(formattedData);
+      setCategories(organizedCategories); // Hiyerarşik kategorileri ayarlama
+      filterData();
     } catch (error) {
       handleApiError(error, t);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Kategorinin seviyesini hesaplayan yardımcı fonksiyon
+  const calculateLevel = (categoryId, categories) => {
+    let level = 0;
+    let currentCategory = categories.find(cat => cat._id === categoryId);
+
+    while (currentCategory && currentCategory.parent_id) {
+      level++;
+      currentCategory = categories.find(
+        cat => cat._id === currentCategory.parent_id
+      );
+    }
+
+    return level;
+  };
+
+  const renderOptions = categories => {
+    return categories.map(category => (
+      <React.Fragment key={category._id}>
+        <Option
+          value={category._id}
+          className={!category.parent_id ? "bold-option" : ""} // Ana kategoriler için class ekleme
+        >
+          {`${"-- ".repeat(calculateLevel(category._id, categories))}${
+            category.name
+          }`}
+          {/* Seviyeye göre çizgi ekliyoruz */}
+        </Option>
+        {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
+        {category.children &&
+          category.children.length > 0 &&
+          renderOptions(category.children)}
+      </React.Fragment>
+    ));
   };
 
   const filterData = () => {
@@ -351,7 +446,7 @@ const CategoryPage = () => {
       message.success(
         t("common:COMMON.UPLOAD_SUCCESS", { fileName: info.file.name })
       );
-      fetchCategories(); 
+      fetchCategories();
     } else if (info.file.status === "error") {
       message.error(
         t("common:COMMON.UPLOAD_ERROR", { fileName: info.file.name })
@@ -699,7 +794,8 @@ const CategoryPage = () => {
     }
   ];
 
-  return (//butonlar
+  return (
+    //butonlar
     <div>
       <Card style={{ marginBottom: 2 }}>
         <Row
@@ -840,6 +936,28 @@ const CategoryPage = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
+            label={t("admin:CATEGORIES.PARENT_CATEGORY")}
+            name="parent_id"
+          >
+            <Select
+              placeholder={t("common:PLACEHOLDER.PARENT_CATEGORY")}
+              onChange={value =>
+                form.setFieldsValue({
+                  parent_id: value === "-1" ? undefined : value
+                })
+              }
+              showSearch
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option.children.toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
+              {renderOptions(categories)}{" "}
+              {/* renderOptions fonksiyonunu çağırma */}
+            </Select>
+          </Form.Item>
+          <Form.Item
             label={t("admin:CATEGORIES.TITLE")}
             name="name"
             rules={[
@@ -933,22 +1051,54 @@ const CategoryPage = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
+            label={t("admin:CATEGORIES.PARENT_CATEGORY")} // Yeni parent_category alanı
+            name="parent_id" // parent_id kullanılıyor
+          >
+            <Select
+              showSearch // Arama özelliğini etkinleştirir
+              placeholder={t("common:PLACEHOLDER.PARENT_CATEGORY")}
+              optionFilterProp="children" // Arama için kullanılacak alan
+              filterOption={
+                (input, option) =>
+                  option.children.toLowerCase().includes(input.toLowerCase()) // Filtreleme işlemi
+              }
+            >
+              <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
+              {categories.map(category => (
+                <Option key={category._id} value={category._id}>
+                  {category.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
             label={t("admin:CATEGORIES.TITLE")}
             name="name"
             rules={[
-              { required: true, message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED") }
+              {
+                required: true,
+                message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED")
+              }
             ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label={t("common:COLUMNS.STATUS")} name="is_active" valuePropName="checked">
+          <Form.Item
+            label={t("common:COLUMNS.STATUS")}
+            name="is_active"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item
             label={t("common:COLUMNS.TAGS")}
             name="tags"
             rules={[
-              { required: true, message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED") }
+              {
+                required: true,
+                message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED")
+              }
             ]}
           >
             <Select
@@ -984,7 +1134,9 @@ const CategoryPage = () => {
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
               ) : null}
-              <Button icon={<UploadOutlined />}>{t("common:BUTTONS.UPLOAD_EDIT_IMAGE")}</Button>
+              <Button icon={<UploadOutlined />}>
+                {t("common:BUTTONS.UPLOAD_EDIT_IMAGE")}
+              </Button>
             </Dragger>
           </Form.Item>
         </Form>

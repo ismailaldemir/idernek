@@ -4,7 +4,8 @@
     "EDIT_MODAL_TITLE": "Edit Category",
     "TITLE": "Category Name :",
     "TITLE_MUST_BE_FILLED":"Category name must be filled.",
-    "TAGS_MUST_BE_FILLED":"Tags must be filled."
+    "TAGS_MUST_BE_FILLED":"Tags must be filled.",
+    "PARENT_CATEGORY":"Parent Category"
   },
    "MENU": {
     "DASHBOARD": "Dashboard",
