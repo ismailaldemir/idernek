@@ -222,6 +222,18 @@ const CategoryPage = () => {
     ));
   };
 
+  const CategoryTree = ({ data }) => {
+    return (
+      <div style={{ height: '500px' }}>
+        <Tree data={data} />
+      </div>
+    );
+  };
+
+  const showTreeModal = () => {
+    setIsModalVisible(true);
+  };
+
   const filterData = () => {
     switch (activeTab) {
       case "active":
@@ -806,6 +818,7 @@ const CategoryPage = () => {
             flexWrap: "wrap"
           }}
         >
+        
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
             <Button
               type="primary"
@@ -817,7 +830,7 @@ const CategoryPage = () => {
               }}
               block
             >
-              {t("common:BUTTONS.NEW_RECORD")}
+              {t("common:BUTTONS.NEW_RECORD")} {/* yeni kayıt ekle butonu */}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -827,7 +840,7 @@ const CategoryPage = () => {
               onClick={openPrintModal}
               block
             >
-              {t("common:BUTTONS.CREATE_PDF")}
+              {t("common:BUTTONS.CREATE_PDF")} {/* pdf oluştur butonu */}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -838,7 +851,7 @@ const CategoryPage = () => {
               icon={<FileExcelOutlined />}
               block
             >
-              {t("common:BUTTONS.CREATE_EXCEL")}
+              {t("common:BUTTONS.CREATE_EXCEL")} {/* excele aktar butonu */}
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
@@ -849,7 +862,7 @@ const CategoryPage = () => {
                 icon={<UploadOutlined />}
                 block
               >
-                {t("common:BUTTONS.IMPORT_EXCEL")}
+                {t("common:BUTTONS.IMPORT_EXCEL")} {/* excelden al */}
               </Button>
             </Upload>
           </Col>
@@ -1065,9 +1078,21 @@ const CategoryPage = () => {
             >
               <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
               {categories.map(category => (
-                <Option key={category._id} value={category._id}>
-                  {category.name}
-                </Option>
+                <React.Fragment key={category._id}>
+                  <Option
+                    value={category._id}
+                    className={!category.parent_id ? "bold-option" : ""} // Ana kategoriler için class ekleme
+                  >
+                    {`${"-- ".repeat(
+                      calculateLevel(category._id, categories)
+                    )}${category.name}`}
+                    {/* Seviyeye göre çizgi ekleme */}
+                  </Option>
+                  {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
+                  {category.children &&
+                    category.children.length > 0 &&
+                    renderOptions(category.children)}
+                </React.Fragment>
               ))}
             </Select>
           </Form.Item>

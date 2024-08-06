@@ -72,7 +72,8 @@
     "UPLOAD_EDIT_IMAGE": "Upload / Edit Image",
     "SAVE":"Save",
     "CANCEL":"Cancel",
-    "EDIT":"Edit"
+    "EDIT":"Edit",
+    "SHOW_CATEGORY_TREE":"Show Category Tree"
   },
   "PLACEHOLDER":{
       "TAGS":"Enter tags",
