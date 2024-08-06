@@ -1065,9 +1065,21 @@ const CategoryPage = () => {
             >
               <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
               {categories.map(category => (
-                <Option key={category._id} value={category._id}>
-                  {category.name}
-                </Option>
+                <React.Fragment key={category._id}>
+                  <Option
+                    value={category._id}
+                    className={!category.parent_id ? "bold-option" : ""} // Ana kategoriler için class ekleme
+                  >
+                    {`${"-- ".repeat(
+                      calculateLevel(category._id, categories)
+                    )}${category.name}`}
+                    {/* Seviyeye göre çizgi ekleme */}
+                  </Option>
+                  {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
+                  {category.children &&
+                    category.children.length > 0 &&
+                    renderOptions(category.children)}
+                </React.Fragment>
               ))}
             </Select>
           </Form.Item>
