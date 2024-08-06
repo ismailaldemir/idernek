@@ -72,7 +72,8 @@
         "UPLOAD_EDIT_IMAGE": "Görsel Yükle / Değiştir",
         "SAVE":"Kaydet",
         "CANCEL":"Vazgeç",
-        "EDIT":"Güncelle"
+        "EDIT":"Güncelle",
+        "SHOW_CATEGORY_TREE":"Kategori Ağacı"
       },
       "PLACEHOLDER":{
           "TAGS":"Etiketleri giriniz",
