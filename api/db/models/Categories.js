@@ -4,6 +4,7 @@ const Users = require("./Users");
 const schema = mongoose.Schema(
   {
     name: { type: String, required: true },
+    slug: { type: String, unique: true },
     parent_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "categories", // Referans olarak "categories" modeli eklendi
