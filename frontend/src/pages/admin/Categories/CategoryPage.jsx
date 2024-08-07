@@ -224,7 +224,7 @@ const CategoryPage = () => {
 
   const CategoryTree = ({ data }) => {
     return (
-      <div style={{ height: '500px' }}>
+      <div style={{ height: "500px" }}>
         <Tree data={data} />
       </div>
     );
@@ -292,28 +292,16 @@ const CategoryPage = () => {
     } catch (error) {
       console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
 
-      if (error.errorFields) {
-        error.errorFields.forEach(field => {
-          const fieldName = field.name[0];
-          form.scrollToField(fieldName); // Hatalı alanlara odaklanma
-          form.getFieldInstance(fieldName).focus(); // Hatalı alana odaklanma
-        });
-        // Alanlar boş olduğunda kullanıcıyı bilgilendir
-        // message.error(t("common:ERRORS.VALIDATION_FAILED")); // Özelleştirilmiş hata mesajı
+      if (error.errorFields && error.errorFields.length > 0) {
+        // İlk hatalı alanı bul
+        const firstErrorField = error.errorFields[0].name[0];
+        // Hatalı alanlara odaklanma
+        form.scrollToField(firstErrorField); // Hatalı alana kaydırma
+        form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
       } else {
         // Diğer hatalar için genel bir mesaj göster
         message.error(t("common:COMMON.ERROR"));
       }
-
-      if (error.errorFields) {
-        // Hatalı alanlara odaklanma
-        const firstErrorField = error.errorFields[0].name[0]; // İlk hatalı alan
-        form.scrollToField(firstErrorField); // Hatalı alana kaydırma
-        form.getFieldInstance(firstErrorField).focus(); // Hatalı alana odaklanma
-      }
-
-      // Özelleştirilmiş hata mesajı gösterme
-      // message.error(t("common:COMMON.VALIDATION_FAILED"));
     }
   };
 
@@ -818,7 +806,6 @@ const CategoryPage = () => {
             flexWrap: "wrap"
           }}
         >
-        
           <Col xs={24} sm={8} md={6} lg={4} style={{ flex: "1 1 auto" }}>
             <Button
               type="primary"

@@ -11,7 +11,7 @@ router.get('/languages', (req, res) => {
     if (err) {
       return res.status(500).json({ error: 'Dosyalar okunamadı.' });
     }
-    // Sadece dizin olan dosyaları filtreleyin
+    // Sadece dizin olan dosyaları filtrele
     const languages = files.filter(file => fs.statSync(path.join(localesPath, file)).isDirectory());
     res.json(languages);
   });
@@ -36,5 +36,3 @@ router.get('/', function(req, res, next) {
 
 module.exports = router;
 
-/*TODO:Yapılan ekleme ve düzenlemeler Githuba issuelar eklenerek gönderilecek. 10.1 videosu sonunda 
-vscode üzerinden gönderim işlemleri anlatılıyor*/
