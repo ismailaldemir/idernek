@@ -3,8 +3,22 @@
     "status": "Durum",
     "tags": "Etiketler",
     "description": "Açıklama",
-    "createdAt": "Oluşturma Tarihi",
-    "updatedAt": "Güncelleme Tarihi",
-    "softDeleteSuccess": "Kategoriler başarıyla silindi."
+    "createdAt": "Oluşturulma Tarihi",
+    "updatedAt": "Güncellenme Tarihi",
+    "softDeleteSuccess": "Kategoriler başarıyla geçici olarak silindi.",
+    "success": "İşlem başarılı.",
+    "deleteSuccess": "Silme işlemi başarılı.",
+    "restoreSuccess": "Geri yükleme işlemi başarılı.",
+    "Entity not found.": "Varlık bulunamadı.",
+    "Category name is required.": "Kategori adı gereklidir.",
+    "Category already exists.": "Kategori zaten mevcut.",
+    "UNKNOWN_ERROR": "Bilinmeyen bir hata oluştu.",
+    "ALREADY_EXIST": "Kategori zaten mevcut.",
+    "ERRORS": {
+      "ENTITY_NOT_FOUND": "Varlık bulunamadı.",
+      "CATEGORY_NAME_REQUIRED": "Kategori adı gereklidir.",
+      "ALREADY_EXIST": "Kategori zaten mevcut.",
+      "UNKNOWN_ERROR": "Bilinmeyen bir hata oluştu."
+    }
   }
   

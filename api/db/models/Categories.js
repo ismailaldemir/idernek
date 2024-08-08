@@ -14,10 +14,10 @@ const schema = mongoose.Schema(
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Users, // Referans olarak "users" modeli eklendi
-      required: false
+      required: false //sadece yeni kayıt eklemede kullanılacağı için zorunlu alan olamaz
     },
     image: { type: String, required: false },
-    tags: { type: [String], required: false },
+    tags: { type: [String], required: true },
     description: { type: String, required: false },
     deleted_at: { type: Date, default: null } // Silinme tarihi
   },

@@ -1,12 +1,19 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const schema = mongoose.Schema({
-    level: String,
-    email: String,
-    location: String,
-    proc_type: String,
-    log: mongoose.SchemaTypes.Mixed
-},{
+const auditLogSchema = new Schema({
+    user_id: { type: Schema.Types.ObjectId, ref: "Users", required: true }, // İşlemi yapan kullanıcı ID'si
+    action: { type: String, required: true }, // İşlem türü: create, read, update, delete, vb.
+    entity: { type: String, required: true }, // İşlem yapılan tablo veya koleksiyon adı
+    entity_id: { type: Schema.Types.ObjectId, required: true }, // İşlem yapılan kaydın ID'si
+    old_value: { type: Schema.Types.Mixed, default: null }, // Güncelleme öncesi eski değer
+    new_value: { type: Schema.Types.Mixed, default: null }, // Güncelleme sonrası yeni değer
+    level: { type: String }, // Seviyeyi tutmak için  (Opsiyonel)
+    email: { type: String }, // Kullanıcı e-postası (Opsiyonel)
+    location: { type: String }, // İşlemin yapıldığı yer (Opsiyonel)
+    proc_type: { type: String }, // İşlem türü (Opsiyonel)
+    log: { type: Schema.Types.Mixed } // Ekstra log bilgileri (Opsiyonel)
+}, {
     versionKey: false,
     timestamps: {
         createdAt: "created_at",
@@ -15,8 +22,8 @@ const schema = mongoose.Schema({
 });
 
 class AuditLogs extends mongoose.Model {
-
+    // Şema üzerine özel metotlar eklemek için
 }
 
-schema.loadClass(AuditLogs);
-module.exports = mongoose.model("audit_logs", schema);
+auditLogSchema.loadClass(AuditLogs);
+module.exports = mongoose.model("AuditLogs", auditLogSchema);

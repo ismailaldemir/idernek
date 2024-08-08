@@ -3,5 +3,13 @@
   "noFileUploaded": "No file uploaded.",
   "Category name is required.": "Category name is required.",
   "Category already exists.": "Category already exists.",
-  "Entity not found.": "Entity not found."
+  "Entity not found.": "Entity not found.",
+  "UNKNOWN_ERROR": "An unknown error occurred.",
+  "ALREADY_EXIST": "The category already exists.",
+  "ERRORS": {
+    "ENTITY_NOT_FOUND": "Entity not found.",
+    "CATEGORY_NAME_REQUIRED": "Category name is required.",
+    "ALREADY_EXIST": "The category already exists.",
+    "UNKNOWN_ERROR": "An unknown error occurred."
+  }
 }

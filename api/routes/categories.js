@@ -73,7 +73,8 @@ router.post("/update", upload, async (req, res) => {
       Categories,
       req.body._id,
       req.body,
-      req.file
+      req.file,
+      req.user
     );
     res.json(response);
   } catch (error) {
@@ -95,7 +96,7 @@ router.post("/soft-delete", async (req, res) => {
       );
     }
 
-    const response = await softDeleteEntities(Categories, req.body.ids);
+    const response = await softDeleteEntities(Categories, req.body.ids, req.user);
     res.json({ message: req.t("common:softDeleteSuccess"), data: response });
   } catch (error) {
     res.status(error.code || 500).json(Response.errorResponse(error));
@@ -116,7 +117,7 @@ router.post("/delete", async (req, res) => {
       );
     }
 
-    const response = await deleteEntities(Categories, req.body.ids);
+    const response = await deleteEntities(Categories, req.body.ids, req.user);
     res.json(response);
   } catch (error) {
     res.status(error.code || 500).json(Response.errorResponse(error));
@@ -137,7 +138,7 @@ router.post("/restore", async (req, res) => {
       );
     }
 
-    const response = await restoreEntities(Categories, req.body.ids);
+    const response = await restoreEntities(Categories, req.body.ids, req.user);
     res.json(response);
   } catch (error) {
     res.status(error.code || 500).json(Response.errorResponse(error));
