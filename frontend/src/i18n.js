@@ -1,19 +1,27 @@
-const i18next = require('i18next');
-const Backend = require('i18next-fs-backend');
-const LanguageDetector = require('i18next-http-middleware').LanguageDetector;
-const { join } = require('path');
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import Backend from 'i18next-http-backend';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
-i18next
+i18n
   .use(Backend)
   .use(LanguageDetector)
+  .use(initReactI18next)
   .init({
     fallbackLng: 'en',
     debug: true,
-    backend: {
-      loadPath: join(__dirname, 'locales/{{lng}}/{{ns}}.json'), // Dil dosyalarının yolu
+    interpolation: {
+      escapeValue: false,
     },
-    ns: ['common', 'error'], // Kullanmak istediğiniz ad alanları
+    backend: {
+      loadPath: '/locales/{{lng}}/{{ns}}/{{ns}}.json',
+    },
+    ns: ['common','admin'], // Kullanmak istediğiniz ad alanları
     defaultNS: 'common', // Varsayılan ad alanı
   });
 
-module.exports = i18next;
+export const changeLanguage = (lng) => {
+  i18n.changeLanguage(lng);
+};
+
+export default i18n;

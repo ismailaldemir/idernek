@@ -1,10 +1,15 @@
 {
-  "IDsMustBeProvided": "IDs boş gönderilemez.",
-  "noFileUploaded": "Dosya yüklenmedi.",
+  "IDsMustBeProvided": "Kimlikler sağlanmalıdır.",
+  "noFileUploaded": "Hiçbir dosya yüklenmedi.",
   "Category name is required.": "Kategori adı gereklidir.",
   "Category already exists.": "Kategori zaten mevcut.",
   "Entity not found.": "Varlık bulunamadı.",
-  "success": "Başarılı işlem.",
-  "deleteSuccess": "Silme işlemi başarılı.",
-  "restoreSuccess": "Geri yükleme işlemi başarılı."
+  "UNKNOWN_ERROR": "Bilinmeyen bir hata oluştu.",
+  "ALREADY_EXIST": "Kategori zaten mevcut.",
+  "ERRORS": {
+    "ENTITY_NOT_FOUND": "Varlık bulunamadı.",
+    "CATEGORY_NAME_REQUIRED": "Kategori adı gereklidir.",
+    "ALREADY_EXIST": "Kategori zaten mevcut.",
+    "UNKNOWN_ERROR": "Bilinmeyen bir hata oluştu."
+  }
 }

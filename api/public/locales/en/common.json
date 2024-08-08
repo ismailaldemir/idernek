@@ -1,12 +1,24 @@
 {
-  "categoryName": "Category Name",
-  "status": "Status",
-  "tags": "Tags",
-  "description": "Description",
-  "createdAt": "Created At",
-  "updatedAt": "Updated At",
-  "softDeleteSuccess": "Categories were successfully soft deleted.",
-  "success": "Successful operation.",
-  "deleteSuccess": "Delete operation successful.",
-  "restoreSuccess": "Restore operation successful."
-}
+    "categoryName": "Category Name",
+    "status": "Status",
+    "tags": "Tags",
+    "description": "Description",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "softDeleteSuccess": "Categories were successfully soft deleted.",
+    "success": "Successful operation.",
+    "deleteSuccess": "Delete operation successful.",
+    "restoreSuccess": "Restore operation successful.",
+    "Entity not found.": "Entity not found.",
+    "Category name is required.": "Category name is required.",
+    "Category already exists.": "Category already exists.",
+    "UNKNOWN_ERROR": "An unknown error occurred.",
+    "ALREADY_EXIST": "The category already exists.",
+    "ERRORS": {
+      "ENTITY_NOT_FOUND": "Entity not found.",
+      "CATEGORY_NAME_REQUIRED": "Category name is required.",
+      "ALREADY_EXIST": "The category already exists.",
+      "UNKNOWN_ERROR": "An unknown error occurred."
+    }
+  }
+  
