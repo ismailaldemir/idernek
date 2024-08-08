@@ -103,33 +103,6 @@ const CategoryPage = () => {
     filterData();
   }, [dataSource, activeTab]);
 
-  // const fetchCategories = async () => {
-  //   setLoading(true); // Veri çekme işlemi başladığında loading durumunu true yapma.
-  //   try {
-  //     const token = localStorage.getItem("token"); // Local storage'dan token'i alma.
-  //     const response = await axios.get(`${API_BASE_URL}/api/categories`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}` // Token'i Authorization header'ına ekleme.
-  //       }
-  //     });
-
-  //     const formattedData = response.data.data.map(item => ({
-  //       ...item,
-  //       key: item._id, // Her bir kategoriyi tanımlamak için benzersiz anahtar olarak _id kullanma.
-  //       imageUrl: `${API_BASE_URL}/images/${item.image}` // Kategori resimlerinin tam URL'ini oluşturma
-  //     }));
-
-  //     setDataSource(formattedData); // Tabloda gösterilecek veri kaynağını ayarlama.
-  //     setPrintTable(formattedData); // Yazdırılacak tablo verisini ayarlama
-  //     setCategories(formattedData); // Kategorileri modal formda kullanmak için ayarlama.
-  //     filterData(); // Veriyi aktif sekmeye göre filtreleme
-  //   } catch (error) {
-  //     handleApiError(error, t);
-  //   } finally {
-  //     setLoading(false); // Veri çekme işlemi tamamlandığında loading durumunu false yapma.
-  //   }
-  // };
-
   const organizeCategories = categories => {
     const categoryMap = {};
     const tree = [];
@@ -212,7 +185,7 @@ const CategoryPage = () => {
           {`${"-- ".repeat(calculateLevel(category._id, categories))}${
             category.name
           }`}
-          {/* Seviyeye göre çizgi ekliyoruz */}
+          {/* Seviyeye göre çizgi ekleme */}
         </Option>
         {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
         {category.children &&
@@ -392,6 +365,26 @@ const CategoryPage = () => {
   const handleColumnChange = selectedColumns => {
     setSelectedColumns(selectedColumns);
   };
+
+  // useEffect(() => {
+  //   // Local Storage'dan sütun seçimlerini yükle
+  //   const savedColumns = JSON.parse(localStorage.getItem('selectedColumns'));
+  //   if (savedColumns) {
+  //     setSelectedColumns(savedColumns);
+  //   } else {
+  //     // Varsayılan sütun ayarları
+  //     setSelectedColumns(columns.map(col => ({ ...col, visible: true })));
+  //   }
+  // }, []);
+
+  // const handleColumnChange = (index) => {
+  //   const newColumns = [...selectedColumns];
+  //   newColumns[index].visible = !newColumns[index].visible;
+  //   setSelectedColumns(newColumns);
+
+  //   // Sütun seçimlerini Local Storage'a kaydet
+  //   localStorage.setItem('selectedColumns', JSON.stringify(newColumns));
+  // };
 
   const handleTableChange = (pagination, filters, sorter) => {
     console.log("pagination:", pagination);
@@ -1116,7 +1109,7 @@ const CategoryPage = () => {
             <Select
               mode="tags"
               style={{ width: "100%" }}
-              placeholder="Etiketleri girin"
+              placeholder={t("common:PLACEHOLDER.TAGS")}
             />
           </Form.Item>
           <Form.Item label={t("common:COLUMNS.DESCRIPTION")} name="description">
@@ -1154,28 +1147,32 @@ const CategoryPage = () => {
         </Form>
       </Modal>
       <Modal
-        title="Yazdırma Ayarları"
+        title={t("admin:CATEGORIES.PDF_MODAL_TITLE")}
         open={printVisible}
         onOk={handlePrintModalOk}
         onCancel={handlePrintModalCancel}
-        okText="Pdf Oluştur"
-        cancelText="Vazgeç"
+        okText={t("common:BUTTONS.CREATE_PDF")}
+        cancelText={t("common:BUTTONS.CANCEL")}
       >
         <Form layout="vertical">
-          <Form.Item label="Kağıt Boyutu">
+          <Form.Item label={t("admin:CATEGORIES.PDF_MODAL_PAPERSIZE")}>
             <Select value={paperSize} onChange={setPaperSize}>
               <Option value="a4">A4</Option>
               <Option value="a5">A5</Option>
               <Option value="letter">Letter</Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Yönlendirme">
+          <Form.Item label={t("admin:CATEGORIES.PDF_MODAL_ORIENTATION")}>
             <Select value={orientation} onChange={setOrientation}>
-              <Option value="portrait">Dikey</Option>
-              <Option value="landscape">Yatay</Option>
+              <Option value="portrait">
+                {t("admin:CATEGORIES.PDF_MODAL_PORTRAIT")}
+              </Option>
+              <Option value="landscape">
+                {t("admin:CATEGORIES.PDF_MODAL_LANDSCAPE")}
+              </Option>
             </Select>
           </Form.Item>
-          <Form.Item label="Yazdırılacak Sütunlar">
+          <Form.Item label={t("admin:CATEGORIES.PDF_MODAL_COLUMNSTOPRINT")}>
             <Select
               mode="multiple"
               value={selectedColumns.map(col => col.key)}
@@ -1196,7 +1193,7 @@ const CategoryPage = () => {
         </Form>
       </Modal>
       <Modal
-        title="Resim Önizleme"
+        title={t("admin:CATEGORIES.IMAGEPREVIEW_MODAL_TITLE")}
         open={previewVisible}
         footer={null}
         onCancel={handleCancelPreview}

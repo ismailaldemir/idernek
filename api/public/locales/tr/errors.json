@@ -1,0 +1,10 @@
+{
+  "IDsMustBeProvided": "IDs boş gönderilemez.",
+  "noFileUploaded": "Dosya yüklenmedi.",
+  "Category name is required.": "Kategori adı gereklidir.",
+  "Category already exists.": "Kategori zaten mevcut.",
+  "Entity not found.": "Varlık bulunamadı.",
+  "success": "Başarılı işlem.",
+  "deleteSuccess": "Silme işlemi başarılı.",
+  "restoreSuccess": "Geri yükleme işlemi başarılı."
+}

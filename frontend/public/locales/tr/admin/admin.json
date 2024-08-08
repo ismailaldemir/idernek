@@ -5,7 +5,14 @@
     "TITLE": "Kategori Adı :",
     "TITLE_MUST_BE_FILLED": "Kategori adı alanı boş olamaz.",
     "TAGS_MUST_BE_FILLED": "Etiket alanı boş olamaz.",
-    "PARENT_CATEGORY":"Üst Kategori"
+    "PARENT_CATEGORY":"Üst Kategori",
+    "PDF_MODAL_TITLE":"Yazdırma Ayarları",
+    "PDF_MODAL_PAPERSIZE":"Kağıt Boyutu",
+    "PDF_MODAL_ORIENTATION":"Yönlendirme",
+    "PDF_MODAL_PORTRAIT":"Dikey",
+    "PDF_MODAL_LANDSCAPE":"Yatay",
+    "PDF_MODAL_COLUMNSTOPRINT":"Yazdırılacak Sütunlar",
+    "IMAGEPREVIEW_MODAL_TITLE":"Resim Önizleme"
   },
   "MENU": {
     "DASHBOARD": "Anasayfa",

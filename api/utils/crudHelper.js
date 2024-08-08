@@ -13,12 +13,12 @@ const createSlug = (name) => {
 const createEntity = async (Model, body, file, user) => {
   try {
     if (!body.name) {
-      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Category name is required.");
+      throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, i18next.t("Category name is required."));
     }
 
     const existingCategory = await Model.findOne({ name: body.name });
     if (existingCategory) {
-      throw new CustomError(Enum.HTTP_CODES.CONFLICT, "Category already exists.");
+      throw new CustomError(Enum.HTTP_CODES.CONFLICT, i18next.t("Category already exists."));
     }
 
     // Slug oluşturma
@@ -46,7 +46,7 @@ const updateEntity = async (Model, id, body, file) => {
   try {
     const entity = await Model.findById(id);
     if (!entity) {
-      throw new CustomError(Enum.HTTP_CODES.NOT_FOUND, "Entity not found.");
+      throw new CustomError(Enum.HTTP_CODES.NOT_FOUND, i18next.t("Entity not found."));
     }
 
     entity.name = body.name || entity.name;

@@ -1,0 +1,12 @@
+{
+  "categoryName": "Category Name",
+  "status": "Status",
+  "tags": "Tags",
+  "description": "Description",
+  "createdAt": "Created At",
+  "updatedAt": "Updated At",
+  "softDeleteSuccess": "Categories were successfully soft deleted.",
+  "success": "Successful operation.",
+  "deleteSuccess": "Delete operation successful.",
+  "restoreSuccess": "Restore operation successful."
+}
