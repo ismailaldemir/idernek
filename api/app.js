@@ -13,6 +13,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// i18next yapılandırması için gerekli dosyayı dahil et
+const i18next = require('./i18n');
+const i18nextMiddleware = require('i18next-http-middleware');
+
 if (typeof global === 'undefined') {
   global = {};
 } else if (typeof globalThis !== 'undefined') {
@@ -20,6 +24,9 @@ if (typeof global === 'undefined') {
 }
 
 var app = express();
+
+// i18next'i middleware olarak kullanma
+app.use(i18nextMiddleware.handle(i18next));
 
 // CORS'u etkinleştirme
 app.use(cors({

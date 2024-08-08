@@ -1,0 +1,10 @@
+{
+    "categoryName": "Kategori Adı",
+    "status": "Durum",
+    "tags": "Etiketler",
+    "description": "Açıklama",
+    "createdAt": "Oluşturma Tarihi",
+    "updatedAt": "Güncelleme Tarihi",
+    "softDeleteSuccess": "Kategoriler başarıyla silindi."
+  }
+  
