@@ -8,11 +8,16 @@ const auditLogSchema = new Schema({
     entity_id: { type: Schema.Types.ObjectId, required: true }, // İşlem yapılan kaydın ID'si
     old_value: { type: Schema.Types.Mixed, default: null }, // Güncelleme öncesi eski değer
     new_value: { type: Schema.Types.Mixed, default: null }, // Güncelleme sonrası yeni değer
-    level: { type: String }, // Seviyeyi tutmak için  (Opsiyonel)
+    level: { type: String }, // Seviyeyi tutmak için (Opsiyonel)
     email: { type: String }, // Kullanıcı e-postası (Opsiyonel)
     location: { type: String }, // İşlemin yapıldığı yer (Opsiyonel)
     proc_type: { type: String }, // İşlem türü (Opsiyonel)
-    log: { type: Schema.Types.Mixed } // Ekstra log bilgileri (Opsiyonel)
+    log: { type: Schema.Types.Mixed }, // Ekstra log bilgileri (Opsiyonel)
+    ip_address: { type: String }, // Kullanıcının IP adresi
+    device: { type: String }, // Kullanıcının cihaz türü
+    browser: { type: String }, // Kullanıcının tarayıcı bilgisi
+    os: { type: String }, // Kullanıcının işletim sistemi
+    is_mobile: { type: Boolean, default: false }, // Kullanıcının mobil olup olmadığı
 }, {
     versionKey: false,
     timestamps: {

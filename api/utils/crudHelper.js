@@ -11,8 +11,15 @@ const createSlug = name => {
   return name.toLowerCase().replace(/ /g, "-") + "-" + uuidv4(); // Kategori adını slug'a çevir ve uuid ekle
 };
 
-const createEntity = async (Model, body, file, user) => {
+const createEntity = async (Model, body, file, user, req) => {
   try {
+    if (!body || typeof body !== "object") {
+      throw new CustomError(
+        Enum.HTTP_CODES.BAD_REQUEST,
+        "Request body is missing or invalid."
+      );
+    }
+
     if (!body.name) {
       throw new CustomError(
         Enum.HTTP_CODES.BAD_REQUEST,
@@ -44,16 +51,26 @@ const createEntity = async (Model, body, file, user) => {
 
     await newEntity.save();
 
-    // Audit log kaydı oluştur
+    // Kullanıcı bilgilerini alma
+    const ip_address =
+      req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+    // Audit log kaydı oluşturma
     const auditLog = new AuditLog({
       user_id: user.id,
-      action: "create", // 'create' olarak güncellendi
+      action: "create",
       entity: Model.collection.collectionName,
-      entity_id: newEntity._id, // Doğru şekilde yeni kaydın ID'sini kullan
-      old_value: null, // Yeni oluşturulmuş bir kayıt için eski değer yok
-      new_value: newEntity // Yeni değer
+      entity_id: newEntity._id,
+      old_value: null,
+      new_value: newEntity,
+      ip_address: ip_address,
+      device: req.useragent.platform, // Middleware'den gelen platform bilgisi
+      os: req.useragent.os, // İşletim sistemi bilgisi
+      browser: req.useragent.browser, // Tarayıcı bilgisi
+      is_mobile: req.useragent.isMobile // Mobil olup olmadığını gösterir
     });
 
+    // Audit log kaydetme
     try {
       await auditLog.save();
     } catch (auditError) {
@@ -66,7 +83,7 @@ const createEntity = async (Model, body, file, user) => {
   }
 };
 
-const updateEntity = async (Model, id, body, file, user) => {
+const updateEntity = async (Model, id, body, file, user, req) => {
   try {
     const entity = await Model.findById(id);
     if (!entity) {
@@ -116,7 +133,12 @@ const updateEntity = async (Model, id, body, file, user) => {
       entity: Model.collection.collectionName,
       entity_id: entity._id,
       old_value: oldValue, // Eski değer
-      new_value: entity // Yeni değer
+      new_value: entity, // Yeni değer
+      user_agent: req.userAgentInfo, // User agent bilgileri
+      ip_address: req.userAgentInfo.ip_address, // IP adresi
+      browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
+      os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
+      device: req.userAgentInfo.device.type // Cihaz türü
     });
 
     await auditLog.save();
@@ -127,7 +149,7 @@ const updateEntity = async (Model, id, body, file, user) => {
   }
 };
 
-const deleteEntities = async (Model, ids, user, fileDelete = true) => {
+const deleteEntities = async (Model, ids, user, req, fileDelete = true) => {
   try {
     const entitiesToDelete = await Model.find({ _id: { $in: ids } });
 
@@ -167,7 +189,12 @@ const deleteEntities = async (Model, ids, user, fileDelete = true) => {
         entity: Model.collection.collectionName,
         entity_id: id, // Her bir silinen kaydın ID'si
         old_value: entitiesToDelete.find(entity => entity._id.equals(id)), // Eski değer
-        new_value: null // Kalıcı silme sonrası değer yok
+        new_value: null, // Kalıcı silme sonrası değer yok
+        user_agent: req.userAgentInfo, // User agent bilgileri
+        ip_address: req.userAgentInfo.ip_address, // IP adresi
+        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
+        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
+        device: req.userAgentInfo.device.type // Cihaz türü
       });
 
       await auditLog.save();
@@ -179,7 +206,7 @@ const deleteEntities = async (Model, ids, user, fileDelete = true) => {
   }
 };
 
-const softDeleteEntities = async (Model, ids, user) => {
+const softDeleteEntities = async (Model, ids, user, req) => {
   try {
     await Model.updateMany(
       { _id: { $in: ids } },
@@ -194,7 +221,12 @@ const softDeleteEntities = async (Model, ids, user) => {
         entity: Model.collection.collectionName,
         entity_id: id, // Her bir silinen kaydın ID'si
         old_value: { deleted_at: null }, // Soft delete öncesi değer
-        new_value: { deleted_at: new Date() } // Soft delete sonrası değer
+        new_value: { deleted_at: new Date() }, // Soft delete sonrası değer
+        user_agent: req.userAgentInfo, // User agent bilgileri
+        ip_address: req.userAgentInfo.ip_address, // IP adresi
+        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
+        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
+        device: req.userAgentInfo.device.type // Cihaz türü
       });
 
       await auditLog.save();
@@ -206,7 +238,7 @@ const softDeleteEntities = async (Model, ids, user) => {
   }
 };
 
-const restoreEntities = async (Model, ids, user) => {
+const restoreEntities = async (Model, ids, user, req) => {
   try {
     await Model.updateMany(
       { _id: { $in: ids } },
@@ -221,7 +253,12 @@ const restoreEntities = async (Model, ids, user) => {
         entity: Model.collection.collectionName,
         entity_id: id, // Her bir geri yüklenen kaydın ID'si
         old_value: { deleted_at: new Date() }, // Geri yüklemeden önceki değer
-        new_value: { deleted_at: null } // Geri yüklemeden sonraki değer
+        new_value: { deleted_at: null }, // Geri yüklemeden sonraki değer
+        user_agent: req.userAgentInfo, // User agent bilgileri
+        ip_address: req.userAgentInfo.ip_address, // IP adresi
+        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
+        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
+        device: req.userAgentInfo.device.type // Cihaz türü
       });
 
       await auditLog.save();

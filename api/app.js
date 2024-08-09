@@ -16,6 +16,8 @@ var logger = require('morgan');
 // i18next yapılandırması için gerekli dosyayı dahil et
 const i18next = require('./i18n');
 const i18nextMiddleware = require('i18next-http-middleware');
+const useragent = require('express-useragent');
+const userAgentMiddleware = require('./middleware/userAgentMiddleware');
 
 if (typeof global === 'undefined') {
   global = {};
@@ -42,6 +44,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(useragent.express());
+app.use(userAgentMiddleware);
 
 app.use('/api', require('./routes/index'));
 
