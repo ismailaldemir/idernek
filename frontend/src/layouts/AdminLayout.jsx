@@ -125,7 +125,14 @@
             icon: <ShoppingCartOutlined />,
             label: t("admin:MENU.ORDERS"),
             onClick: () => navigate(`/admin/orders`)
+          },
+          {
+            key: "14",
+            icon: <ShoppingCartOutlined />,
+            label: t("admin:MENU.LANGUAGES"),
+            onClick: () => navigate(`/admin/languages`)
           }
+
         ]);
       };
 

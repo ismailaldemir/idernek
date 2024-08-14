@@ -13,11 +13,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const compression = require('compression');
 // i18next yapılandırması için gerekli dosyayı dahil et
 const i18next = require('./i18n');
 const i18nextMiddleware = require('i18next-http-middleware');
 const useragent = require('express-useragent');
 const userAgentMiddleware = require('./middleware/userAgentMiddleware');
+
 
 if (typeof global === 'undefined') {
   global = {};
@@ -39,6 +41,11 @@ app.use(cors({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// Gzip sıkıştırmasını etkinleştir
+app.use(compression({
+  threshold: 0 // 0 bayttan büyük olan tüm yanıtları sıkıştır
+}));
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -46,6 +53,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express());
 app.use(userAgentMiddleware);
+
+
+app.get('/test', (req, res) => {
+  res.send('Hello World!');
+});
+
 
 app.use('/api', require('./routes/index'));
 

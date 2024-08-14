@@ -5,11 +5,11 @@ const fs = require("fs");
 const path = require("path");
 
 // Dil dosyalarını oku
-router.get('/languages', (req, res) => {
+router.get('/systemlanguages', (req, res) => {
   const localesPath = path.join(__dirname, '../../frontend/public/locales'); 
   fs.readdir(localesPath, (err, files) => {
     if (err) {
-      return res.status(500).json({ error: 'Dosyalar okunamadı.' });
+      return res.status(500).json({ error: 'Dosyalar okunamadı.' }); //TODO:Çeviri eklenecek
     }
     // Sadece dizin olan dosyaları filtrele
     const languages = files.filter(file => fs.statSync(path.join(localesPath, file)).isDirectory());

@@ -10,12 +10,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // .env dosyasındaki de
 
 export const addEntity = async (
   entityType,
-  values, // Form verilerini burada al
+  values,
   fileList,
   fetchEntities,
   setModalVisible,
   t,
-  form // Form nesnesini ekle
+  form
 ) => {
   try {
     const token = localStorage.getItem("token");
@@ -28,8 +28,11 @@ export const addEntity = async (
     });
 
     const existingEntity = response.data.data.find(
-      entity => entity.name.toLowerCase() === values.name.toLowerCase()
+      entity => 
+        entity.name && values.name && 
+        entity.name.toLowerCase() === values.name.toLowerCase()
     );
+    
 
     if (existingEntity) {
       message.error(
@@ -40,28 +43,18 @@ export const addEntity = async (
 
     const formData = new FormData();
     // Form verilerini ekle
-    for (const key in entityFields[entityType]) {
+    for (const key in values) {
       if (
         values[key] !== undefined &&
         values[key] !== null &&
         values[key] !== ""
       ) {
-        if (key === "tags" && Array.isArray(values[key])) {
-          // Tags dizisini JSON string olarak ekleyin
-          formData.append(key, JSON.stringify(values[key]));
-        } else {
-          formData.append(key, values[key]);
-        }
+        formData.append(key, values[key]);
       }
     }
 
-    // parent_id değerini formData'ya ekle
-    if (values.parent_id !== undefined) {
-      formData.append("parent_id", values.parent_id);
-    }
-
-    // Resim dosyasını ekle
-    if (fileList.length > 0) {
+    // Varsa resim dosyasını ekle
+    if (fileList && fileList.length > 0) {
       formData.append("image", fileList[0]);
     }
 

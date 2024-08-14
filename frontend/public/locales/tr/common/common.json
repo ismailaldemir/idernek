@@ -3,7 +3,7 @@
     "VALIDATION_ERROR_TITLE": "Doğrulama Hatası",
     "ERROR": "Bir hata oluştu :",
     "ALREADY_EXIST": "Eklemeye çalıştığınız kayıt sistemde mevcuttur.",
-    "RECORD_ALREADY_EXISTS": "{{recName}} kaydı zaten mevcut. Lütfen başka bir ad giriniz.",
+    "RECORD_ALREADY_EXISTS": "{{recName}} kaydı zaten mevcuttur.",
     "UNKNOWN_ERROR": "Bilinmeyen Hata!",
     "FETCH_ERROR": "Veri çekme hatası. Lütfen tekrar deneyin.",
     "FIELD_MUST_BE_FILLED": "{} alanı dolu olmalıdır.",
@@ -16,9 +16,9 @@
     "RECORD_UPDATE_SUCCESS": "{{recName}} kaydı başarıyla güncellendi.",
     "SOFT_DELETED_SUCCESS": "Kayıt başarıyla silindi.",
     "DELETED_SUCCESS": "Kayıt başarıyla kalıcı olarak silindi.",
-    "CONFIRM_RESTORE": "Bu kaydı geri yüklemek ister misiniz?",
-    "CONFIRM_DELETE": "Bu kaydı veritabanından kalıcı olarak silmek ister misiniz?",
-    "CONFIRM_SOFT_DELETE": "Bu kaydı silmek ister misiniz?",
+    "CONFIRM_RESTORE": "Kayıt geri yüklenecektir. Emin misiniz?",
+    "CONFIRM_DELETE": "Kayıt veritabanından kalıcı olarak silinecektir. Emin misiniz?",
+    "CONFIRM_SOFT_DELETE": "Kayıt silinecektir. Emin misiniz?",
     "CONFIRM_YES": "Evet",
     "CONFIRM_NO": "Hayır",
     "RESTORED_SUCCESS": "Kayıt başarıyla geri alındı.",
@@ -33,7 +33,7 @@
     "ONLY_IMAGES_ALLOWED": "Yalnızca resim dosyaları yüklenebilir!",
     "UPLOAD_SUCCESS": "{{fileName}} dosyası başarıyla yüklendi.",
     "UPLOAD_ERROR": "{{fileName}} dosyasını yüklerken bir hata oluştu.",
-    "VALIDATION_FAILED":"Lütfen tüm alanları doldurun"
+    "VALIDATION_FAILED":"Lütfen zorunlu olan tüm alanları doldurun"
   },
   "SEARCH": {
     "SEARCH": "Ara",
@@ -69,7 +69,7 @@
         "DELETE_SELECTED_RECORDS": "Seçilenleri  Sil",
         "RESTORE_SELECTED_RECORDS": "Seçilenleri  Geri Yükle",
         "UPLOAD_IMAGE": "Görsel Yükle",
-        "UPLOAD_EDIT_IMAGE": "Görsel Yükle / Değiştir",
+        "UPLOAD_EDIT_IMAGE": "Görsel Yükle / Güncelle",
         "SAVE":"Kaydet",
         "CANCEL":"Vazgeç",
         "EDIT":"Güncelle",
@@ -79,6 +79,7 @@
           "TAGS":"Etiketleri giriniz",
           "TITLE":"Başlık /ad giriniz",
           "PARENT_CATEGORY":"Üst Kategori seçiniz",
-          "NO_PARENT":"Yok"
+          "NO_PARENT":"Yok",
+          "SELECT_LANGUAGE":"Dil Seçiniz"
         }
 }

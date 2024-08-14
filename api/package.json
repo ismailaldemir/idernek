@@ -8,6 +8,7 @@
   "dependencies": {
     "antd": "^5.19.2",
     "bcrypt-nodejs": "^0.0.3",
+    "compression": "^1.7.4",
     "cookie-parser": "~1.4.4",
     "core-js": "^3.37.1",
     "cors": "^2.8.5",
@@ -17,6 +18,7 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.2.0",
     "express-useragent": "^1.0.15",
+    "express-validator": "^7.2.0",
     "http-errors": "~1.6.3",
     "i18next": "^23.12.2",
     "i18next-fs-backend": "^2.3.2",

@@ -16,11 +16,11 @@ const LanguageSwitcher = () => {
     const fetchLanguages = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/languages`
+          `${API_BASE_URL}/api/systemlanguages`
         );
         setAvailableLanguages(response.data);
       } catch (error) {
-        console.error("Diller alınırken hata oluştu:", error);
+        console.error("Diller alınırken hata oluştu:", error); //TODO:Çeviri eklenecek
       }
     };
 

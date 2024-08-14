@@ -5,7 +5,18 @@
     "TITLE": "Category Name :",
     "TITLE_MUST_BE_FILLED":"Category name must be filled.",
     "TAGS_MUST_BE_FILLED":"Tags must be filled.",
-    "PARENT_CATEGORY":"Parent Category",
+    "PARENT_CATEGORY":"Parent Category"
+  },
+  "LANGUAGES": {
+    "ADD_MODAL_TITLE": "Add Language",
+    "EDIT_MODAL_TITLE": "Edit Language",
+    "SELECT_LANGUAGE":"Select Language",
+    "TITLE": "Language Name :",
+    "TITLE_MUST_BE_FILLED":"Language name must be filled.",
+    "TAGS_MUST_BE_FILLED":"Tags must be filled.",
+    "SELECT_LANGUAGE_MUST_BE_FILLED":"Select Language must be filled"
+  },
+    "MODAL":{
     "PDF_MODAL_TITLE":"Print Settings",
     "PDF_MODAL_PAPERSIZE":"Paper Size",
     "PDF_MODAL_ORIENTATION":"Orientation",
@@ -14,7 +25,7 @@
     "PDF_MODAL_COLUMNSTOPRINT":"Columns To Print",
     "IMAGEPREVIEW_MODAL_TITLE":"İmage Preview"
   },
-   "MENU": {
+  "MENU": {
     "DASHBOARD": "Dashboard",
     "CATEGORIES": "Categories",
     "PRODUCTS": "Products",
@@ -25,7 +36,8 @@
     "NEW_COUPON": "Create Coupon",
     "CONTACTS": "Contacts",
     "USERS": "Users",
-    "ORDERS": "Orders"
+    "ORDERS": "Orders",
+    "LANGUAGES": "Languages"
   },
   "HEADER": {
     "TITLE": "Management Dashboard"

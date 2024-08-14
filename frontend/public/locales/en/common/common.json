@@ -79,6 +79,7 @@
       "TAGS":"Enter tags",
       "TITLE":"Enter title",
       "PARENT_CATEGORY":"Enter parent category",
-      "NO_PARENT":"Not"
+      "NO_PARENT":"Not",
+      "SELECT_LANGUAGE":"Select Language"
     }
 }

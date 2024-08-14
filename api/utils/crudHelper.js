@@ -6,10 +6,116 @@ const path = require("path");
 const config = require("../config");
 const { v4: uuidv4 } = require("uuid");
 const AuditLog = require("../db/models/AuditLogs");
+const { createAuditLog } = require("../utils/auditLogHelper");
 
 const createSlug = name => {
   return name.toLowerCase().replace(/ /g, "-") + "-" + uuidv4(); // Kategori adını slug'a çevir ve uuid ekle
 };
+
+// Dinamik olarak entityFields.js dosyasını yükleme
+async function loadEntityFields() {
+  //const entityFields = await import('../../frontend/src/constants/entityFields.js');
+  const entityFields = await import('../../shared/entityFields.js');
+  console.log("Loaded Entity Fields:", entityFields.default || entityFields); 
+  return entityFields.default; // Eğer `export default` kullanıldıysa.
+}
+
+// Entity alanlarını dinamik olarak hazırlayan fonksiyon
+async function prepareEntityValues(collectionName, body) {
+  console.log("Collection Name:", collectionName);
+  const entityFields = await loadEntityFields();
+  console.log("Fields for All Collections:", entityFields); 
+  const fields = entityFields[collectionName];
+  console.log("Fields for Specific Collection:", fields);
+  if (!fields) {
+    throw new CustomError(
+      Enum.HTTP_CODES.BAD_REQUEST,
+      "Invalid collection name." //TODO: Çeviri eklenecek
+    );
+  }
+
+  const preparedValues = {};
+  for (const key of Object.keys(fields)) {
+    if (body[key] !== undefined) {
+      preparedValues[key] = body[key];
+    }
+  }
+  console.log("Prepared Values:", preparedValues);
+  return preparedValues;
+}
+
+// const createEntity = async (Model, body, file, user, req) => {
+//   try {
+//     if (!body || typeof body !== "object") {
+//       throw new CustomError(
+//         Enum.HTTP_CODES.BAD_REQUEST,
+//         "Request body is missing or invalid."
+//       );
+//     }
+
+//     if (!body.name) {
+//       throw new CustomError(
+//         Enum.HTTP_CODES.BAD_REQUEST,
+//         "Name is required." //TODO:Çeviri eklenecek
+//       );
+//     }
+
+//     const existingCategory = await Model.findOne({ name: body.name });
+//     if (existingCategory) {
+//       throw new CustomError(
+//         Enum.HTTP_CODES.CONFLICT,
+//         "Record already exists."
+//       );
+//     }
+
+//     // Slug oluşturma
+//     const slug = createSlug(body.name); // Kategori adı ile slug oluştur
+
+//     const newEntity = new Model({
+//       lang:body.lang,
+//       name: body.name,
+//       slug: slug,
+//       is_active: body.is_active,
+//       created_by: user.id,
+//       image: file ? file.filename : undefined,
+//       tags: body.tags ? JSON.parse(body.tags) : [],
+//       description: body.description || "",
+//       parent_id: body.parent_id || null
+//     });
+
+//     await newEntity.save();
+
+//     // Kullanıcı bilgilerini alma
+//     const ip_address =
+//       req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+//     // Audit log kaydı oluşturma
+//     const auditLog = new AuditLog({
+//       user_id: user.id,
+//       action: "create",
+//       entity: Model.collection.collectionName,
+//       entity_id: newEntity._id,
+//       old_value: null,
+//       new_value: newEntity,
+//       ip_address: ip_address,
+//       device: req.useragent.platform, // Middleware'den gelen platform bilgisi
+//       os: req.useragent.os, // İşletim sistemi bilgisi
+//       browser: req.useragent.browser, // Tarayıcı bilgisi
+//       is_mobile: req.useragent.isMobile // Mobil olup olmadığını gösterir
+//     });
+
+//     // Audit log kaydetme
+//     try {
+//       await auditLog.save();
+//     } catch (auditError) {
+//       console.error("Audit log kaydedilemedi:", auditError);
+//     }
+
+//     return Response.successResponse(newEntity);
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 const createEntity = async (Model, body, file, user, req) => {
   try {
@@ -20,33 +126,14 @@ const createEntity = async (Model, body, file, user, req) => {
       );
     }
 
-    if (!body.name) {
-      throw new CustomError(
-        Enum.HTTP_CODES.BAD_REQUEST,
-        "Category name is required."
-      );
-    }
-
-    const existingCategory = await Model.findOne({ name: body.name });
-    if (existingCategory) {
-      throw new CustomError(
-        Enum.HTTP_CODES.CONFLICT,
-        "Category already exists."
-      );
-    }
-
-    // Slug oluşturma
-    const slug = createSlug(body.name); // Kategori adı ile slug oluştur
+    // Body içindeki alanları dinamik olarak hazırla
+    const preparedBody = await prepareEntityValues(Model.collection.collectionName, body);
 
     const newEntity = new Model({
-      name: body.name,
-      slug: slug,
-      is_active: body.is_active,
+      ...preparedBody,
       created_by: user.id,
       image: file ? file.filename : undefined,
-      tags: body.tags ? JSON.parse(body.tags) : [],
-      description: body.description || "",
-      parent_id: body.parent_id || null
+      tags: preparedBody.tags ? JSON.parse(preparedBody.tags) : [],
     });
 
     await newEntity.save();
@@ -92,6 +179,7 @@ const updateEntity = async (Model, id, body, file, user, req) => {
 
     // Eski değeri kaydet
     const oldValue = {
+      lang:entity.lang,
       name: entity.name,
       is_active: entity.is_active,
       tags: entity.tags,
@@ -102,6 +190,7 @@ const updateEntity = async (Model, id, body, file, user, req) => {
 
     // Güncelleme işlemleri
     entity.name = body.name || entity.name;
+    entity.lang = body.lang || entity.lang;
     entity.is_active =
       body.is_active !== undefined ? body.is_active : entity.is_active;
     entity.tags = body.tags ? JSON.parse(body.tags) : entity.tags;
@@ -127,21 +216,15 @@ const updateEntity = async (Model, id, body, file, user, req) => {
     await entity.save();
 
     // Audit log kaydı oluştur
-    const auditLog = new AuditLog({
-      user_id: user.id, // Kullanıcının ID'sini al
-      action: "update", // Güncelleme işlemi
+    await createAuditLog({
+      user,
+      action: "update",
       entity: Model.collection.collectionName,
-      entity_id: entity._id,
-      old_value: oldValue, // Eski değer
-      new_value: entity, // Yeni değer
-      user_agent: req.userAgentInfo, // User agent bilgileri
-      ip_address: req.userAgentInfo.ip_address, // IP adresi
-      browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
-      os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
-      device: req.userAgentInfo.device.type // Cihaz türü
+      entityId: entity._id,
+      oldValue, // Eski değer
+      newValue: entity, // Yeni değer
+      userAgentInfo: req.userAgentInfo // User agent bilgileri
     });
-
-    await auditLog.save();
 
     return Response.successResponse(entity);
   } catch (error) {
@@ -160,6 +243,7 @@ const deleteEntities = async (Model, ids, user, req, fileDelete = true) => {
     // Silinecek kayıtların eski değerlerini kaydet
     const oldValues = entitiesToDelete.map(entity => ({
       _id: entity._id,
+      lang:entity.lang,
       name: entity.name,
       is_active: entity.is_active,
       tags: entity.tags,
@@ -182,22 +266,16 @@ const deleteEntities = async (Model, ids, user, req, fileDelete = true) => {
     }
 
     // Audit log kaydı oluştur
-    for (const id of ids) {
-      const auditLog = new AuditLog({
-        user_id: user.id,
-        action: "delete", // Kalıcı silme işlemi
+    for (const entity of entitiesToDelete) {
+      await createAuditLog({
+        user,
+        action: "delete",
         entity: Model.collection.collectionName,
-        entity_id: id, // Her bir silinen kaydın ID'si
-        old_value: entitiesToDelete.find(entity => entity._id.equals(id)), // Eski değer
-        new_value: null, // Kalıcı silme sonrası değer yok
-        user_agent: req.userAgentInfo, // User agent bilgileri
-        ip_address: req.userAgentInfo.ip_address, // IP adresi
-        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
-        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
-        device: req.userAgentInfo.device.type // Cihaz türü
+        entityId: entity._id,
+        oldValue: entity, // Eski değer
+        newValue: null, // Kalıcı silme sonrası değer yok
+        userAgentInfo: req.userAgentInfo // User agent bilgileri
       });
-
-      await auditLog.save();
     }
 
     return Response.successResponse({ success: true });
@@ -215,21 +293,15 @@ const softDeleteEntities = async (Model, ids, user, req) => {
 
     // Audit log kaydı oluştur
     for (const id of ids) {
-      const auditLog = new AuditLog({
-        user_id: user.id,
-        action: "soft_delete", // Soft delete işlemi
+      await createAuditLog({
+        user,
+        action: "soft_delete",
         entity: Model.collection.collectionName,
-        entity_id: id, // Her bir silinen kaydın ID'si
-        old_value: { deleted_at: null }, // Soft delete öncesi değer
-        new_value: { deleted_at: new Date() }, // Soft delete sonrası değer
-        user_agent: req.userAgentInfo, // User agent bilgileri
-        ip_address: req.userAgentInfo.ip_address, // IP adresi
-        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
-        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
-        device: req.userAgentInfo.device.type // Cihaz türü
+        entityId: id,
+        oldValue: { deleted_at: null }, // Soft delete öncesi değer
+        newValue: { deleted_at: new Date() }, // Soft delete sonrası değer
+        userAgentInfo: req.userAgentInfo // User agent bilgileri
       });
-
-      await auditLog.save();
     }
 
     return Response.successResponse({ success: true });
@@ -247,21 +319,15 @@ const restoreEntities = async (Model, ids, user, req) => {
 
     // Audit log kaydı oluştur
     for (const id of ids) {
-      const auditLog = new AuditLog({
-        user_id: user.id,
-        action: "restore", // Geri yükleme işlemi
+      await createAuditLog({
+        user,
+        action: "restore",
         entity: Model.collection.collectionName,
-        entity_id: id, // Her bir geri yüklenen kaydın ID'si
-        old_value: { deleted_at: new Date() }, // Geri yüklemeden önceki değer
-        new_value: { deleted_at: null }, // Geri yüklemeden sonraki değer
-        user_agent: req.userAgentInfo, // User agent bilgileri
-        ip_address: req.userAgentInfo.ip_address, // IP adresi
-        browser: req.userAgentInfo.browser.name, // Tarayıcı bilgisi
-        os: req.userAgentInfo.os.name, // İşletim sistemi bilgisi
-        device: req.userAgentInfo.device.type // Cihaz türü
+        entityId: id,
+        oldValue: { deleted_at: new Date() }, // Geri yüklemeden önceki değer
+        newValue: { deleted_at: null }, // Geri yüklemeden sonraki değer
+        userAgentInfo: req.userAgentInfo // User agent bilgileri
       });
-
-      await auditLog.save();
     }
 
     return Response.successResponse({ success: true });

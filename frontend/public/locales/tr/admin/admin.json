@@ -3,16 +3,27 @@
     "ADD_MODAL_TITLE": "Kategori Ekle",
     "EDIT_MODAL_TITLE": "Kategori Düzenle",
     "TITLE": "Kategori Adı :",
-    "TITLE_MUST_BE_FILLED": "Kategori adı alanı boş olamaz.",
-    "TAGS_MUST_BE_FILLED": "Etiket alanı boş olamaz.",
-    "PARENT_CATEGORY":"Üst Kategori",
-    "PDF_MODAL_TITLE":"Yazdırma Ayarları",
-    "PDF_MODAL_PAPERSIZE":"Kağıt Boyutu",
-    "PDF_MODAL_ORIENTATION":"Yönlendirme",
-    "PDF_MODAL_PORTRAIT":"Dikey",
-    "PDF_MODAL_LANDSCAPE":"Yatay",
-    "PDF_MODAL_COLUMNSTOPRINT":"Yazdırılacak Sütunlar",
-    "IMAGEPREVIEW_MODAL_TITLE":"Resim Önizleme"
+    "TITLE_MUST_BE_FILLED": "Kategori adı boş olamaz.",
+    "TAGS_MUST_BE_FILLED": "Etiket bilgisi boş olamaz.",
+    "PARENT_CATEGORY": "Üst Kategori"
+  },
+  "LANGUAGES": {
+    "ADD_MODAL_TITLE": "Dil Ekle",
+    "EDIT_MODAL_TITLE": "Dil Düzenle",
+    "SELECT_LANGUAGE":"Dil Seç",
+    "TITLE": "Dil Adı:",
+    "TITLE_MUST_BE_FILLED":"Dil adı alanı boş olamaz.",
+    "TAGS_MUST_BE_FILLED":"Etiket bilgisi boş olamaz.",
+    "SELECT_LANGUAGE_MUST_BE_FILLED":"Dil seçiniz"
+  },
+  "MODAL": {
+    "PDF_MODAL_TITLE": "Yazdırma Ayarları",
+    "PDF_MODAL_PAPERSIZE": "Kağıt Boyutu",
+    "PDF_MODAL_ORIENTATION": "Yönlendirme",
+    "PDF_MODAL_PORTRAIT": "Dikey",
+    "PDF_MODAL_LANDSCAPE": "Yatay",
+    "PDF_MODAL_COLUMNSTOPRINT": "Yazdırılacak Sütunlar",
+    "IMAGEPREVIEW_MODAL_TITLE": "Resim Önizleme"
   },
   "MENU": {
     "DASHBOARD": "Anasayfa",
@@ -25,18 +36,19 @@
     "NEW_COUPON": "Yeni Kupon",
     "CONTACTS": "Kişiler",
     "USERS": "Kullanıcılar",
-    "ORDERS": "Siparişler"
+    "ORDERS": "Siparişler",
+    "LANGUAGES": "Diller"
   },
   "HEADER": {
     "TITLE": "Yönetim Paneli"
   },
-  "SETTINGS":{
-    "TITLE":"Ayarlar",
-    "BACKGROUND_COLOR":"Arka Plan Rengi",
-    "TAB_HEADER":"Header",
-    "TEXT_COLOR":"Yazı Rengi",
-    "TAB_SIDEBAR":"Sidebar",
-    "MENU_MODE":"Menü Modu",
-    "MENU_THEME":"Menü Teması"
+  "SETTINGS": {
+    "TITLE": "Ayarlar",
+    "BACKGROUND_COLOR": "Arka Plan Rengi",
+    "TAB_HEADER": "Header",
+    "TEXT_COLOR": "Yazı Rengi",
+    "TAB_SIDEBAR": "Sidebar",
+    "MENU_MODE": "Menü Modu",
+    "MENU_THEME": "Menü Teması"
   }
 }

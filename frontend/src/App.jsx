@@ -10,6 +10,8 @@ import BlogDetailsPage from "./pages/BlogDetailsPage";
 import UserPage from "./pages/admin/UserPage";
 import CategoryPage from "./pages/admin/Categories/CategoryPage";
 import ContactsPage from "./pages/admin/Contacts/ContactsPage";
+import LanguagePage from "./pages/admin/Languages/LanguagePage";
+
 
 import "./App.css";
 
@@ -32,6 +34,7 @@ function App() {
           <Route path="users" element={<UserPage />} />
           <Route path="categories" element={<CategoryPage />} />
           <Route path="contacts" element={<ContactsPage />} />
+          <Route path="languages" element={<LanguagePage />} />
         </Route>
       </Routes>
     </I18nextProvider>

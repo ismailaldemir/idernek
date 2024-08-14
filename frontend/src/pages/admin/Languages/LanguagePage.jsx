@@ -69,7 +69,7 @@ const { Option } = Select;
 const { Dragger } = Upload;
 const { TabPane } = Tabs;
 
-const CategoryPage = () => {
+const LanguagePage = () => {
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -85,7 +85,7 @@ const CategoryPage = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingData, seteditingData] = useState(null);
   const [fileList, setFileList] = useState([]);
   const [previewImage, setPreviewImage] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -93,52 +93,26 @@ const CategoryPage = () => {
   const [file, setFile] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const { t } = useTranslation();
-  const [categories, setCategories] = useState([]);
-  const [availableLanguages, setAvailableLanguages] = useState([]);
-  const supportedLanguages = Object.keys(languageNames);
 
   useEffect(() => {
-    fetchCategories();
+    fetchData();
   }, []);
 
   useEffect(() => {
-    if (editingCategory) {
+    if (editingData) {
       setFileList([]);
     }
-  }, [editingCategory]);
+  }, [editingData]);
 
   useEffect(() => {
     filterData();
   }, [dataSource, activeTab]);
 
-  const organizeCategories = categories => {
-    const categoryMap = {};
-    const tree = [];
-
-    // Kategorileri harita yapısına dönüştür
-    categories.forEach(category => {
-      categoryMap[category._id] = { ...category, children: [] };
-    });
-
-    // Hiyerarşik yapıyı oluştur
-    categories.forEach(category => {
-      if (category.parent_id) {
-        categoryMap[category.parent_id].children.push(
-          categoryMap[category._id]
-        );
-      } else {
-        tree.push(categoryMap[category._id]);
-      }
-    });
-
-    return tree;
-  };
-
-  const fetchCategories = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_BASE_URL}/api/categories`, {
+      const response = await axios.get(`${API_BASE_URL}/api/languages`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -150,75 +124,19 @@ const CategoryPage = () => {
         console.info("Veri bulunamadı");
       }
 
-      const categoriesData = response.data.data;
-
-      // Kategorileri hiyerarşik yapıya dönüştür
-      const organizedCategories = organizeCategories(categoriesData);
-
-      // Kategorilerin seviyelerini hesapla
-      const formattedData = categoriesData.map(item => ({
+      const formattedData = data.map(item => ({
         ...item,
-        key: item._id,
-        imageUrl: `${API_BASE_URL}/images/${item.image}`,
-        level: calculateLevel(item._id, categoriesData)
+        key: item._id
       }));
 
       setDataSource(formattedData);
       setPrintTable(formattedData);
-      setCategories(organizedCategories); // Hiyerarşik kategorileri ayarlama
       filterData();
     } catch (error) {
       handleApiError(error, t);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Kategorinin seviyesini hesaplayan yardımcı fonksiyon
-  const calculateLevel = (categoryId, categories) => {
-    let level = 0;
-    let currentCategory = categories.find(cat => cat._id === categoryId);
-
-    while (currentCategory && currentCategory.parent_id) {
-      level++;
-      currentCategory = categories.find(
-        cat => cat._id === currentCategory.parent_id
-      );
-    }
-
-    return level;
-  };
-
-  const renderOptions = categories => {
-    return categories.map(category => (
-      <React.Fragment key={category._id}>
-        <Option
-          value={category._id}
-          className={!category.parent_id ? "bold-option" : ""} // Ana kategoriler için class ekleme
-        >
-          {`${"-- ".repeat(calculateLevel(category._id, categories))}${
-            category.name
-          }`}
-          {/* Seviyeye göre çizgi ekleme */}
-        </Option>
-        {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
-        {category.children &&
-          category.children.length > 0 &&
-          renderOptions(category.children)}
-      </React.Fragment>
-    ));
-  };
-
-  const CategoryTree = ({ data }) => {
-    return (
-      <div style={{ height: "500px" }}>
-        <Tree data={data} />
-      </div>
-    );
-  };
-
-  const showTreeModal = () => {
-    setIsModalVisible(true);
   };
 
   const filterData = () => {
@@ -254,57 +172,23 @@ const CategoryPage = () => {
 
   const handleActiveChange = async (id, checked) => {
     const data = { is_active: checked /* diğer alanlar */ };
-    await updateStatus("categories", id, data, fetchCategories, t);
+    await updateStatus("languages", id, data, fetchData, t);
   };
-
-  //   const handleAddData = async () => {
-  //   try {
-  //     const values = await form.validateFields();
-
-  //     // Tabloya özgü alanları ekle
-  //     const modifiedValues = {
-  //       ...values,
-  //       parent_id: values.parent_id !== "-1" ? values.parent_id : null,
-  //       tags: values.tags ? JSON.stringify(values.tags) : null
-  //     };
-
-  //     await addEntity(
-  //       "categories",
-  //       modifiedValues,
-  //       fileList,
-  //       fetchCategories,
-  //       setAddModalVisible,
-  //       t,
-  //       form
-  //     );
-
-  //     form.resetFields();
-  //     setFileList([]);
-  //   } catch (error) {
-  //     console.log("Hata nesnesi:", error);
-
-  //     if (error.errorFields && error.errorFields.length > 0) {
-  //       const firstErrorField = error.errorFields[0].name[0];
-  //       form.scrollToField(firstErrorField);
-  //       form.getFieldInstance(firstErrorField).focus();
-  //     } else {
-  //       message.error(t("common:COMMON.ERROR"));
-  //     }
-  //   }
-  // };
 
   const handleAddData = async () => {
     try {
       const values = await form.validateFields();
+      console.log(values); // Gönderilen form verilerini kontrol et
 
       // Genel değerleri hazırlama
-      const modifiedValues = prepareEntityValues("categories", values); //formdan gelen verilere göre kontrol edilmesi gereken değerleri kontrol edip hazırlayan fonksiyon
+      const modifiedValues = prepareEntityValues("languages", values); //formdan gelen verilere göre kontrol edilmesi gereken değerleri kontrol edip hazırlayan fonksiyon
+      console.log("Modified Values After Preparation:", modifiedValues); // Hazırlanan verileri kontrol et
 
       await addEntity(
-        "categories",
+        "languages",
         modifiedValues,
         fileList,
-        fetchCategories,
+        fetchData,
         setAddModalVisible,
         t,
         form
@@ -325,22 +209,22 @@ const CategoryPage = () => {
     }
   };
 
-  const handleEditCategory = async () => {
+  const handleEditData = async () => {
     try {
       // Formun alanlarını doğrula
       const values = await form.validateFields();
 
       await editEntity(
-        "categories",
+        "languages",
         form,
         fileList,
-        fetchCategories,
+        fetchData,
         setEditModalVisible,
-        editingCategory,
+        editingData,
         t
       );
 
-      setEditingCategory(null);
+      seteditingData(null);
       setFileList([]);
     } catch (error) {
       console.log("Hata nesnesi:", error); // Hata nesnesini inceleme
@@ -370,25 +254,25 @@ const CategoryPage = () => {
     }
   };
 
-  const handleDeleteCategories = async () => {
-    await deleteEntity("categories", selectedRowKeys, fetchCategories, t);
+  const handleDeleteData = async () => {
+    await deleteEntity("languages", selectedRowKeys, fetchData, t);
     setSelectedRowKeys([]);
   };
 
-  const handleSoftDeleteCategories = async () => {
-    await softDeleteEntity("categories", selectedRowKeys, fetchCategories, t);
+  const handleSoftDeleteData = async () => {
+    await softDeleteEntity("languages", selectedRowKeys, fetchData, t);
     setSelectedRowKeys([]);
   };
 
   const handleRestore = async () => {
     setLoading(true);
-    await restoreEntity("categories", selectedRowKeys, fetchCategories, t);
+    await restoreEntity("languages", selectedRowKeys, fetchData, t);
     setLoading(false);
   };
 
   const handlePrint = () => {
     printEntity(
-      "categories",
+      "languages",
       selectedColumns,
       printTable,
       orientation,
@@ -412,26 +296,6 @@ const CategoryPage = () => {
   const handleColumnChange = selectedColumns => {
     setSelectedColumns(selectedColumns);
   };
-
-  // useEffect(() => {
-  //   // Local Storage'dan sütun seçimlerini yükle
-  //   const savedColumns = JSON.parse(localStorage.getItem('selectedColumns'));
-  //   if (savedColumns) {
-  //     setSelectedColumns(savedColumns);
-  //   } else {
-  //     // Varsayılan sütun ayarları
-  //     setSelectedColumns(columns.map(col => ({ ...col, visible: true })));
-  //   }
-  // }, []);
-
-  // const handleColumnChange = (index) => {
-  //   const newColumns = [...selectedColumns];
-  //   newColumns[index].visible = !newColumns[index].visible;
-  //   setSelectedColumns(newColumns);
-
-  //   // Sütun seçimlerini Local Storage'a kaydet
-  //   localStorage.setItem('selectedColumns', JSON.stringify(newColumns));
-  // };
 
   const handleTableChange = (pagination, filters, sorter) => {
     console.log("pagination:", pagination);
@@ -474,11 +338,11 @@ const CategoryPage = () => {
   };
 
   const handleExport = async () => {
-    await exportData("categories", setLoading, t);
+    await exportData("languages", setLoading, t);
   };
 
   const handleUpload = async () => {
-    await uploadFile("categories", file, t);
+    await uploadFile("languages", file, t);
   };
 
   const handleUploadChange = info => {
@@ -486,7 +350,7 @@ const CategoryPage = () => {
       message.success(
         t("common:COMMON.UPLOAD_SUCCESS", { fileName: info.file.name })
       );
-      fetchCategories();
+      fetchData();
     } else if (info.file.status === "error") {
       message.error(
         t("common:COMMON.UPLOAD_ERROR", { fileName: info.file.name })
@@ -496,7 +360,7 @@ const CategoryPage = () => {
 
   const uploadProps = {
     name: "image",
-    action: `${API_BASE_URL}/api/categories/import`,
+    action: `${API_BASE_URL}/api/languages/import`,
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`
     },
@@ -626,8 +490,8 @@ const CategoryPage = () => {
     },
     {
       title: t("COLUMNS.IMAGE"),
-      dataIndex: "imageUrl",
-      key: "imageUrl",
+      dataIndex: "image",
+      key: "image",
       render: text => {
         if (text && text.includes("undefined")) {
           return "Resim Yok";
@@ -658,9 +522,9 @@ const CategoryPage = () => {
                   title={t("common:COMMON.CONFIRM_RESTORE")}
                   onConfirm={async () => {
                     await restoreEntity(
-                      "categories",
+                      "languages",
                       [record._id],
-                      fetchCategories,
+                      fetchData,
                       t
                     );
                   }}
@@ -675,12 +539,7 @@ const CategoryPage = () => {
                 <Popconfirm
                   title={t("common:COMMON.CONFIRM_DELETE")}
                   onConfirm={async () => {
-                    await deleteEntity(
-                      "categories",
-                      [record._id],
-                      fetchCategories,
-                      t
-                    );
+                    await deleteEntity("languages", [record._id], fetchData, t);
                   }}
                   okText={t("common:COMMON.CONFIRM_YES")}
                   cancelText={t("common:COMMON.CONFIRM_NO")}
@@ -696,7 +555,7 @@ const CategoryPage = () => {
                   icon={<EditOutlined />}
                   type="default"
                   onClick={() => {
-                    setEditingCategory(record);
+                    seteditingData(record);
                     form.setFieldsValue(record);
                     setEditModalVisible(true);
                   }}
@@ -707,9 +566,9 @@ const CategoryPage = () => {
                   title={t("common:COMMON.CONFIRM_SOFT_DELETE")}
                   onConfirm={async () => {
                     await softDeleteEntity(
-                      "categories",
+                      "languages",
                       [record._id],
-                      fetchCategories,
+                      fetchData,
                       t
                     );
                   }}
@@ -920,7 +779,7 @@ const CategoryPage = () => {
               {activeTab === "deleted" ? (
                 <Popconfirm
                   title={t("common:COMMON.CONFIRM_DELETE")}
-                  onConfirm={handleDeleteCategories}
+                  onConfirm={handleDeleteData}
                   okText={t("common:COMMON.CONFIRM_YES")}
                   cancelText={t("common:COMMON.CONFIRM_NO")}
                   className="ant-popover-buttons"
@@ -937,7 +796,7 @@ const CategoryPage = () => {
               ) : (
                 <Popconfirm
                   title={t("common:COMMON.CONFIRM_SOFT_DELETE")}
-                  onConfirm={handleSoftDeleteCategories}
+                  onConfirm={handleSoftDeleteData}
                   okText={t("common:COMMON.CONFIRM_YES")}
                   cancelText={t("common:COMMON.CONFIRM_NO")}
                   className="ant-popover-buttons"
@@ -966,7 +825,7 @@ const CategoryPage = () => {
       </Card>
 
       <Modal
-        title={t("admin:CATEGORIES.ADD_MODAL_TITLE")} //kategori ekle modal form
+        title={t("admin:LANGUAGES.ADD_MODAL_TITLE")} // Veri ekle modal form
         open={addModalVisible}
         onOk={handleAddData}
         onCancel={() => setAddModalVisible(false)}
@@ -976,39 +835,44 @@ const CategoryPage = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={t("admin:CATEGORIES.PARENT_CATEGORY")}
-            name="parent_id"
+            label={t("admin:LANGUAGES.SELECT_LANGUAGE")}
+            name="lang"
+            rules={[
+              {
+                required: true,
+                message: t("admin:LANGUAGES.SELECT_LANGUAGE_MUST_BE_FILLED")
+              }
+            ]}
           >
-            <Select
-              placeholder={t("common:PLACEHOLDER.PARENT_CATEGORY")}
-              onChange={value =>
-                form.setFieldsValue({
-                  parent_id: value === "-1" ? undefined : value
-                })
-              }
-              showSearch
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }
-            >
-              <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
-              {renderOptions(categories)}{" "}
-              {/* renderOptions fonksiyonunu çağırma */}
+            <Select placeholder={t("common:PLACEHOLDER.SELECT_LANGUAGE")}>
+              {Object.keys(languageNames) // languages.js dosyasındaki dilleri al
+                .filter(lng => lng in languageNames) // Sadece tanımlı diller
+                .map(lng => (
+                  <Option key={lng} value={lng}>
+                    <img
+                      src={getFlagPath(lng)} // Bayrak görselini al
+                      alt={`${languageNames[lng]} bayrağı`} // Alt metin
+                      style={{ width: "20px", marginRight: "8px" }} // Stil ayarları
+                    />
+                    {languageNames[lng]} {/* Dil ismi */}
+                  </Option>
+                ))}
             </Select>
           </Form.Item>
+
           <Form.Item
-            label={t("admin:CATEGORIES.TITLE")}
+            label={t("admin:LANGUAGES.TITLE")}
             name="name"
             rules={[
               {
                 required: true,
-                message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED")
+                message: t("admin:LANGUAGES.TITLE_MUST_BE_FILLED")
               }
             ]}
           >
             <Input placeholder={t("common:PLACEHOLDER.TITLE")} />
           </Form.Item>
+
           <Form.Item
             label={t("common:COLUMNS.STATUS")}
             name="is_active"
@@ -1017,13 +881,14 @@ const CategoryPage = () => {
           >
             <Switch defaultChecked={false} />
           </Form.Item>
+
           <Form.Item
             label={t("common:COLUMNS.TAGS")}
             name="tags"
             rules={[
               {
                 required: true,
-                message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED")
+                message: t("admin:LANGUAGES.TAGS_MUST_BE_FILLED")
               }
             ]}
           >
@@ -1033,10 +898,12 @@ const CategoryPage = () => {
               placeholder={t("common:PLACEHOLDER.TAGS")}
             />
           </Form.Item>
+
           <Form.Item label={t("common:COLUMNS.DESCRIPTION")} name="description">
             <Input.TextArea />
           </Form.Item>
-          {/* <Form.Item label="Görsel" name="image">
+
+          <Form.Item label={t("common:COLUMNS.IMAGE")} name="image">
             <Dragger
               beforeUpload={file => {
                 setFileList([file]);
@@ -1044,23 +911,7 @@ const CategoryPage = () => {
               }}
               fileList={fileList}
               onRemove={() => setFileList([])}
-            >
-              {fileList.length > 0 && (
-                <img
-                  src={URL.createObjectURL(fileList[0])}
-                  alt="Görsel Önizleme"
-                  style={{ marginTop: 16, width: "100%", height: "auto" }}
-                />
-              )}
-              <Button icon={<UploadOutlined />}>Görsel Yükle</Button>
-            </Dragger>
-          </Form.Item> */}
-          <Form.Item label={t("common:COLUMNS.IMAGE")} name="image">
-            <Dragger
-              beforeUpload={handleBeforeUpload}
-              fileList={fileList}
-              onRemove={handleRemove}
-              accept="image/*" // Sadece resim dosyalarının seçilmesine izin verir
+              accept="image/*"
             >
               {fileList.length > 0 && (
                 <img
@@ -1078,12 +929,12 @@ const CategoryPage = () => {
       </Modal>
 
       <Modal
-        title={t("admin:CATEGORIES.EDIT_MODAL_TITLE")} //kategori düzenle modal form
+        title={t("admin:LANGUAGES.EDIT_MODAL_TITLE")} //Veri düzenle modal form
         open={editModalVisible}
-        onOk={handleEditCategory}
+        onOk={handleEditData}
         onCancel={() => {
           setEditModalVisible(false);
-          setEditingCategory(null);
+          seteditingData(null);
         }}
         okText={t("common:BUTTONS.EDIT")}
         cancelText={t("common:BUTTONS.CANCEL")}
@@ -1091,46 +942,38 @@ const CategoryPage = () => {
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label={t("admin:CATEGORIES.PARENT_CATEGORY")} // Yeni parent_category alanı
-            name="parent_id" // parent_id kullanılıyor
-          >
-            <Select
-              showSearch // Arama özelliğini etkinleştirir
-              placeholder={t("common:PLACEHOLDER.PARENT_CATEGORY")}
-              optionFilterProp="children" // Arama için kullanılacak alan
-              filterOption={
-                (input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase()) // Filtreleme işlemi
+            label={t("admin:LANGUAGES.SELECT_LANGUAGE")}
+            name="lang"
+            rules={[
+              {
+                required: true,
+                message: t("admin:LANGUAGES.SELECT_LANGUAGE_MUST_BE_FILLED")
               }
-            >
-              <Option value="-1">{t("common:PLACEHOLDER.NO_PARENT")}</Option>
-              {categories.map(category => (
-                <React.Fragment key={category._id}>
-                  <Option
-                    value={category._id}
-                    className={!category.parent_id ? "bold-option" : ""} // Ana kategoriler için class ekleme
-                  >
-                    {`${"-- ".repeat(
-                      calculateLevel(category._id, categories)
-                    )}${category.name}`}
-                    {/* Seviyeye göre çizgi ekleme */}
+            ]}
+          >
+            <Select placeholder={t("common:PLACEHOLDER.SELECT_LANGUAGE")}>
+              {Object.keys(languageNames) // languages.js dosyasındaki dilleri al
+                .filter(lng => lng in languageNames) // Sadece tanımlı diller
+                .map(lng => (
+                  <Option key={lng} value={lng}>
+                    <img
+                      src={getFlagPath(lng)} // Bayrak görselini al
+                      alt={`${languageNames[lng]} bayrağı`} // Alt metin
+                      style={{ width: "20px", marginRight: "8px" }} // Stil ayarları
+                    />
+                    {languageNames[lng]} {/* Dil ismi */}
                   </Option>
-                  {/* Eğer alt kategorileri varsa, rekürsif olarak render et */}
-                  {category.children &&
-                    category.children.length > 0 &&
-                    renderOptions(category.children)}
-                </React.Fragment>
-              ))}
+                ))}
             </Select>
           </Form.Item>
 
           <Form.Item
-            label={t("admin:CATEGORIES.TITLE")}
+            label={t("admin:LANGUAGES.TITLE")}
             name="name"
             rules={[
               {
                 required: true,
-                message: t("admin:CATEGORIES.TITLE_MUST_BE_FILLED")
+                message: t("admin:LANGUAGES.TITLE_MUST_BE_FILLED")
               }
             ]}
           >
@@ -1149,7 +992,7 @@ const CategoryPage = () => {
             rules={[
               {
                 required: true,
-                message: t("admin:CATEGORIES.TAGS_MUST_BE_FILLED")
+                message: t("admin:LANGUAGES.TAGS_MUST_BE_FILLED")
               }
             ]}
           >
@@ -1179,9 +1022,9 @@ const CategoryPage = () => {
                   alt="Görsel Önizleme"
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
-              ) : editingCategory && editingCategory.image ? (
+              ) : editingData && editingData.image ? (
                 <img
-                  src={`${API_BASE_URL}/images/${editingCategory.image}`}
+                  src={`${API_BASE_URL}/images/${editingData.image}`}
                   alt="Yüklü Görsel"
                   style={{ marginTop: 16, width: "100%", height: "auto" }}
                 />
@@ -1193,6 +1036,7 @@ const CategoryPage = () => {
           </Form.Item>
         </Form>
       </Modal>
+
       <Modal
         title={t("admin:MODAL.PDF_MODAL_TITLE")}
         open={printVisible}
@@ -1244,7 +1088,6 @@ const CategoryPage = () => {
         open={previewVisible}
         footer={null}
         onCancel={handleCancelPreview}
-        width={800}
       >
         <img
           alt="Önizleme"
@@ -1256,4 +1099,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default LanguagePage;
