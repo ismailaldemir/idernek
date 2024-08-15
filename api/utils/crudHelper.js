@@ -14,7 +14,6 @@ const createSlug = name => {
 
 // Dinamik olarak entityFields.js dosyasını yükleme
 async function loadEntityFields() {
-  //const entityFields = await import('../../frontend/src/constants/entityFields.js');
   const entityFields = await import('../../shared/entityFields.js');
   console.log("Loaded Entity Fields:", entityFields.default || entityFields); 
   return entityFields.default; // Eğer `export default` kullanıldıysa.
@@ -22,11 +21,11 @@ async function loadEntityFields() {
 
 // Entity alanlarını dinamik olarak hazırlayan fonksiyon
 async function prepareEntityValues(collectionName, body) {
-  console.log("Collection Name:", collectionName);
+  //console.log("Collection Name:", collectionName);
   const entityFields = await loadEntityFields();
-  console.log("Fields for All Collections:", entityFields); 
+  //console.log("Fields for All Collections:", entityFields); 
   const fields = entityFields[collectionName];
-  console.log("Fields for Specific Collection:", fields);
+  //console.log("Fields for Specific Collection:", fields);
   if (!fields) {
     throw new CustomError(
       Enum.HTTP_CODES.BAD_REQUEST,
@@ -40,7 +39,7 @@ async function prepareEntityValues(collectionName, body) {
       preparedValues[key] = body[key];
     }
   }
-  console.log("Prepared Values:", preparedValues);
+  //console.log("Prepared Values:", preparedValues);
   return preparedValues;
 }
 
