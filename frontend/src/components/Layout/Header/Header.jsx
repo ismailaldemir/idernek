@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import Proptypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
-import { CartContext } from "../../../context/CartProvider";
 import "./Header.css";
 import { Modal, message } from "antd";
 import axios from "axios";
@@ -9,7 +8,6 @@ import axios from "axios";
 const { confirm } = Modal;
 
 const Header = ({ setIsSearchShow }) => {
-  const { cartItems } = useContext(CartContext);
   const user = localStorage.getItem("token");
   const { pathname } = useLocation();
   const [currentUser, setCurrentUser] = useState(null);
@@ -226,16 +224,6 @@ const Header = ({ setIsSearchShow }) => {
                   </li>
                   <li className="menu-list-item">
                     <Link
-                      to={"/blog"}
-                      className={`menu-link ${
-                        pathname === "/blog" && "active"
-                      }`}
-                    >
-                      Blog
-                    </Link>
-                  </li>
-                  <li className="menu-list-item">
-                    <Link
                       to={"/contact"}
                       className={`menu-link ${
                         pathname === "/contact" && "active"
@@ -262,14 +250,6 @@ const Header = ({ setIsSearchShow }) => {
                 <a href="#">
                   <i className="bi bi-heart"></i>
                 </a>
-                <div className="header-cart">
-                  <Link to={"/cart"} className="header-cart-link">
-                    <i className="bi bi-cart"></i>
-                    <span className="header-cart-count">
-                      {cartItems.length}
-                    </span>
-                  </Link>
-                </div>
                 {user && (
                   <button className="search-button" onClick={handleLogout}>
                     <i className="bi bi-box-arrow-right"></i>

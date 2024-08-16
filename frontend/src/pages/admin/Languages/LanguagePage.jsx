@@ -35,7 +35,6 @@ import {
   CloseCircleOutlined,
   StopOutlined
 } from "@ant-design/icons";
-import { PaperSizeOptions, OrientationOptions } from "../constants";
 import "./../admin.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";
@@ -126,7 +125,8 @@ const LanguagePage = () => {
 
       const formattedData = data.map(item => ({
         ...item,
-        key: item._id
+        key: item._id,
+        imageUrl: `${API_BASE_URL}/images/${item.image}`,
       }));
 
       setDataSource(formattedData);
@@ -490,8 +490,8 @@ const LanguagePage = () => {
     },
     {
       title: t("COLUMNS.IMAGE"),
-      dataIndex: "image",
-      key: "image",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
       render: text => {
         if (text && text.includes("undefined")) {
           return "Resim Yok";
@@ -1088,6 +1088,7 @@ const LanguagePage = () => {
         open={previewVisible}
         footer={null}
         onCancel={handleCancelPreview}
+        width={800}
       >
         <img
           alt="Önizleme"

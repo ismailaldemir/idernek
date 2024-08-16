@@ -35,7 +35,6 @@ import {
   CloseCircleOutlined,
   StopOutlined
 } from "@ant-design/icons";
-import { PaperSizeOptions, OrientationOptions } from "../constants";
 import "./../admin.css";
 import Highlighter from "react-highlight-words";
 import { ValidateError } from "antd/lib/form/Form";

@@ -24,10 +24,14 @@ const Login = () => {
         message.error('Login failed. No token received.');
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        message.error('Login failed. Please check your credentials and try again.');
+      if (error.response) {
+        if (error.response.status === 401) {
+          message.error('Login failed. Please check your credentials and try again.');
+        } else {
+          message.error(`Error: ${error.response.data.message || 'An error occurred.'}`);
+        }
       } else {
-        message.error('An error occurred. Please try again later.');
+        message.error('An unexpected error occurred. Please try again later.');
       }
     }
   };

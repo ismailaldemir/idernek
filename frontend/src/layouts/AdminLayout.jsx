@@ -75,40 +75,6 @@
             onClick: () => navigate(`/admin/categories`)
           },
           {
-            key: "5",
-            icon: <LaptopOutlined />,
-            label: t("admin:MENU.PRODUCTS"),
-            children: [
-              {
-                key: "6",
-                label: t("admin:MENU.PRODUCT_LIST"),
-                onClick: () => navigate(`/admin/products`)
-              },
-              {
-                key: "7",
-                label: t("admin:MENU.NEW_PRODUCT"),
-                onClick: () => navigate("/admin/products/create")
-              }
-            ]
-          },
-          {
-            key: "8",
-            icon: <BarcodeOutlined />,
-            label: t("admin:MENU.COUPONS"),
-            children: [
-              {
-                key: "9",
-                label: t("admin:MENU.COUPON_LIST"),
-                onClick: () => navigate(`/admin/coupons`)
-              },
-              {
-                key: "10",
-                label: t("admin:MENU.NEW_COUPON"),
-                onClick: () => navigate("/admin/coupons/create")
-              }
-            ]
-          },
-          {
             key: "13",
             icon: <IdcardOutlined />,
             label: t("admin:MENU.CONTACTS"),
@@ -119,12 +85,6 @@
             icon: <UserOutlined />,
             label: t("admin:MENU.USERS"),
             onClick: () => navigate(`/admin/users`)
-          },
-          {
-            key: "12",
-            icon: <ShoppingCartOutlined />,
-            label: t("admin:MENU.ORDERS"),
-            onClick: () => navigate(`/admin/orders`)
           },
           {
             key: "14",
