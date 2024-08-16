@@ -1,15 +1,38 @@
-api/node_modules/
+# Node modules
 node_modules/
-api/node_modules/.bin/acorn
-api/package-lock.json
-api/tmp/
-api/public/images/
-frontend/public/flags/
-
+api/node_modules/
+frontend/node_modules/
 
 # Environment variables
-/.env
-/api/.env
+.env
 api/.env
 frontend/.env
-.env
+
+# Build output
+dist/
+build/
+public/
+tmp/
+temp/
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Package lock files (if using Yarn, you may want to ignore `yarn.lock` instead)
+package-lock.json
+api/package-lock.json
+
+# Miscellaneous
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
